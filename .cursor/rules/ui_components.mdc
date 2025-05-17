@@ -1,0 +1,322 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# UI Component Conventions
+
+This guide outlines the conventions for creating and maintaining UI components in our codebase.
+
+## Component Structure
+
+- **Use Function Components**
+  - All components should be defined as function components
+  - Use arrow function syntax for consistency
+  ```javascript
+  // ✅ DO: Use arrow function syntax
+  const MyComponent = () => {
+    return (
+      <div>Content</div>
+    );
+  };
+
+  // ❌ DON'T: Use function declaration syntax
+  function MyComponent() {
+    return (
+      <div>Content</div>
+    );
+  }
+  ```
+
+- **Default Export Pattern**
+  - All components should be exported as default exports
+  - Export statement should be placed at the end of the file
+  ```javascript
+  // ✅ DO: Export at the bottom of file
+  const MyComponent = () => {
+    // Component implementation
+  };
+
+  export default MyComponent;
+  ```
+
+## Client vs Server Components
+
+- **Client Components**
+  - Add `"use client";` directive at the top of the file when using hooks or browser APIs
+  - All components with event handlers must be client components
+  ```javascript
+  // ✅ DO: Mark interactive components as client components
+  "use client";
+
+  import { useState } from "react";
+
+  const InteractiveComponent = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    // Component implementation
+  };
+  ```
+
+- **Server Components**
+  - When a component doesn't use hooks, event handlers, or browser APIs, leave out the "use client" directive
+  - Keep data fetching logic in server components when possible
+
+## State Management
+
+- **Use React Hooks**
+  - Prefer `useState` for local component state
+  - Use `useEffect` for side effects and lifecycle handling
+  - Consider custom hooks for shared logic
+  ```javascript
+  // ✅ DO: Use hooks for state management
+  const [isOpen, setIsOpen] = useState(false);
+  
+  useEffect(() => {
+    // Effect code
+  }, [dependencies]);
+  ```
+
+## Props and Parameters
+
+- **Destructure Props**
+  - Destructure props in the function parameters
+  - Provide default values when appropriate
+  ```javascript
+  // ✅ DO: Destructure props with defaults
+  const ButtonGradient = ({ title = "Gradient Button", onClick = () => {} }) => {
+    return (
+      <button className="btn btn-gradient animate-shimmer" onClick={onClick}>
+        {title}
+      </button>
+    );
+  };
+  ```
+
+- **Prop Documentation**
+  - Include JSDoc-style comments for components with complex props
+  - Document each prop's purpose, especially for reusable components
+  ```javascript
+  // ✅ DO: Document component props with comments
+  // ButtonCheckout handles payment processing via Stripe
+  // - priceId: The Stripe price ID to charge
+  // - mode: 'payment' (one-time) or 'subscription' (recurring)
+  const ButtonCheckout = ({ priceId, mode = "payment" }) => {
+    // Component implementation
+  };
+  ```
+
+## Styling
+
+- **Use Tailwind Classes**
+  - Use Tailwind CSS classes for styling components
+  - Group related classes together for readability
+  - Use conditional classes with template literals or ternary operators
+  ```javascript
+  // ✅ DO: Use Tailwind with conditional styling
+  <div className={`relative flex ${isOpen ? "gap-4" : "gap-2"}`}>
+
+  // ✅ DO: Group related classes together
+  <div className="flex flex-col items-center justify-center gap-3 p-2">
+  ```
+
+- **Component-Specific Utility Classes**
+  - Define specialized utility classes in `app/globals.css` for reused styling patterns
+  - For example, `.btn-gradient` for gradient buttons
+
+## Image Handling
+
+- **Use Next.js Image Component**
+  - Use `next/image` for all images for optimization
+  - Always specify width and height props
+  - Add appropriate alt text for accessibility
+  - Use `priority` prop for critical above-the-fold images
+  ```javascript
+  // ✅ DO: Use Next.js Image component with required props
+  <Image
+    src={imageSrc}
+    alt="Descriptive alt text"
+    width={500}
+    height={300}
+    className="object-cover rounded-lg"
+    priority={isPriority}
+  />
+  ```
+
+## Component Organization
+
+- **Component Sections**
+  - Structure larger components into logical sections using comments
+  - For complex components, consider splitting into subcomponents
+  ```javascript
+  // ✅ DO: Use sections for complex components
+  // Header section
+  const Header = () => {
+    // Header implementation
+  };
+
+  // Main component 
+  const PageComponent = () => {
+    return (
+      <>
+        <Header />
+        {/* Content section */}
+        <main>...</main>
+      </>
+    );
+  };
+  ```
+
+- **File Naming**
+  - Use PascalCase for component file names (e.g., `ButtonGradient.js`)
+  - Name should clearly indicate the component's purpose
+
+## Interactivity
+
+- **Event Handlers**
+  - Prefix event handler functions with `handle` (e.g., `handleClick`, `handleSubmit`)
+  - Define handlers within component functions, not outside
+  ```javascript
+  // ✅ DO: Use handle prefix for event handlers
+  const handleClick = () => {
+    // Handle click logic
+  };
+  
+  return <button onClick={handleClick}>Click me</button>;
+  ```
+
+- **Loading States**
+  - Implement loading states for async operations
+  - Use loading indicators to provide user feedback
+  ```javascript
+  // ✅ DO: Handle loading states
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      // Async operation
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return (
+    <button disabled={isLoading}>
+      {isLoading ? <span className="loading loading-spinner loading-xs"></span> : "Submit"}
+    </button>
+  );
+  ```
+
+## Accessibility
+
+- **Semantic HTML**
+  - Use semantic HTML elements (`button`, `nav`, `header`, etc.)
+  - Don't use divs for interactive elements
+  ```javascript
+  // ✅ DO: Use semantic elements
+  <button onClick={handleClick}>Click me</button>
+  
+  // ❌ DON'T: Use non-semantic elements for interaction
+  <div onClick={handleClick}>Click me</div>
+  ```
+
+- **ARIA Attributes**
+  - Add appropriate ARIA attributes when needed
+  - Ensure proper keyboard navigation
+  ```javascript
+  // ✅ DO: Use ARIA attributes when appropriate
+  <button
+    aria-expanded={isOpen}
+    aria-controls="menu-content"
+    onClick={toggleMenu}
+  >
+    Menu
+  </button>
+  ```
+
+## Error Handling
+
+- **Error States**
+  - Handle potential errors gracefully
+  - Provide fallbacks for failed operations
+  ```javascript
+  // ✅ DO: Handle errors gracefully
+  const [error, setError] = useState(null);
+  
+  try {
+    // Operation that might fail
+  } catch (e) {
+    setError(e.message);
+    console.error(e);
+  }
+  
+  if (error) {
+    return <div className="text-error">Error: {error}</div>;
+  }
+  ```
+
+## Performance
+
+- **Memoization**
+  - Use `useMemo` for expensive calculations
+  - Consider `React.memo` for components that render often but rarely change
+  ```javascript
+  // ✅ DO: Memoize expensive calculations
+  const expensiveResult = useMemo(() => {
+    return computeExpensiveValue(a, b);
+  }, [a, b]);
+  ```
+
+- **Dynamic Imports**
+  - Use dynamic imports for large components not needed immediately
+  ```javascript
+  // ✅ DO: Use dynamic imports for large components
+  const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
+    loading: () => <p>Loading...</p>
+  });
+  ```
+
+## Configuration Integration
+
+- **Use Config Values**
+  - Import app-wide configuration from `@/config` when needed
+  - Don't hardcode values that might change between environments
+  ```javascript
+  // ✅ DO: Use config values instead of hardcoding
+  import config from "@/config";
+  
+  // Use config.appName, config.auth.callbackUrl, etc.
+  ```
+
+## Responsive Design
+
+- **Mobile-First Approach**
+  - Design for mobile first, then add Tailwind breakpoint classes for larger screens
+  - Use responsive utility classes (`md:`, `lg:`, etc.)
+  ```javascript
+  // ✅ DO: Use responsive classes
+  <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+  
+  // ✅ DO: Use responsive text sizes
+  <h1 className="text-2xl md:text-4xl lg:text-6xl">Heading</h1>
+  ```
+
+## SEO and Metadata
+
+- **Use Metadata API**
+  - Define page metadata using Next.js's metadata API in page components
+  - Include title, description, and Open Graph data
+  ```javascript
+  // ✅ DO: Define metadata for pages
+  export async function generateMetadata({ params }) {
+    return {
+      title: "Page Title",
+      description: "Page description",
+      openGraph: {
+        // OG data
+      }
+    };
+  }
+  ```
+
+These conventions ensure consistency, maintainability, and best practices across our UI components.

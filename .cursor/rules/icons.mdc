@@ -1,0 +1,202 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Icon Implementation Guidelines
+
+This guide outlines the conventions for implementing and using icons throughout the application.
+
+## Icon Approaches
+
+Our codebase uses several approaches for icons, each with specific use cases:
+
+- **Inline SVGs**: Primary method for most icons
+- **BetterIcon Component**: For highlighted/contained icons with background
+- **Image Component**: For complex icons or brand logos
+
+## Inline SVG Icons
+
+- **Default Approach**
+  - Use inline SVGs from Heroicons or similar libraries
+  - Set width and height using Tailwind classes (`w-5 h-5`, `w-6 h-6`, etc.)
+  - Use `currentColor` for fill/stroke to inherit text color
+  
+  ```javascript
+  // ✅ DO: Use inline SVGs with currentColor
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    className="w-5 h-5"
+  >
+    <path
+      fillRule="evenodd"
+      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+      clipRule="evenodd"
+    />
+  </svg>
+  ```
+
+## BetterIcon Component
+
+- **Usage Pattern**
+  - Use the [BetterIcon.js](mdc:components/BetterIcon.js) component for icons that need visual emphasis
+  - Pass SVG as children to the component
+  - Icons get a circular background with the primary color
+
+  ```javascript
+  // ✅ DO: Use BetterIcon for emphasized icons
+  <BetterIcon>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="w-6 h-6"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+      />
+    </svg>
+  </BetterIcon>
+  ```
+
+## Style Conventions
+
+- **Size Classes**
+  - Use consistent Tailwind size classes:
+    - Small: `w-4 h-4` or `w-5 h-5`
+    - Medium (default): `w-6 h-6`
+    - Large: `w-8 h-8` or larger
+  
+  ```javascript
+  // ✅ DO: Use consistent size classes
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    className="w-5 h-5" // Small icon
+  >
+    {/* paths */}
+  </svg>
+  ```
+
+- **Color Management**
+  - Use `currentColor` to inherit text color
+  - For specific colors, use Tailwind text colors
+  
+  ```javascript
+  // ✅ DO: Set color with Tailwind classes
+  <svg className="w-6 h-6 text-primary stroke-primary-content">
+    {/* paths */}
+  </svg>
+  
+  // ✅ DO: Use currentColor to inherit parent text color
+  <span className="text-warning">
+    <svg fill="currentColor" className="w-5 h-5">
+      {/* paths */}
+    </svg>
+  </span>
+  ```
+
+- **Animation & Interaction**
+  - Add animation classes when icons indicate state changes
+  - Example: Rotating chevron for dropdown state
+  
+  ```javascript
+  // ✅ DO: Animate icons that indicate state
+  <svg
+    className={`w-5 h-5 duration-200 ${
+      isOpen ? "transform rotate-180" : ""
+    }`}
+  >
+    {/* paths */}
+  </svg>
+  ```
+
+## Accessibility
+
+- **Decorative Icons**
+  - For decorative icons, use `aria-hidden="true"`
+  - Ensure parent element has appropriate accessible text
+  
+  ```javascript
+  // ✅ DO: Hide decorative icons from screen readers
+  <button>
+    <svg aria-hidden="true" className="w-5 h-5">
+      {/* paths */}
+    </svg>
+    <span>Submit</span>
+  </button>
+  ```
+
+- **Semantic Icons**
+  - For icons that convey meaning on their own, include `role="img"` and `aria-label`
+  
+  ```javascript
+  // ✅ DO: Add accessible labels to semantic icons
+  <svg
+    role="img"
+    aria-label="Warning"
+    className="w-6 h-6 text-warning"
+  >
+    {/* paths */}
+  </svg>
+  ```
+
+## Loading Icons
+
+- **Use Consistent Spinners**
+  - For loading states, use the DaisyUI loading spinner
+  - Default class: `loading loading-spinner loading-xs`
+  
+  ```javascript
+  // ✅ DO: Use consistent loading spinners
+  <button disabled={isLoading}>
+    {isLoading ? (
+      <span className="loading loading-spinner loading-xs"></span>
+    ) : (
+      "Submit"
+    )}
+  </button>
+  ```
+
+## Button Icons
+
+- **Alignment in Buttons**
+  - For buttons with text + icon, use gap utilities
+  - Center icons vertically with flex layout
+  
+  ```javascript
+  // ✅ DO: Properly align icons in buttons
+  <button className="btn btn-primary flex items-center gap-2">
+    <span>Download</span>
+    <svg className="w-5 h-5">
+      {/* paths */}
+    </svg>
+  </button>
+  ```
+
+## Icon Consistency
+
+- **Icon Libraries**
+  - Prefer using icons from the same visual family (Heroicons, etc.)
+  - Maintain consistent stroke width (1.5 for outline icons)
+  
+  ```javascript
+  // ✅ DO: Maintain consistent stroke width
+  <svg
+    stroke="currentColor"
+    strokeWidth={1.5} // Consistent across outline icons
+    fill="none"
+    className="w-6 h-6"
+  >
+    {/* paths */}
+  </svg>
+  ```
+
+These guidelines ensure that icons are implemented consistently throughout the application, improving both aesthetics and accessibility.

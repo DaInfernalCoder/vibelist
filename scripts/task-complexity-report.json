@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "generatedAt": "2025-05-17T23:17:23.678Z",
+    "tasksAnalyzed": 15,
+    "thresholdScore": 6,
+    "projectName": "Your Project Name",
+    "usedResearch": true
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "Project Setup and Infrastructure Configuration",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "List and describe the key steps required to initialize a NextJS project using the ShipFast boilerplate, set up Tailwind CSS and Shadcn UI, configure environment variables for Supabase, Stripe, Resend, PostHog, and Cloudflare, initialize a Git repository, and set up a deployment pipeline with Vercel.",
+      "reasoning": "This task involves multiple foundational steps including project initialization, environment configuration, UI setup, and deployment pipeline integration. Each integration (e.g., Tailwind, Shadcn, environment variables for multiple services) introduces its own setup and validation requirements, making the task moderately complex and best broken down into clear, sequential subtasks."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "Supabase Integration and Database Schema Implementation",
+      "complexityScore": 8,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down the process of creating a Supabase project, designing and implementing the database schema (including tables, relationships, and indexes), configuring row-level security, and implementing necessary database functions and triggers for analytics.",
+      "reasoning": "Designing a robust database schema with proper relationships, security policies, and performance optimizations is a complex task. It requires careful planning, knowledge of Supabase features, and attention to data protection and analytics requirements."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "Authentication System Implementation",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Detail the steps to implement user registration (email/password and social), login, authentication state management, password reset, protected routes, session management, and logout using Supabase Auth.",
+      "reasoning": "Implementing a secure and user-friendly authentication system involves multiple flows (registration, login, password reset), state management, and security considerations, each of which can be a source of subtle bugs or vulnerabilities."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "Account Settings Management",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "List the steps to implement user profile editing, account deletion, notification preferences, profile picture upload, UI validation, and backend updates in Supabase.",
+      "reasoning": "While not as foundational as authentication, this task covers several user-facing features that require both frontend and backend work, including file uploads and sensitive operations like account deletion."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "Sidebar Navigation and Application Layout",
+      "complexityScore": 6,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Describe the process for building a responsive sidebar navigation, main application layout, mobile navigation menu, active state styling, and ensuring consistent styling across the app.",
+      "reasoning": "This task is primarily UI-focused but requires attention to responsive design, routing, and user experience, making it moderately complex."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Waitlist Template Creation",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Outline the steps to design and implement three distinct waitlist templates, ensure responsiveness, enable template preview, and create reusable components for shared elements.",
+      "reasoning": "Designing multiple professional templates with consistent customization and responsiveness requires both design and engineering effort, especially to ensure maintainability and reusability."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Waitlist Customization Interface",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down the implementation of a visual customization editor, including form controls for all options, color scheme selector, logo upload, toggle controls, real-time preview, and auto-saving to Supabase.",
+      "reasoning": "Building a dynamic, real-time customization interface with live preview and persistent storage is complex, involving advanced state management, UI/UX design, and backend integration."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Waitlist URL Generation and Publication",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "List the steps to generate unique SEO-friendly URLs, implement publication and unpublish functionality, enable copy-to-clipboard, track publication status, and create preview mode.",
+      "reasoning": "This task requires careful handling of URL generation, state management for publication status, and user experience features like preview and copy-to-clipboard."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Waitlist Signup Form and Validation",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Describe the process to implement the public signup form, email validation, Cloudflare bot protection, success messaging, backend storage in Supabase, and duplicate email detection.",
+      "reasoning": "Implementing a secure, user-friendly, and spam-resistant signup form with backend integration and validation involves multiple moving parts and potential edge cases."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Email Functionality Implementation",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Detail the steps to integrate Resend, create email templates, implement sending for various triggers, add tracking and analytics, build an email queue system, and create a test mode.",
+      "reasoning": "Email integration involves both backend and template work, handling asynchronous delivery, analytics, and ensuring reliable operation for multiple triggers."
+    },
+    {
+      "taskId": 11,
+      "taskTitle": "Analytics Dashboard Implementation",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "List the steps to design and implement the analytics dashboard UI, data visualizations, real-time data fetching, date filtering, detailed data tables, PostHog integration, and CSV export.",
+      "reasoning": "Building a robust analytics dashboard requires frontend data visualization, real-time data handling, integration with analytics services, and export functionality, all of which add to the complexity."
+    },
+    {
+      "taskId": 12,
+      "taskTitle": "Multiple Waitlist Management",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Describe the process to build an interface for managing multiple waitlists, including creation, editing, deletion, duplication, sorting/filtering, status indicators, and separate analytics tracking.",
+      "reasoning": "Supporting multiple entities with full CRUD operations, duplication, sorting/filtering, and analytics tracking increases both UI and backend complexity."
+    },
+    {
+      "taskId": 13,
+      "taskTitle": "Marketing Features Implementation",
+      "complexityScore": 6,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "Break down the steps to design and implement the Market page, create launch platform templates, implement copy-to-clipboard, add guidance sections, and provide SEO tips.",
+      "reasoning": "While mostly content and UI-driven, this task requires thoughtful UX design and template logic for customization, but is less technically complex than core application features."
+    },
+    {
+      "taskId": 14,
+      "taskTitle": "Payment Processing with Stripe",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "List the steps to integrate Stripe, implement one-time payment flow, build secure checkout with Stripe Elements, handle payment success/failure, generate and send receipts, update user status, and handle webhooks.",
+      "reasoning": "Payment processing is inherently complex due to security, compliance, error handling, and integration with external services like Stripe, requiring careful implementation and testing."
+    },
+    {
+      "taskId": 15,
+      "taskTitle": "Performance Optimization and Final Testing",
+      "complexityScore": 9,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Detail the steps for image optimization, caching strategies, database query optimization, code splitting, comprehensive feature testing, bug fixing, accessibility improvements, SEO optimization, and security review.",
+      "reasoning": "This task encompasses a wide range of advanced optimizations and testing activities across the entire application, requiring expertise in performance, security, accessibility, and quality assurance."
+    }
+  ]
+}
