@@ -1,0 +1,282 @@
+# Task ID: 2
+# Title: Supabase Integration and Database Schema Implementation
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Set up Supabase project and implement the required database schema
+# Details:
+Create a new Supabase project. Design and implement the database schema with tables for Users, Waitlists, Waitlist_Signups, and Customization_Settings. Set up proper relationships between tables with foreign key constraints. Configure row-level security policies for data protection. Create necessary database functions and triggers for analytics calculations. Implement database indexes for query optimization.
+
+# Test Strategy:
+Verify table creation and relationships using Supabase interface. Test data insertion, retrieval, and relationship queries. Validate security policies by attempting unauthorized access.
+
+# Subtasks:
+## 1. Create Supabase Project and Configure Authentication [done]
+### Dependencies: None
+### Description: Set up a new Supabase project and configure the authentication settings for the application
+### Details:
+1. Create a new Supabase project in the Supabase dashboard
+2. Configure authentication settings (enable email/password, OAuth providers if needed)
+3. Set up password policies and email templates for authentication flows
+4. Store the Supabase URL and anon key in environment variables
+5. Test authentication by creating a test user account
+6. Document the project setup and authentication configuration
+
+## 2. Implement Core Database Tables and Relationships [done]
+### Dependencies: 2.1
+### Description: Create the primary database tables (Users, Waitlists, Waitlist_Signups) with proper relationships and constraints
+### Details:
+1. Create the Users table with fields: id, email, created_at, updated_at, name, avatar_url
+2. Create the Waitlists table with fields: id, owner_id (FK to Users), name, description, created_at, updated_at, status
+3. Create the Waitlist_Signups table with fields: id, waitlist_id (FK to Waitlists), email, name, signup_time, status, referral_code, referral_source
+4. Set up foreign key constraints between tables
+5. Add appropriate NOT NULL constraints and default values
+6. Test the schema by inserting and querying sample data
+7. Document the table structure and relationships
+
+## 3. Implement Customization_Settings Table and Relationships [done]
+### Dependencies: 2.2
+### Description: Create the Customization_Settings table and establish relationships with the Waitlists table
+### Details:
+1. Create the Customization_Settings table with fields: id, waitlist_id (FK to Waitlists), theme_color, logo_url, custom_fields (JSONB), redirect_url, email_template, created_at, updated_at
+2. Set up foreign key constraint to Waitlists table
+3. Add appropriate default values for theme settings
+4. Create a database trigger to create default customization settings when a new waitlist is created
+5. Test the customization settings by inserting and querying sample data
+6. Verify the trigger works correctly when creating new waitlists
+7. Document the customization settings schema and trigger behavior
+
+## 4. Configure Row-Level Security Policies [done]
+### Dependencies: 2.2, 2.3
+### Description: Implement row-level security (RLS) policies to ensure proper data access control
+### Details:
+1. Enable RLS on all tables (Users, Waitlists, Waitlist_Signups, Customization_Settings)
+2. Create RLS policy for Users table to allow users to only access their own data
+3. Create RLS policy for Waitlists to allow access only to the owner
+4. Create RLS policy for Waitlist_Signups to allow access only to the waitlist owner
+5. Create RLS policy for Customization_Settings to allow access only to the related waitlist owner
+6. Test RLS policies by creating multiple user accounts and verifying proper access control
+7. Document all RLS policies and their expected behavior
+
+## 5. Implement Database Functions, Triggers, and Indexes [done]
+### Dependencies: 2.2, 2.3, 2.4
+### Description: Create database functions for analytics, triggers for automated processes, and indexes for query optimization
+### Details:
+1. Create a function to calculate waitlist statistics (total signups, signup rate, etc.)
+2. Implement a trigger to update analytics data when new signups occur
+3. Create a function to handle referral tracking and attribution
+4. Add indexes on frequently queried columns:
+   - email in Users and Waitlist_Signups
+   - waitlist_id in Waitlist_Signups
+   - owner_id in Waitlists
+   - created_at in all tables
+5. Test the performance of queries with and without indexes
+6. Test the analytics functions with sample data
+7. Document all functions, triggers, and indexes with their purpose and expected behavior
+
+## 6. Explain Task 2 (Supabase Integration & DB Schema Implementation) in detail [pending]
+### Dependencies: None
+### Description: Provide a detailed explanation of the work done in Task 2, including what database migrations are, the schema created, and how it integrates with Supabase.
+### Details:
+
+
+<info added on 2025-05-18T04:31:21.409Z>
+# Detailed Explanation of Task 2: Supabase Integration & DB Schema Implementation
+
+## A. Understanding Task 2: Supabase Integration and Database Schema Implementation
+
+### 1. Supabase Project Setup (Subtask 2.1)
+- Created a new Supabase project through the Supabase dashboard
+- Configured authentication settings for email/password and potentially OAuth providers
+- Stored Supabase URL and anon key in `.env.local` for secure application connectivity
+- Set up proper CORS configuration to allow frontend access
+
+### 2. Core Database Schema Design & Implementation (Subtasks 2.2 & 2.3)
+**Tables Created:**
+- `Users`: Stores user profiles (id, email, name, avatar_url, created_at, updated_at)
+- `Waitlists`: Manages waitlists (id, owner_id, name, description, status, created_at, updated_at)
+- `Waitlist_Signups`: Tracks signups (id, waitlist_id, email, name, signup_time, status, referral_code, referred_by)
+- `Customization_Settings`: Defines waitlist appearance (id, waitlist_id, theme_color, logo_url, custom_fields, redirect_url, email_template)
+
+**Relationships and Constraints:**
+- Foreign key constraints link tables (e.g., `waitlist_id` references `Waitlists.id`)
+- `NOT NULL` constraints on critical fields ensure data integrity
+- Default timestamps using `now()` function
+- Unique constraints on emails within a waitlist
+
+**Database Trigger:**
+```sql
+CREATE OR REPLACE FUNCTION create_default_customization()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO customization_settings (waitlist_id, theme_color)
+  VALUES (NEW.id, '#4F46E5');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_waitlist_created
+AFTER INSERT ON waitlists
+FOR EACH ROW
+EXECUTE FUNCTION create_default_customization();
+```
+
+### 3. Security Configuration (Subtask 2.4)
+**Row-Level Security (RLS) Policies:**
+```sql
+-- Example RLS policy for waitlists
+CREATE POLICY "Users can view their own waitlists" 
+ON waitlists FOR SELECT 
+USING (auth.uid() = owner_id);
+
+CREATE POLICY "Users can insert their own waitlists" 
+ON waitlists FOR INSERT 
+WITH CHECK (auth.uid() = owner_id);
+```
+
+### 4. Database Logic & Performance Optimization (Subtask 2.5)
+**Database Functions:**
+```sql
+-- Function to get waitlist statistics
+CREATE OR REPLACE FUNCTION get_waitlist_stats(waitlist_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+BEGIN
+  SELECT json_build_object(
+    'total_signups', COUNT(*),
+    'confirmed', COUNT(*) FILTER (WHERE status = 'confirmed'),
+    'pending', COUNT(*) FILTER (WHERE status = 'pending'),
+    'conversion_rate', CASE 
+      WHEN COUNT(*) > 0 THEN 
+        ROUND((COUNT(*) FILTER (WHERE status = 'confirmed')::FLOAT / COUNT(*)) * 100, 2)
+      ELSE 0
+    END
+  ) INTO result
+  FROM waitlist_signups
+  WHERE waitlist_id = $1;
+  
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+**Indexes for Performance:**
+```sql
+CREATE INDEX idx_waitlist_signups_email ON waitlist_signups(waitlist_id, email);
+CREATE INDEX idx_waitlist_signups_status ON waitlist_signups(waitlist_id, status);
+CREATE INDEX idx_waitlist_signups_signup_time ON waitlist_signups(signup_time);
+```
+
+## B. What are Database Migrations?
+
+Database migrations are version-controlled scripts that manage database schema changes over time:
+
+- **Implementation in this project:** Migration files in `scripts/migrations/` folder (e.g., `01_core_tables.sql`, `02_indexes.sql`)
+- **Migration tracking:** A `schema_migrations` table tracks which migrations have been applied
+- **Idempotency:** Migrations are designed to be safely re-runnable with checks like `CREATE TABLE IF NOT EXISTS`
+
+## C. Error Resolution: `TypeError: supabase.sql is not a function`
+
+The error occurred because the Supabase JavaScript client doesn't support direct DDL execution. The solution uses direct PostgreSQL connection:
+
+```javascript
+// Modified apply_migrations_direct.js
+const { Client } = require('pg');
+const fs = require('fs');
+const path = require('path');
+
+async function applyMigrations() {
+  // Extract DB host from Supabase URL
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const dbHost = supabaseUrl.replace('https://', '').replace('.supabase.co', '.supabase.co:5432');
+  
+  // Create PostgreSQL connection string
+  const connectionString = `postgresql://postgres:${process.env.SUPABASE_DB_PASSWORD}@${dbHost}/postgres`;
+  const pgClient = new Client({ connectionString });
+  
+  try {
+    await pgClient.connect();
+    console.log('Connected to PostgreSQL database');
+    
+    // Read and apply migration files
+    const migrationsDir = path.join(__dirname, './');
+    const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
+    
+    for (const file of files) {
+      console.log(`Applying migration: ${file}`);
+      const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
+      await pgClient.query(sql);
+      console.log(`Successfully applied: ${file}`);
+    }
+  } catch (error) {
+    console.error('Migration error:', error);
+  } finally {
+    await pgClient.end();
+  }
+}
+
+applyMigrations();
+```
+
+This approach ensures proper execution of DDL statements for creating and modifying the database schema.
+</info added on 2025-05-18T04:31:21.409Z>
+
+## 7. Fix migration script error (supabase.sql is not a function) and explain cause [pending]
+### Dependencies: None
+### Description: Diagnose and fix the 'TypeError: supabase.sql is not a function' in the migration script. Explain why the error occurs and the correct way to execute SQL with the Supabase JS client.
+### Details:
+
+
+<info added on 2025-05-18T04:31:39.519Z>
+# Diagnosis and Fix for 'TypeError: supabase.sql is not a function' in Migration Script:
+
+## 1. Cause of the Error:
+
+The error occurs because the `supabase-js` client doesn't provide a direct `sql()` method for executing raw SQL DDL statements. The client is primarily designed for data operations (CRUD) and RPC function calls, not schema migrations.
+
+## 2. Correct Way to Execute SQL Migrations:
+
+```javascript
+// Before (incorrect approach)
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+// In migration function
+await supabase.sql(rawSqlString); // This fails with TypeError
+
+// After (correct approach)
+const { Client } = require('pg');
+const connectionString = `postgresql://postgres:${process.env.SUPABASE_DB_PASSWORD}@${dbHost}:5432/postgres`;
+const pgClient = new Client({ connectionString });
+
+// In migration function
+await pgClient.connect();
+try {
+  await pgClient.query(rawSqlString); // This works correctly
+} finally {
+  await pgClient.end();
+}
+```
+
+## 3. Implementation Steps:
+
+1. Add `pg` package: `npm install pg`
+2. Update your `.env.local` to include `SUPABASE_DB_PASSWORD`
+3. Extract the database host from your Supabase URL:
+   ```javascript
+   const dbHost = process.env.NEXT_PUBLIC_SUPABASE_URL.replace('https://', '').split('.')[0] + '.supabase.co';
+   ```
+4. Replace the Supabase client SQL execution with direct PostgreSQL queries
+5. Ensure proper connection management with connect/end calls
+
+## 4. Testing the Fix:
+
+After implementing the fix, verify by running:
+```bash
+node scripts/migrations/apply_migrations_direct.js
+```
+
+You should see successful migration execution without the TypeError.
+</info added on 2025-05-18T04:31:39.519Z>
+

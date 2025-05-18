@@ -1,0 +1,88 @@
+# Task ID: 9
+# Title: Waitlist Signup Form and Validation
+# Status: pending
+# Dependencies: 8
+# Priority: high
+# Description: Implement the public-facing waitlist signup form with validation
+# Details:
+Create the signup form component that appears on published waitlist pages. Implement email validation with proper error messages. Add Cloudflare bot protection integration. Create success message display after successful signup. Implement backend logic to store signup data in Supabase. Add duplicate email detection to prevent multiple signups from the same email.
+
+# Test Strategy:
+Test form submission with valid and invalid email formats. Verify error messages display correctly. Test duplicate email submission. Verify data is correctly stored in the database. Test bot protection functionality if possible.
+
+# Subtasks:
+## 1. Create Waitlist Signup Form Component [pending]
+### Dependencies: None
+### Description: Build the UI component for the waitlist signup form that will appear on published waitlist pages
+### Details:
+Create a React component for the waitlist signup form with the following elements:
+1. Email input field with appropriate styling
+2. Submit button
+3. Basic form layout and container
+4. Loading state indicator
+5. Placeholder for error messages
+6. Placeholder for success message
+
+The component should accept props for customization and handle form submission events. Style the component according to the design system. Ensure the component is responsive and works well on mobile devices. Test the component rendering in isolation using component testing tools.
+
+## 2. Implement Email Validation Logic [pending]
+### Dependencies: 9.1
+### Description: Add client-side validation for email inputs with appropriate error messages
+### Details:
+Enhance the signup form with validation logic:
+1. Implement regex-based email format validation
+2. Add validation on blur and on form submission
+3. Create error message display for invalid email formats
+4. Add visual indicators for validation states (error, success)
+5. Ensure accessibility of error messages
+6. Prevent form submission if validation fails
+
+Test validation with various email formats including valid and invalid cases. Ensure error messages are clear and helpful. Validate that the form cannot be submitted with invalid data.
+
+## 3. Integrate Cloudflare Bot Protection [pending]
+### Dependencies: 9.1
+### Description: Add Cloudflare bot protection to the signup form to prevent automated submissions
+### Details:
+Integrate Cloudflare bot protection:
+1. Set up Cloudflare Turnstile or similar bot protection service
+2. Add the protection widget to the form component
+3. Configure the widget with appropriate site keys
+4. Handle the token validation in the form submission process
+5. Add error handling for failed bot validation
+6. Implement fallback behavior if the protection service is unavailable
+
+Test the integration with both automated and manual form submissions. Verify that legitimate users can pass the protection while automated submissions are blocked. Document the configuration process for future reference.
+
+## 4. Implement Backend Signup Logic with Supabase [pending]
+### Dependencies: 9.1, 9.2
+### Description: Create the backend logic to store signup data in Supabase and handle duplicate email detection
+### Details:
+Develop the backend logic for processing signups:
+1. Create a Supabase table schema for waitlist signups with fields for email, timestamp, waitlist ID, and metadata
+2. Implement an API endpoint to handle form submissions
+3. Add server-side email validation as a security measure
+4. Create a query to check for existing emails before insertion
+5. Implement duplicate email detection logic with appropriate error responses
+6. Add error handling for database operations
+7. Log signup attempts for monitoring purposes
+
+Test the backend with various scenarios including new signups, duplicate attempts, and error conditions. Verify that data is correctly stored in Supabase. Ensure proper error handling for all edge cases.
+
+## 5. Implement Success and Error Handling UI [pending]
+### Dependencies: 9.1, 9.2, 9.3, 9.4
+### Description: Create success message display and comprehensive error handling for the signup process
+### Details:
+Enhance the form with proper success and error handling:
+1. Create a success message component to display after successful signup
+2. Implement transitions between form and success states
+3. Add specific error message displays for different error types:
+   - Duplicate email errors
+   - Validation errors
+   - Server errors
+   - Bot protection failures
+4. Implement retry logic for temporary failures
+5. Add analytics tracking for form submissions, successes, and failures
+6. Ensure all states are accessible and properly announced to screen readers
+
+Test the complete flow from form submission through all possible response scenarios. Verify that users receive appropriate feedback for each outcome. Ensure the UI gracefully handles all error conditions and provides clear next steps for users.
+

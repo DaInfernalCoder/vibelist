@@ -1,0 +1,190 @@
+# Task ID: 4
+# Title: Account Settings Management
+# Status: pending
+# Dependencies: 3
+# Priority: medium
+# Description: Create user profile and account settings management functionality
+# Details:
+Implement user profile page with editable fields for name, email, and password. Create account deletion functionality with confirmation. Implement settings for notification preferences. Add profile picture upload capability. Create UI components for all settings forms with proper validation. Implement backend logic to update user data in Supabase.
+
+# Test Strategy:
+Test profile information updates with valid and invalid inputs. Verify password change functionality. Test account deletion process. Verify that changes persist after page refresh.
+
+# Subtasks:
+## 1. Create User Profile UI Components [pending]
+### Dependencies: None
+### Description: Develop the UI components for the user profile page with editable fields for name, email, and password.
+### Details:
+Implementation details:
+1. Create a responsive profile page layout with appropriate sections for different settings
+2. Implement form components for name, email, and password fields with proper styling
+3. Add validation logic for each field (e.g., email format, password strength)
+4. Create edit/save toggle functionality for each field
+5. Implement form submission handling with loading states
+6. Add error message display for validation failures
+7. Testing approach: Test form validation with various inputs, verify responsive design on different screen sizes, and ensure proper focus management when editing fields.
+
+<info added on 2025-05-18T12:49:04.464Z>
+Additional implementation details:
+
+```jsx
+// Example component structure for profile section
+const ProfileSection = ({ title, value, onSave }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentValue, setCurrentValue] = useState(value);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      await onSave(currentValue);
+      toast.success(`${title} updated successfully`);
+      setIsEditing(false);
+    } catch (error) {
+      toast.error(`Failed to update ${title}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return (
+    <div className="card bg-base-100 shadow-sm mb-4 p-4">
+      <h3 className="text-lg font-medium mb-2">{title}</h3>
+      {isEditing ? (
+        <div className="flex flex-col gap-2">
+          <input 
+            type="text" 
+            className="input input-bordered w-full" 
+            value={currentValue}
+            onChange={(e) => setCurrentValue(e.target.value)}
+          />
+          <div className="flex gap-2">
+            <button 
+              className="btn btn-primary btn-sm" 
+              onClick={handleSave}
+              disabled={isLoading}
+            >
+              {isLoading ? <span className="loading loading-spinner"></span> : 'Save'}
+            </button>
+            <button 
+              className="btn btn-ghost btn-sm" 
+              onClick={() => {
+                setIsEditing(false);
+                setCurrentValue(value);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-between items-center">
+          <p>{value}</p>
+          <button 
+            className="btn btn-ghost btn-sm" 
+            onClick={() => setIsEditing(true)}
+          >
+            Edit
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+```
+
+Password validation implementation:
+```javascript
+const validatePassword = (password, confirmPassword) => {
+  const errors = [];
+  
+  if (password.length < 8) {
+    errors.push("Password must be at least 8 characters");
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Password must contain at least one uppercase letter");
+  }
+  
+  if (!/[a-z]/.test(password)) {
+    errors.push("Password must contain at least one lowercase letter");
+  }
+  
+  if (!/[0-9]/.test(password)) {
+    errors.push("Password must contain at least one number");
+  }
+  
+  if (password !== confirmPassword) {
+    errors.push("Passwords do not match");
+  }
+  
+  return errors;
+};
+```
+
+Responsive design considerations:
+- Mobile view uses stacked layout with full-width inputs
+- Tablet/desktop uses two-column grid for better space utilization
+- Form controls adapt to container width using flex-wrap
+- Added media queries for font size adjustments on smaller screens
+
+Accessibility improvements:
+- Added proper aria-labels to all form elements
+- Implemented keyboard navigation support for edit/save actions
+- Added focus management when toggling edit mode
+- Included error announcements for screen readers
+</info added on 2025-05-18T12:49:04.464Z>
+
+## 2. Implement Profile Picture Upload Functionality [pending]
+### Dependencies: 4.1
+### Description: Add the ability for users to upload, preview, and update their profile pictures.
+### Details:
+Implementation details:
+1. Create a profile picture component with placeholder for users without images
+2. Implement file selection dialog with filtering for image file types
+3. Add image preview functionality before confirming upload
+4. Implement client-side image compression/resizing if needed
+5. Create progress indicator for upload process
+6. Set up Supabase storage bucket configuration for profile images
+7. Implement backend logic to store image reference in user profile
+8. Testing approach: Test with various image formats and sizes, verify error handling for invalid files, and confirm proper display of uploaded images.
+
+## 3. Implement Backend Profile Update Logic [pending]
+### Dependencies: 4.1, 4.2
+### Description: Create the backend functionality to update user profile information in Supabase.
+### Details:
+Implementation details:
+1. Create API functions to handle profile data updates (name, email, password)
+2. Implement proper error handling and validation on the server side
+3. Set up Supabase queries to update user data in the database
+4. Add security checks to ensure users can only modify their own data
+5. Implement email verification flow if email is changed
+6. Create password update logic with current password verification
+7. Testing approach: Test API endpoints with valid and invalid data, verify database updates are correct, and ensure proper error responses.
+
+## 4. Create Notification Preferences Settings [pending]
+### Dependencies: 4.3
+### Description: Implement the UI and backend logic for managing user notification preferences.
+### Details:
+Implementation details:
+1. Design and implement UI components for notification settings (toggles, checkboxes)
+2. Create categories for different notification types (e.g., email, in-app, marketing)
+3. Implement form submission handling for notification preferences
+4. Set up Supabase schema to store user notification preferences
+5. Create backend logic to update notification settings in the database
+6. Add default notification settings for new users
+7. Testing approach: Verify that preference changes are saved correctly, test with all combinations of settings, and ensure defaults are applied for new users.
+
+## 5. Implement Account Deletion Functionality [pending]
+### Dependencies: 4.3
+### Description: Create the UI and backend logic for account deletion with confirmation flow.
+### Details:
+Implementation details:
+1. Create a dedicated section for account deletion in the settings page
+2. Implement a multi-step confirmation process (e.g., checkbox acknowledgment, password verification)
+3. Design and implement warning modals explaining the consequences of account deletion
+4. Create backend logic to properly delete or anonymize user data in Supabase
+5. Implement cleanup of associated data (profile pictures, user-generated content)
+6. Add session termination and redirect to home page after deletion
+7. Testing approach: Test the entire deletion flow, verify all user data is properly removed or anonymized, and ensure associated resources are cleaned up.
+

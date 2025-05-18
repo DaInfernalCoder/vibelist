@@ -1,0 +1,43 @@
+# Task ID: 8
+# Title: Waitlist URL Generation and Publication
+# Status: pending
+# Dependencies: 7
+# Priority: high
+# Description: Implement functionality to generate unique URLs and publish waitlists
+# Details:
+Create system to generate unique, SEO-friendly URLs for each waitlist. Implement waitlist publication functionality that makes the waitlist publicly accessible. Create copy-to-clipboard functionality for the generated URL. Implement publication status tracking in the database. Add unpublish capability. Create preview mode for testing before publication.
+
+# Test Strategy:
+Verify unique URL generation for multiple waitlists. Test URL accessibility after publication. Verify copy-to-clipboard functionality. Test unpublish functionality and confirm waitlist becomes inaccessible.
+
+# Subtasks:
+## 1. Database Schema Updates for Waitlist Publication [pending]
+### Dependencies: None
+### Description: Update the database schema to support waitlist publication status, URL slugs, and preview mode
+### Details:
+Add the following fields to the waitlist table: 'slug' (string, unique, indexed), 'is_published' (boolean, default false), 'published_at' (timestamp, nullable), 'is_preview_mode' (boolean, default false). Create database migrations to add these fields. Update relevant models/entities to include these new fields. Add validation rules to ensure slugs are unique and URL-friendly. Write unit tests to verify the schema changes and validation rules work correctly.
+
+## 2. URL Generation Service Implementation [pending]
+### Dependencies: 8.1
+### Description: Create a service to generate unique, SEO-friendly URLs for waitlists
+### Details:
+Implement a URLGenerationService with methods to: 1) Generate a slug based on waitlist name (convert to lowercase, replace spaces with hyphens, remove special characters), 2) Check for slug uniqueness and append a number if needed, 3) Validate slugs meet SEO requirements. Add functionality to regenerate slugs if needed. Include configuration for base URL structure. Write unit tests for slug generation, uniqueness handling, and validation. The service should handle edge cases like very long waitlist names or names with only special characters.
+
+## 3. Waitlist Publication API Endpoints [pending]
+### Dependencies: 8.1, 8.2
+### Description: Create API endpoints to publish, unpublish, and preview waitlists
+### Details:
+Implement the following RESTful endpoints: 1) POST /api/waitlists/{id}/publish - Sets is_published to true and published_at to current time, 2) POST /api/waitlists/{id}/unpublish - Sets is_published to false, 3) POST /api/waitlists/{id}/preview - Sets is_preview_mode to true without publishing, 4) GET /api/waitlists/{id}/status - Returns publication status. Add proper authentication and authorization checks. Implement request validation. Update relevant controllers and services. Write integration tests for each endpoint to verify correct database updates and response formats.
+
+## 4. Public Waitlist Access Implementation [pending]
+### Dependencies: 8.1, 8.2, 8.3
+### Description: Create public-facing routes and controllers to access published waitlists via their unique URLs
+### Details:
+Implement a route handler for /{slug} URLs that fetches the corresponding waitlist. Create a controller to handle public waitlist access that: 1) Verifies the waitlist is published or in preview mode, 2) Returns 404 for unpublished waitlists, 3) Clearly indicates preview mode if applicable. Add caching for published waitlists to improve performance. Implement proper security measures to prevent unauthorized access to unpublished waitlists. Create integration tests that verify public access works for published waitlists and fails appropriately for unpublished ones.
+
+## 5. URL Management UI Components [pending]
+### Dependencies: 8.2, 8.3, 8.4
+### Description: Implement UI components for managing waitlist URLs and publication status
+### Details:
+Create UI components for: 1) Displaying the generated URL with a copy-to-clipboard button using the Clipboard API, 2) Publication status indicator showing published/unpublished state and timestamp, 3) Publish/Unpublish toggle button that calls the appropriate API endpoints, 4) Preview mode button that opens the waitlist in a new tab in preview mode, 5) URL customization input that allows editing the slug (calling the URL generation service to validate). Implement proper error handling and success notifications. Add unit tests for UI components and integration tests for the complete publication workflow. Ensure the UI is responsive and accessible.
+

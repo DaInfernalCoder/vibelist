@@ -1,0 +1,139 @@
+# Task ID: 5
+# Title: Sidebar Navigation and Application Layout
+# Status: done
+# Dependencies: 3
+# Priority: high
+# Description: Implement the application's main navigation structure and responsive layout by adapting the existing Shadcn UI sidebar component
+# Details:
+Adapt the existing sidebar.jsx component from Shadcn UI to fit our application needs. Set up proper Next.js pages and routing structure for the main application sections: Create, Analytics, Market, and Settings. Implement placeholder pages for these main sections. Configure the sidebar to correctly link to these pages with proper active state styling. Add waitlist selection dropdown without the product launch button. Implement account button showing user profile picture with options for billing changes and logout. Ensure responsive behavior for all screen sizes with proper mobile implementation. Create the main application layout with proper Next.js routing. Ensure consistent spacing and styling throughout the application.
+
+# Test Strategy:
+Test navigation functionality across all routes. Verify responsive behavior at all specified breakpoints. Test mobile menu functionality. Verify active state indicators work correctly. Test the waitlist dropdown selection functionality. Test account button functionality including profile picture display and dropdown options for billing and logout. Ensure the adapted sidebar component renders and functions properly within the Next.js application structure.
+
+# Subtasks:
+## 1. Create Base Layout Component Structure [done]
+### Dependencies: None
+### Description: Set up the foundational layout components that will structure the entire application
+### Details:
+Create a main Layout component that will wrap the entire application. Implement a basic grid or flex structure with placeholders for Sidebar and Content areas. Define CSS variables for consistent spacing, colors, and breakpoints. Set up the basic routing structure with React Router (or your preferred routing solution). Create empty placeholder components for each main section (Create, Analytics, Market, Settings). Test the basic routing between these empty components to ensure navigation works correctly.
+
+## 8. Adapt Existing Sidebar Component [done]
+### Dependencies: 5.1
+### Description: Modify the existing Shadcn UI sidebar.jsx component to fit our application needs
+### Details:
+Import and review the existing sidebar.jsx component from Shadcn UI. Identify the necessary modifications to adapt it to our application structure. Customize the component to include our main navigation sections: Create, Analytics, and Settings. Ensure the component works with Next.js routing. Add proper icons for each navigation item. Implement active state styling for the current route. Test the adapted component to ensure it renders correctly and navigation works as expected.
+
+## 9. Set Up Next.js Pages and Routing [done]
+### Dependencies: 5.1
+### Description: Create the necessary Next.js page structure and routing for the main application sections
+### Details:
+Set up the Next.js pages directory with appropriate structure. Create placeholder pages for Create, Analytics, and Settings sections. Implement proper routing between these pages. Configure layout components to work with Next.js app structure. Ensure the sidebar navigation correctly links to these pages. Test routing functionality to verify navigation between pages works correctly.
+
+## 10. Implement Create Page Placeholder [done]
+### Dependencies: 5.9
+### Description: Create a basic placeholder for the Create page with minimal functionality
+### Details:
+Develop a simple placeholder for the Create page. Include basic UI elements to represent the future functionality. Add a page title and description. Ensure the page is properly linked from the sidebar navigation. Test that the page renders correctly and is accessible via navigation.
+
+## 11. Implement Analytics Page Placeholder [done]
+### Dependencies: 5.9
+### Description: Create a basic placeholder for the Analytics page with minimal functionality
+### Details:
+Develop a simple placeholder for the Analytics page. Include basic UI elements to represent the future functionality. Add a page title and description. Ensure the page is properly linked from the sidebar navigation. Test that the page renders correctly and is accessible via navigation.
+
+## 12. Implement Settings Page Placeholder [done]
+### Dependencies: 5.9
+### Description: Create a basic placeholder for the Settings page with minimal functionality
+### Details:
+Develop a simple placeholder for the Settings page. Include basic UI elements to represent the future functionality. Add a page title and description. Ensure the page is properly linked from the sidebar navigation. Test that the page renders correctly and is accessible via navigation.
+
+## 13. Implement Active State Styling [done]
+### Dependencies: 5.8, 5.9
+### Description: Add active state styling to highlight the current route in the sidebar navigation
+### Details:
+Implement active state styling for navigation items in the sidebar. Use Next.js routing utilities to determine the current route. Apply appropriate styling to the active navigation item. Test active state functionality across different routes to ensure it correctly reflects the current page.
+
+## 14. Add Conditional Waitlist Features (if needed) [done]
+### Dependencies: 5.8
+### Description: Implement waitlist selection dropdown and Edit/Submissions tabs if required by the application
+### Details:
+Assess whether waitlist selection functionality is needed in the current implementation. If required, add a waitlist selection dropdown to the sidebar using dropdown-menu.jsx. Implement Edit and Submissions tabs for selected waitlists if needed. Ensure these components only appear when appropriate based on user context. Test the conditional rendering and functionality of these components.
+
+## 15. Ensure Responsive Behavior [done]
+### Dependencies: 5.8
+### Description: Verify and enhance responsive behavior of the adapted sidebar component
+### Details:
+Review the responsive behavior of the adapted sidebar component. Ensure it works correctly on desktop, tablet, and mobile screen sizes. Implement any necessary modifications to improve responsive behavior. Test the component across various screen sizes and devices to verify proper functionality and appearance.
+
+## 16. Finalize and Integrate Components [done]
+### Dependencies: 5.8, 5.9, 5.10, 5.11, 5.12, 5.13, 5.14, 5.15
+### Description: Integrate all components into a cohesive application layout
+### Details:
+Integrate the adapted sidebar with the page components and Next.js routing. Ensure all components work together seamlessly. Verify navigation between pages functions correctly. Test the entire application layout across different browsers and devices. Conduct final review of styling, spacing, and consistency throughout the application.
+
+## 23. Remove Dashboard from Sidebar Navigation [done]
+### Dependencies: None
+### Description: Remove the dashboard link from the sidebar to reduce clutter and improve focus.
+### Details:
+1. Identify the dashboard link in the sidebar navigation component
+2. Remove the dashboard entry from the navigation items array/structure
+3. Update any related navigation state or logic that might reference the dashboard
+4. Test navigation to ensure removal doesn't cause any issues
+5. Ensure the application still has a proper default landing page after authentication
+6. Verify the sidebar appears cleaner without the dashboard link
+
+## 24. Add Market Section Placeholder to Sidebar [done]
+### Dependencies: None
+### Description: Add a navigation link and placeholder for the Market section in the sidebar.
+### Details:
+1. Add a new navigation item for the Market section in the sidebar component
+2. Choose an appropriate icon that represents marketing or market functionality
+3. Link the Market item to the appropriate route (e.g., /market or /dashboard/market)
+4. Update the routing configuration to recognize this new route
+5. Create a basic placeholder page for the Market section (similar to other placeholder pages)
+6. Test navigation to ensure the Market link works correctly
+7. Verify that the Market section appears consistently with other navigation items
+
+## 25. Implement Account Button with Profile Picture [done]
+### Dependencies: None
+### Description: Update the account button in the sidebar to show the user's profile picture and provide options for billing and logout, based on ButtonAccount.js.
+### Details:
+1. Study the ButtonAccount.js implementation for reference
+2. Modify the existing account functionality in the sidebar to incorporate profile picture display
+3. Implement a popover or dropdown menu for the account button with options for:
+   - Billing: Link to Stripe Customer Portal
+   - Logout: Sign out functionality
+4. Handle loading states and transitions properly
+5. Ensure the profile picture is correctly fetched from user metadata
+6. Implement a fallback for users without profile pictures (e.g., first letter of email as avatar)
+7. Test all functionality including:
+   - Profile picture display
+   - Dropdown/popover opening and closing
+   - Billing link functionality
+   - Logout functionality
+8. Style the component to match the overall design system
+
+## 26. Remove Edit and Submissions Tabs from Sidebar [done]
+### Dependencies: None
+### Description: Remove the Edit and Submissions tabs from the sidebar as their purpose isn't clear and they add unnecessary complexity.
+### Details:
+1. Identify the Edit and Submissions tabs in the sidebar component
+2. Remove the tab structure and related tab components
+3. Update any state management related to these tabs
+4. Ensure the removal doesn't affect other functionality
+5. Test navigation and sidebar display to confirm tabs are completely removed
+6. Verify that the sidebar maintains a clean and focused appearance after removal
+7. Update any documentation or comments referencing these tabs
+
+## 27. Remove Product Launch Button and Keep Waitlist Dropdown [done]
+### Dependencies: None
+### Description: Maintain the dropdown functionality for switching between waitlists, but remove the Product Launch button to reduce clutter.
+### Details:
+1. Identify the Product Launch button in the sidebar component
+2. Remove the Product Launch button while preserving the waitlist dropdown functionality
+3. Ensure the waitlist dropdown still works correctly for selecting different waitlists
+4. Update any state management or logic that might have referenced the Product Launch button
+5. Test the waitlist dropdown to verify it functions properly after the changes
+6. Verify that the sidebar appears cleaner without the removed button
+7. Make any necessary adjustments to layout or spacing following the button removal
+

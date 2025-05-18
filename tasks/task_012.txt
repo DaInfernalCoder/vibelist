@@ -1,0 +1,78 @@
+# Task ID: 12
+# Title: Multiple Waitlist Management
+# Status: pending
+# Dependencies: 8, 11
+# Priority: medium
+# Description: Implement functionality to create and manage multiple waitlists
+# Details:
+Create interface for viewing all created waitlists. Implement functionality to create new waitlists. Add edit and delete capabilities for existing waitlists. Create waitlist duplication functionality. Implement sorting and filtering of waitlist list. Add waitlist status indicators (published/draft). Create separate analytics tracking for each waitlist.
+
+# Test Strategy:
+Test creation of multiple waitlists. Verify edit and delete functionality. Test waitlist duplication. Verify each waitlist has separate analytics tracking.
+
+# Subtasks:
+## 1. Create Database Schema and Models for Multiple Waitlists [pending]
+### Dependencies: None
+### Description: Design and implement the database schema and models to support multiple waitlists in the system
+### Details:
+1. Create a Waitlist model with fields for name, description, status (published/draft), creation date, and other metadata
+2. Establish relationships between Waitlist model and existing User/Subscriber models
+3. Add necessary indexes for efficient querying
+4. Create database migrations to update the schema
+5. Update existing queries to work with the new multi-waitlist structure
+6. Test the model by creating sample waitlists and verifying relationships
+7. Document the schema design for future reference
+
+## 2. Implement Waitlist Management Interface [pending]
+### Dependencies: 12.1
+### Description: Create a user interface for viewing, sorting, and filtering all waitlists
+### Details:
+1. Design a waitlist dashboard layout showing all waitlists in a table/grid format
+2. Implement server-side API endpoints to fetch waitlists with pagination
+3. Add sorting functionality by name, creation date, status, and subscriber count
+4. Implement filtering by status (published/draft) and other relevant criteria
+5. Create status indicators (badges/icons) to visually distinguish published vs. draft waitlists
+6. Add a search function to find waitlists by name
+7. Test the interface with various screen sizes to ensure responsiveness
+8. Implement proper error handling for API requests
+
+## 3. Create Waitlist CRUD Operations [pending]
+### Dependencies: 12.1, 12.2
+### Description: Implement functionality to create, edit, and delete waitlists
+### Details:
+1. Create a form component for adding new waitlists with fields for name, description, and status
+2. Implement server-side validation for waitlist data
+3. Add API endpoints for creating, updating, and deleting waitlists
+4. Create edit functionality that pre-populates the form with existing waitlist data
+5. Implement delete confirmation dialog to prevent accidental deletions
+6. Add proper error handling and success notifications
+7. Ensure all operations update the UI immediately after completion
+8. Test all CRUD operations thoroughly, including edge cases and validation errors
+
+## 4. Implement Waitlist Duplication Functionality [pending]
+### Dependencies: 12.3
+### Description: Add the ability to duplicate existing waitlists with all their settings
+### Details:
+1. Create a 'Duplicate' button/action in the waitlist management interface
+2. Implement server-side logic to copy all waitlist settings and configurations
+3. Determine which elements should be copied (settings, but not subscribers)
+4. Add naming convention for duplicated waitlists (e.g., 'Copy of [Original Name]')
+5. Set appropriate default status for duplicated waitlists (draft)
+6. Create API endpoint for the duplication process
+7. Add progress indicator for duplication of large waitlists
+8. Test duplication with various waitlist configurations to ensure all settings are properly copied
+
+## 5. Implement Per-Waitlist Analytics Tracking [pending]
+### Dependencies: 12.1, 12.2
+### Description: Create separate analytics tracking and reporting for each waitlist
+### Details:
+1. Extend analytics data model to associate metrics with specific waitlists
+2. Create dashboard components to display per-waitlist analytics
+3. Implement metrics such as signup rate, conversion rate, and growth over time for each waitlist
+4. Add comparative analytics to see performance across different waitlists
+5. Create exportable reports for waitlist-specific data
+6. Implement data visualization (charts/graphs) for key metrics
+7. Add date range filtering for analytics data
+8. Test analytics tracking with sample data to ensure accuracy
+9. Optimize queries for performance with large datasets
+

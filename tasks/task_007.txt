@@ -1,0 +1,88 @@
+# Task ID: 7
+# Title: Waitlist Customization Interface
+# Status: pending
+# Dependencies: 6
+# Priority: high
+# Description: Create the visual editor for customizing waitlist pages
+# Details:
+Implement the customization interface with form controls for all customization options (Project Title, Hero Text, Sub Text, Placeholder Input Text, Button Text, Success Message). Create color scheme selector with predefined options. Implement logo upload and size adjustment. Add toggle controls for optional elements like social proof and video. Create real-time preview of changes. Implement auto-saving functionality to Supabase.
+
+# Test Strategy:
+Test each customization option to verify it updates the preview. Verify color scheme changes are applied correctly. Test logo upload and sizing. Verify all changes are saved to the database.
+
+# Subtasks:
+## 1. Create Basic Form Layout for Waitlist Customization [pending]
+### Dependencies: None
+### Description: Implement the foundational form structure with input fields for all required customization options
+### Details:
+Implementation steps:
+1. Create a new component called `WaitlistCustomizationForm`
+2. Implement form sections with appropriate labels and grouping
+3. Add input fields for Project Title, Hero Text, Sub Text, Placeholder Input Text, Button Text, and Success Message
+4. Set up form state management using React hooks (useState or useForm)
+5. Create basic styling for the form layout with appropriate spacing and sections
+6. Implement form validation for required fields
+7. Test that all form fields render correctly and can capture user input
+8. Ensure the form layout is responsive for different screen sizes
+
+## 2. Implement Color Scheme Selector and Logo Upload [pending]
+### Dependencies: 7.1
+### Description: Add color scheme selection with predefined options and logo upload functionality with size adjustment controls
+### Details:
+Implementation steps:
+1. Create a color scheme selector component with predefined theme options
+2. Implement visual swatches for each color scheme option
+3. Add logo upload functionality using file input with preview
+4. Implement logo size adjustment controls (width/height sliders)
+5. Add validation for logo file type and size
+6. Create appropriate state management for color scheme and logo data
+7. Connect these components to the main form created in subtask 1
+8. Test file uploads with various image types and sizes
+9. Verify that color scheme selection updates the form state correctly
+
+## 3. Add Toggle Controls for Optional Elements [pending]
+### Dependencies: 7.1
+### Description: Implement toggle switches for optional waitlist elements like social proof and video embedding
+### Details:
+Implementation steps:
+1. Create toggle switch components for each optional element (social proof, video, etc.)
+2. Implement conditional form sections that appear when toggles are activated
+3. For social proof toggle: add fields for testimonials, user counts, or company logos
+4. For video toggle: add video URL input with validation and optional caption field
+5. Ensure each toggle properly updates the form state
+6. Add appropriate validation for conditional fields
+7. Test that toggling controls correctly shows/hides the relevant form sections
+8. Verify that the form state correctly captures the toggle states and associated data
+
+## 4. Create Real-time Preview Component [pending]
+### Dependencies: 7.1, 7.2, 7.3
+### Description: Implement a live preview that updates in real-time as users modify the customization options
+### Details:
+Implementation steps:
+1. Create a `WaitlistPreview` component that renders a simplified version of the actual waitlist page
+2. Connect the preview to the form state to reflect changes in real-time
+3. Implement styling that matches the actual waitlist page appearance
+4. Ensure the preview updates when any form field changes
+5. Make the preview responsive with mobile/desktop toggle views
+6. Apply the selected color scheme to the preview
+7. Display uploaded logo with specified dimensions
+8. Show/hide optional elements based on toggle states
+9. Test the preview with various combinations of settings
+10. Ensure the preview accurately represents how the final waitlist page will appear
+
+## 5. Implement Auto-saving to Supabase [pending]
+### Dependencies: 7.1, 7.2, 7.3, 7.4
+### Description: Add functionality to automatically save customization changes to Supabase database
+### Details:
+Implementation steps:
+1. Set up Supabase client connection and table structure for storing waitlist customizations
+2. Implement debounced auto-save functionality that triggers after user changes
+3. Create save indicators (saving/saved status) to provide user feedback
+4. Add error handling for failed save attempts with retry options
+5. Implement loading of existing customization data when the form first loads
+6. Create a function to transform form data into the correct format for database storage
+7. Add a manual save button as a fallback option
+8. Implement optimistic UI updates during saving process
+9. Test auto-saving with various change scenarios and network conditions
+10. Verify that saved data can be correctly retrieved and loaded back into the form
+
