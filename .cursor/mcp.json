@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "/Users/sumit/.local/bin/supabase-mcp-server",
+      "env": {
+        "SUPABASE_PROJECT_REF": "wejhvwzgymkaerwupjqn",
+        "SUPABASE_DB_PASSWORD": "vibeylist1!",
+        "SUPABASE_REGION": "us-west-1",
+        "SUPABASE_ACCESS_TOKEN": "sbp_b9f7677fc888504fbbb722cb8ed7ba99bbb521f4",
+        "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indlamh2d3pneW1rYWVyd3VwanFuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Njk4ODAxNiwiZXhwIjoyMDYyNTY0MDE2fQ.aig9nhcxFaoUp08jYMnUl0peBJ--z0H7RFHnfO1UY20"
+      }
+    }
+  }
+}

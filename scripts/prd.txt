@@ -1,0 +1,469 @@
+# VibeList Product Requirements Document
+
+## 1. Introduction
+
+This Product Requirements Document (PRD) outlines the detailed specifications for VibeList, an AI-powered waitlist generator designed for founders of "vibe-coded" products. The purpose of this document is to provide a comprehensive guide for the development team to understand the requirements, features, and technical specifications needed to successfully build and launch the product. It serves as a central reference point for all stakeholders involved in the project's development lifecycle.
+
+### 1.1 Document purpose
+
+This PRD aims to:
+- Define the product vision and scope
+- Document specific functional and non-functional requirements
+- Establish user stories and acceptance criteria for development
+- Outline technical architecture and dependencies
+- Provide a basis for project planning and execution
+
+## 2. Product overview
+
+VibeList is the easiest AI-powered waitlist generator specifically created for "vibe coders" - founders who prioritize aesthetic and simplicity in their products. The platform enables founders to validate their product ideas through beautifully designed waitlist pages without requiring any coding knowledge. Users can create customizable waitlist pages from professional templates, generate unique URLs to share with potential customers, and monitor signup analytics through an intuitive dashboard.
+
+### 2.1 Product vision
+
+VibeList aims to solve the critical problem faced by many founders: launching products without validation. By providing an exceptionally simple waitlist creation tool with beautiful templates, VibeList enables founders to quickly gauge interest in their ideas before committing significant resources to development.
+
+### 2.2 Key differentiators
+
+- **Aesthetic focus**: Unlike competing waitlist tools that often look generic, VibeList emphasizes beautiful design with premium templates.
+- **Simplicity**: Extreme ease-of-use with "braindead simple" interface requiring minimal setup.
+- **Validation-focused**: Built specifically to help founders validate ideas and build audience before full product launch.
+- **One-time pricing**: Affordable lifetime access model versus subscription-based competitors.
+
+## 3. Goals and objectives
+
+### 3.1 Primary goals
+
+1. Create a platform that enables founders to validate their product ideas in minutes rather than hours
+2. Provide beautiful, no-code waitlist creation capability with customizable templates
+3. Deliver actionable insights through a simple analytics dashboard
+4. Guide founders on effective marketing of their waitlist through built-in resources
+
+### 3.2 Success metrics
+
+1. **User adoption**: Target 1,000 paying users within first six months of launch
+2. **Template usage**: 90% of users successfully create and publish a waitlist within 10 minutes of signing up
+3. **Validation efficiency**: 75% of users report meaningful validation insights for their product ideas
+4. **User satisfaction**: Maintain 4.7+ star rating on review platforms
+
+### 3.3 Business objectives
+
+1. Generate revenue through one-time payments of approximately $20 per user
+2. Minimize ongoing maintenance costs through robust architecture
+3. Build positive reputation in the indie founder community
+4. Establish foundation for potential future complementary products
+
+## 4. Target audience
+
+### 4.1 Primary user persona
+
+**Indie SaaS Founder**
+- **Demographics**: 25-45 years old, tech-savvy but may not be a developer
+- **Goals**: Validate product ideas quickly before investing significant time/money
+- **Pain points**:
+  - Limited technical skills to create professional-looking waitlists
+  - Uncertainty about market demand for their ideas
+  - Fear of building products nobody wants
+  - Limited budget for expensive validation tools
+- **Motivations**:
+  - Desire to create profitable, sustainable businesses
+  - Need for validation before committing resources
+  - Appreciation for aesthetically pleasing design
+
+### 4.2 Secondary user personas
+
+**Non-Technical Entrepreneurs**
+- Have business ideas but lack technical knowledge to implement validation tools
+- Need simplicity and guidance throughout the process
+
+**Solo Technical Founders**
+- Have technical skills but prioritize speed and efficiency
+- Want to focus on core product rather than building validation tools
+
+## 5. Features and requirements
+
+### 5.1 Waitlist creation
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-1.1 | System shall provide 3 professional templates for waitlist pages | High |
+| FR-1.2 | System shall generate a unique URL for each waitlist page | High |
+| FR-1.3 | System shall store all waitlist signup data in Supabase | High |
+| FR-1.4 | System shall enable custom branding and color schemes | Medium |
+
+### 5.2 User dashboard
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-2.1 | System shall display real-time signup metrics | High |
+| FR-2.2 | System shall provide CSV export of waitlist data | Medium |
+
+### 5.3 Email management
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-3.1 | System shall collect and validate email addresses | High |
+| FR-3.2 | System shall send confirmation emails to new signups | Medium |
+| FR-3.3 | System shall provide founders with email analytics | Low |
+| FR-3.4 | System shall protect against botted submissions using Cloudflare | Medium |
+
+### 5.4 Navigation
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-4.1 | System shall provide sidebar navigation with Market, Create, Analytics, and Settings sections | High |
+| FR-4.2 | System shall implement responsive design for all screen sizes | Medium |
+| FR-4.3 | System shall prioritize minimalist, intuitive interfaces | High |
+
+### 5.5 Waitlist customization interface
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-5.1 | System shall provide visual editor for waitlist pages | High |
+| FR-5.2 | System shall implement customization options including Project Title, Hero Text, Sub Text, Placeholder Input Text, Button Text, Success Message, Logo visibility and size, Optional Social proof display, and Optional video | High |
+
+### 5.6 Marketing features
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-6.1 | System shall provide curated list of product launch platforms | Medium |
+| FR-6.2 | System shall include customizable template messages for each platform with placeholders for human text | Medium |
+| FR-6.3 | System shall provide guidance on optimal launch timing, cold emailing strategies, ways to launch | Low |
+| FR-7.1 | System shall include cold email templates with customizable fields | Low |
+| FR-7.2 | System shall provide social media promotion strategies | Low |
+| FR-7.3 | System shall offer SEO optimization tips for waitlist pages | Low |
+
+### 5.7 Email analytics
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-11.1 | System shall email the user on updates on the waitlist | Medium |
+
+### 5.8 Business requirements
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-13.1 | System shall implement one-time payment model (~$20 lifetime) | High |
+| FR-13.2 | System shall process payments securely through Stripe | High |
+| FR-13.3 | System shall provide receipt/invoice for purchases through Stripe | Medium |
+
+### 5.9 Target users
+
+| Requirement ID | Requirement Description | Priority |
+|----------------|-------------------------|----------|
+| FR-14.1 | System shall be optimized for SaaS founders | High |
+| FR-14.2 | System shall cater to non-technical users | High |
+| FR-14.3 | System shall address validation needs for early-stage products | High |
+
+## 6. User stories and acceptance criteria
+
+### 6.1 Account management
+
+**ST-101: User registration**
+- **As a** founder
+- **I want to** create an account on VibeList
+- **So that** I can access the platform's features
+- **Acceptance criteria**:
+  - User can register using email/password or social auth
+  - User receives confirmation email after registration
+  - User can log in after registration is complete
+  - System creates user record in Supabase
+
+**ST-102: User authentication**
+- **As a** registered user
+- **I want to** securely log in to my account
+- **So that** I can access my waitlists and data
+- **Acceptance criteria**:
+  - User can log in with email/password or social auth
+  - Invalid credentials result in appropriate error message
+  - Authentication state persists across sessions
+  - Password reset functionality is available
+
+**ST-103: Account settings management**
+- **As a** registered user
+- **I want to** update my account settings
+- **So that** I can manage my profile and preferences
+- **Acceptance criteria**:
+  - User can update name, email, and password
+  - User can delete account if needed
+  - Changes are saved and reflected immediately
+
+### 6.2 Waitlist creation
+
+**ST-201: Template selection**
+- **As a** founder
+- **I want to** browse and select from available waitlist templates
+- **So that** I can find a design that matches my product's aesthetic
+- **Acceptance criteria**:
+  - User can view all 3 template options
+  - Templates are displayed with preview images
+  - Selected template is highlighted
+  - Template selection is saved with waitlist settings
+
+**ST-202: Waitlist customization**
+- **As a** founder
+- **I want to** customize my waitlist page
+- **So that** it aligns with my product branding
+- **Acceptance criteria**:
+  - User can edit all customization options:
+    - Project Title
+    - Hero Text
+    - Sub Text
+    - Placeholder Input Text
+    - Button Text
+    - Success Message
+  - User can toggle logo visibility and adjust size
+  - User can enable/disable social proof display
+  - User can add optional video
+  - Changes appear in real-time preview
+  - All changes are saved automatically
+
+**ST-203: Color scheme selection**
+- **As a** founder
+- **I want to** select a color scheme for my waitlist
+- **So that** it matches my brand identity
+- **Acceptance criteria**:
+  - User can select from predefined color schemes
+  - User can view real-time preview of color changes
+  - Color scheme selection is saved with waitlist
+
+**ST-204: Waitlist publication**
+- **As a** founder
+- **I want to** publish my customized waitlist
+- **So that** I can share it with potential users
+- **Acceptance criteria**:
+  - System generates unique URL for waitlist
+  - URL is displayed to user and can be copied
+  - Published waitlist is accessible via URL
+  - System confirms successful publication
+
+### 6.3 Waitlist management
+
+**ST-301: Viewing waitlist analytics**
+- **As a** founder
+- **I want to** view signup analytics for my waitlist
+- **So that** I can track validation progress
+- **Acceptance criteria**:
+  - Dashboard displays total signup count
+  - Dashboard shows signup trend over time
+  - User can filter data by date range
+  - Analytics updates in real-time
+
+**ST-302: Exporting waitlist data**
+- **As a** founder
+- **I want to** export my waitlist signup data
+- **So that** I can analyze it externally or use it for marketing
+- **Acceptance criteria**:
+  - User can export data in CSV format
+  - Export includes all signup emails and timestamps
+  - Download starts immediately after request
+  - User receives confirmation of successful export
+
+**ST-303: Managing multiple waitlists**
+- **As a** founder
+- **I want to** create and manage multiple waitlists
+- **So that** I can validate different product ideas
+- **Acceptance criteria**:
+  - User can create multiple waitlist pages
+  - User can view list of all created waitlists
+  - User can edit or delete existing waitlists
+  - System tracks analytics separately for each waitlist
+
+### 6.4 End-user experience
+
+**ST-401: Waitlist signup process**
+- **As an** end-user visiting a waitlist
+- **I want to** sign up for the waitlist
+- **So that** I can receive updates about the product
+- **Acceptance criteria**:
+  - User can enter email address in form
+  - Form validates email format
+  - User receives success message after submission
+  - System stores email in database
+  - System sends confirmation email to user
+
+**ST-402: End-user confirmation**
+- **As an** end-user who signed up for a waitlist
+- **I want to** receive confirmation of my signup
+- **So that** I know my registration was successful
+- **Acceptance criteria**:
+  - User receives confirmation email
+  - Email contains information about the product
+  - Email design matches waitlist branding
+  - Confirmation happens within 5 minutes of signup
+
+### 6.5 Marketing features
+
+**ST-501: Accessing launch platforms directory**
+- **As a** founder
+- **I want to** access the curated list of product launch platforms
+- **So that** I can promote my waitlist effectively
+- **Acceptance criteria**:
+  - User can access Market page from sidebar
+  - List displays all recommended launch platforms
+  - Each platform includes brief description
+  - List is organized by platform type or effectiveness
+
+**ST-502: Using marketing templates**
+- **As a** founder
+- **I want to** use provided marketing templates
+- **So that** I can efficiently promote my waitlist
+- **Acceptance criteria**:
+  - User can view templates for different marketing channels
+  - Templates include placeholders for customization
+  - User can copy templates for external use
+  - Templates include guidance on effective usage
+
+### 6.6 Database modeling
+
+**ST-601: Database schema implementation**
+- **As a** system architect
+- **I want to** implement an efficient database schema
+- **So that** user data and waitlist information is properly stored
+- **Acceptance criteria**:
+  - Supabase schema includes tables for:
+    - Users
+    - Waitlists
+    - Waitlist_Signups
+    - Customization_Settings
+  - Proper relationships between tables are established
+  - Schema supports efficient querying of analytics data
+  - Data validation rules are implemented
+
+### 6.7 Payment processing
+
+**ST-701: One-time payment**
+- **As a** founder
+- **I want to** make a one-time payment for lifetime access
+- **So that** I can use all features without recurring charges
+- **Acceptance criteria**:
+  - User can view pricing information
+  - Payment process uses Stripe for secure transactions
+  - User is charged approximately $20
+  - User receives receipt/invoice via email
+  - User account is marked as paid with lifetime access
+
+## 7. Technical requirements / stack
+
+### 7.1 Frontend technologies
+
+| Technology | Purpose | Justification |
+|------------|---------|---------------|
+| NextJS | Frontend framework and routing | Provides optimized rendering and routing capabilities |
+| Shadcn | UI component library | Offers beautiful, consistent components that align with the "vibe coded" aesthetic |
+| Tailwind CSS | Styling framework | Enables rapid styling with consistent design system |
+| ShipFast | Boilerplate | Accelerates development with pre-built components and patterns |
+
+### 7.2 Backend technologies
+
+| Technology | Purpose | Justification |
+|------------|---------|---------------|
+| Supabase | Database and authentication | Provides integrated backend services with minimal setup |
+| Resend | Email functionality | Reliable email delivery service with templating capabilities |
+
+### 7.3 Infrastructure and analytics
+
+| Technology | Purpose | Justification |
+|------------|---------|---------------|
+| Vercel | Hosting and deployment | Seamless integration with NextJS for optimal performance |
+| Stripe | Payment processing | Industry-standard secure payment processing |
+| PostHog | Analytics | Comprehensive user behavior tracking and insights |
+| Cloudflare | Bot protection | Prevents spam submissions to waitlists |
+
+### 7.4 Integration requirements
+
+1. **Supabase integration**:
+   - Authentication flow must use Supabase Auth
+   - Database queries should use Supabase client library
+   - Real-time subscriptions for dashboard updates
+
+2. **Stripe integration**:
+   - One-time payment flow
+   - Secure checkout process
+   - Receipt generation
+
+3. **Resend integration**:
+   - Email template system
+   - Triggered emails for:
+     - User registration
+     - Waitlist signup confirmations
+     - Payment receipts
+     - Waitlist updates
+
+4. **PostHog integration**:
+   - Event tracking for user actions
+   - Funnel analysis for conversion optimization
+   - User retention metrics
+
+### 7.5 Performance requirements
+
+1. **Page load times**:
+   - Initial page load < 2 seconds
+   - Subsequent navigation < 500ms
+
+2. **Scalability**:
+   - Support for at least 10,000 concurrent users
+   - Handle waitlists with up to 100,000 signups
+
+3. **Reliability**:
+   - 99.9% uptime for waitlist pages
+   - Automatic database backups
+
+### 7.6 Security requirements
+
+1. **Authentication security**:
+   - Secure password storage
+   - Multi-factor authentication option
+   - Session timeout controls
+
+2. **Data protection**:
+   - GDPR-compliant data collection
+   - Encrypted data storage
+   - API endpoint security
+
+## 8. Design and user interface
+
+### 8.1 Design principles
+
+1. **Simplicity**: Interfaces should be intuitive with minimal cognitive load
+2. **Aesthetics**: All templates and UI elements should be visually appealing
+3. **Consistency**: Design patterns should be consistent throughout the application
+4. **Responsiveness**: All interfaces must function well on mobile and desktop devices
+
+### 8.2 Navigation structure
+
+The application will include a sidebar navigation with the following sections:
+1. **Create**: For waitlist creation and customization
+2. **Analytics**: For viewing signup data and metrics
+3. **Market**: For accessing marketing resources and launch platforms
+4. **Settings**: For account and general application settings
+
+### 8.3 Waitlist templates
+
+Three distinct template designs will be provided, each with:
+- Unique layout structure
+- Consistent customization options
+- Mobile-responsive design
+- High-quality visual aesthetics
+
+### 8.4 Customization interface
+
+The visual editor for waitlist customization will include:
+1. **Live preview**: Real-time visualization of changes
+2. **Intuitive controls**: Simple form inputs for text elements
+3. **Toggle options**: For optional elements like logo and social proof
+4. **Color palette selector**: For changing the color scheme
+
+### 8.5 Dashboard design
+
+The analytics dashboard will feature:
+1. **Key metrics display**: Prominent visualization of total signups
+2. **Growth chart**: Signup trend over time
+3. **Data table**: Detailed list of waitlist subscribers
+4. **Export controls**: Options for exporting data in various formats
+
+### 8.6 Responsive design specifications
+
+1. **Mobile breakpoints**: 320px, 480px, 768px
+2. **Tablet breakpoints**: 992px, 1024px
+3. **Desktop breakpoints**: 1280px, 1440px, 1920px
+
+All interfaces must maintain usability and visual integrity across all specified breakpoints. 

@@ -1,0 +1,351 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Section Components and Page Layout Guidelines
+
+This guide outlines the conventions for creating section components and page layouts throughout the application.
+
+## Section Types
+
+Our codebase includes several main section component types:
+
+- **Hero Sections**: [Hero.js](mdc:components/Hero.js) introduces the main product
+- **Feature Sections**: Several variations ([FeaturesAccordion.js](mdc:components/FeaturesAccordion.js), [FeaturesGrid.js](mdc:components/FeaturesGrid.js), [FeaturesListicle.js](mdc:components/FeaturesListicle.js))
+- **CTA Sections**: [CTA.js](mdc:components/CTA.js) for call-to-action
+- **Pricing Sections**: [Pricing.js](mdc:components/Pricing.js) displays product plans
+- **Testimonial Sections**: Various testimonial components showing social proof
+- **FAQ Sections**: [FAQ.js](mdc:components/FAQ.js) for frequently asked questions
+- **Problem Sections**: [Problem.js](mdc:components/Problem.js) for problem statement/agitation
+
+## Section Structure
+
+- **Container Pattern**
+  - Use `max-w-*` Tailwind classes to constrain width
+  - Center with `mx-auto`
+  - Add appropriate padding with `px-8` or similar
+  
+  ```javascript
+  // ✅ DO: Use container pattern
+  <section className="bg-base-100">
+    <div className="max-w-7xl mx-auto px-8 py-24">
+      {/* Section content */}
+    </div>
+  </section>
+  ```
+
+- **Section Spacing**
+  - Standard vertical spacing: `py-24` or `py-16 md:py-24`
+  - Adjust for responsive layouts with breakpoint-specific classes
+  
+  ```javascript
+  // ✅ DO: Use consistent vertical spacing
+  <section className="py-16 md:py-24 lg:py-32">
+    {/* Section content */}
+  </section>
+  ```
+
+## Section Component Organization
+
+- **Section Components as Default Exports**
+  - Each major section should be its own component
+  - Export as the default from its file
+  
+  ```javascript
+  // ✅ DO: Create standalone section components
+  const FeaturesSection = () => {
+    return (
+      <section className="bg-base-200">
+        {/* Section content */}
+      </section>
+    );
+  };
+  
+  export default FeaturesSection;
+  ```
+
+- **Subcomponents Within Sections**
+  - Define child components within the same file
+  - Keep these as function components above the main component
+  
+  ```javascript
+  // ✅ DO: Define subcomponents within section files
+  // Subcomponent
+  const FeatureCard = ({ title, description, icon }) => {
+    return (
+      <div className="card">
+        {icon}
+        <h3>{title}</h3>
+        <p>{description}</p>
+      </div>
+    );
+  };
+  
+  // Main section component
+  const FeaturesSection = () => {
+    return (
+      <section>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <FeatureCard 
+            title="Feature 1"
+            description="Description"
+            icon={<SomeIcon />}
+          />
+          {/* More feature cards */}
+        </div>
+      </section>
+    );
+  };
+  ```
+
+## Page Layout Structure
+
+- **Page Component Pattern**
+  - Pages assembled from section components
+  - Each page is a server component by default
+  
+  ```javascript
+  // ✅ DO: Compose pages from section components
+  export default function HomePage() {
+    return (
+      <>
+        <Hero />
+        <FeaturesSection />
+        <Pricing />
+        <FAQ />
+        <CTA />
+      </>
+    );
+  }
+  ```
+
+- **Layout Structure**
+  - Use Next.js layout components for shared UI
+  - Keep headers, footers in layout, not individual pages
+  
+  ```javascript
+  // ✅ DO: Use layout components for shared UI
+  export default function RootLayout({ children }) {
+    return (
+      <html lang="en">
+        <body>
+          <Header />
+          <main>{children}</main>
+          <Footer />
+        </body>
+      </html>
+    );
+  }
+  ```
+
+## Responsive Layout Patterns
+
+- **Mobile-First Approach**
+  - Design for mobile first, then enhance for larger screens
+  - Use Tailwind responsive classes (md:, lg:, etc.) to adapt layouts
+  
+  ```javascript
+  // ✅ DO: Use responsive classes for layout changes
+  <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+    <div className="w-full md:w-1/2">
+      {/* First column */}
+    </div>
+    <div className="w-full md:w-1/2">
+      {/* Second column */}
+    </div>
+  </div>
+  ```
+
+- **Responsive Grid System**
+  - Use CSS Grid with responsive columns
+  - Adjust column count at different breakpoints
+  
+  ```javascript
+  // ✅ DO: Use responsive grid layouts
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {/* Grid items */}
+  </div>
+  ```
+
+## Section Typography
+
+- **Heading Hierarchy**
+  - Use appropriate heading levels (h1, h2, h3)
+  - Consistent font weights: `font-bold` or `font-extrabold` for headings
+  - Consistent sizing scale using Tailwind text classes
+  
+  ```javascript
+  // ✅ DO: Use consistent heading hierarchy
+  <section>
+    <h2 className="font-extrabold text-3xl lg:text-5xl tracking-tight mb-8">
+      Section Heading
+    </h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 className="font-bold text-xl mb-4">Subsection Heading</h3>
+        <p className="text-base-content/80">Description text</p>
+      </div>
+      {/* More items */}
+    </div>
+  </section>
+  ```
+
+- **Text Formatting**
+  - Body text: Standard size with reduced opacity for secondary text
+  - Use `tracking-tight` for headings
+  - Use `leading-relaxed` for paragraph text
+  
+  ```javascript
+  // ✅ DO: Use consistent text formatting
+  <p className="text-base-content/80 leading-relaxed">
+    Paragraph text with appropriate line height and reduced opacity
+  </p>
+  ```
+
+## Color and Background
+
+- **Section Background Alternation**
+  - Alternate between `bg-base-100` and `bg-base-200` for visual separation
+  - Use `bg-neutral` with `text-neutral-content` for high-contrast sections
+  
+  ```javascript
+  // ✅ DO: Alternate section backgrounds
+  <section className="bg-base-100">
+    {/* Section content */}
+  </section>
+  <section className="bg-base-200">
+    {/* Next section content */}
+  </section>
+  <section className="bg-neutral text-neutral-content">
+    {/* High-contrast section */}
+  </section>
+  ```
+
+- **DaisyUI Theme Integration**
+  - Use theme-aware colors: `primary`, `secondary`, `accent`, etc.
+  - Use opacity modifiers for subtle variations: `bg-primary/20`
+  
+  ```javascript
+  // ✅ DO: Use theme-aware colors
+  <div className="bg-primary/20 text-primary rounded-lg p-4">
+    {/* Themed content */}
+  </div>
+  ```
+
+## Section Animation and Interactivity
+
+- **Animate on Interaction**
+  - Use Tailwind's transition utilities for interactive elements
+  - Keep animations subtle and purposeful
+  
+  ```javascript
+  // ✅ DO: Use subtle animations
+  <button className="transition-all duration-200 hover:scale-105">
+    Interactive Element
+  </button>
+  ```
+
+- **Section-Specific Interactivity**
+  - Interactive elements should be client components
+  - Keep state management clean with React hooks
+  
+  ```javascript
+  // ✅ DO: Implement clean interactivity
+  "use client";
+  
+  import { useState } from "react";
+  
+  const TabSection = () => {
+    const [activeTab, setActiveTab] = useState(0);
+    
+    return (
+      <section>
+        <div className="tabs">
+          {tabData.map((tab, i) => (
+            <button 
+              key={i}
+              className={`tab ${activeTab === i ? 'tab-active' : ''}`}
+              onClick={() => setActiveTab(i)}
+            >
+              {tab.title}
+            </button>
+          ))}
+        </div>
+        <div className="tab-content">
+          {tabData[activeTab].content}
+        </div>
+      </section>
+    );
+  };
+  ```
+
+## Semantic HTML Structure
+
+- **HTML5 Semantic Elements**
+  - Use `<section>` for distinct content sections
+  - Use `<header>` and `<footer>` appropriately
+  - Use `<nav>` for navigation areas
+  
+  ```javascript
+  // ✅ DO: Use semantic HTML elements
+  <section aria-labelledby="features-heading">
+    <header>
+      <h2 id="features-heading">Features</h2>
+    </header>
+    <div className="content">
+      {/* Features content */}
+    </div>
+  </section>
+  ```
+
+## Page SEO Optimization
+
+- **Section IDs for Navigation**
+  - Add IDs to main sections for anchor links
+  - Use descriptive IDs that match content
+  
+  ```javascript
+  // ✅ DO: Add section IDs for navigation
+  <section id="pricing" className="bg-base-200">
+    <h2>Pricing Plans</h2>
+    {/* Pricing content */}
+  </section>
+  ```
+
+- **Content Structure**
+  - Organize content in a logical hierarchy
+  - Use appropriate heading levels (h1-h6)
+  
+  ```javascript
+  // ✅ DO: Use proper content hierarchy
+  <article>
+    <h1>Main Page Title</h1>
+    <section>
+      <h2>Major Section</h2>
+      <div>
+        <h3>Subsection</h3>
+        <p>Content</p>
+      </div>
+    </section>
+  </article>
+  ```
+
+## Performance Considerations
+
+- **Lazy Loading Sections**
+  - Consider lazy loading below-the-fold sections
+  - Use Next.js `<Suspense>` for progressive loading
+  
+  ```javascript
+  // ✅ DO: Lazy load below-the-fold content
+  import { Suspense } from 'react';
+  const LowerSection = dynamic(() => import('./LowerSection'));
+  
+  // In the page component:
+  <Suspense fallback={<div className="h-96 skeleton"></div>}>
+    <LowerSection />
+  </Suspense>
+  ```
+
+These guidelines ensure consistent section implementation and page layout throughout the application, improving user experience, SEO, and maintainability.
