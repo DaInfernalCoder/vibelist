@@ -472,67 +472,70 @@
     {
       "id": 6,
       "title": "Waitlist Template Creation",
-      "description": "Design and implement the three professional waitlist templates",
+      "description": "Design and implement a customizable waitlist template with editor interface",
       "status": "pending",
       "dependencies": [
         5
       ],
       "priority": "high",
-      "details": "Design and implement three distinct, professional waitlist templates using Tailwind CSS and Shadcn components. Ensure each template has a unique layout but consistent customization options. Make all templates fully responsive across all specified breakpoints. Implement template preview functionality. Create reusable components for common elements across templates.",
-      "testStrategy": "Verify visual appearance of each template. Test responsive behavior at all breakpoints. Validate HTML structure and accessibility. Test template preview functionality.",
+      "details": "Design and implement a customizable waitlist template using the provided boilerplate components (demo.tsx, grid-background.tsx, avatar.tsx, input.tsx, icons.tsx, button.tsx). Create a side editor panel with comprehensive customization options for branding, template style, hero section, features section, and product showcase. Implement a live preview area that updates in real-time as users make changes. Focus on creating a single highly customizable template rather than three separate templates. Ensure the template is fully responsive across all specified breakpoints.",
+      "testStrategy": "Verify visual appearance of the template with different customization options. Test responsive behavior at all breakpoints. Validate HTML structure and accessibility. Test the live preview functionality and ensure changes in the editor panel correctly update the preview.",
       "subtasks": [
         {
           "id": 1,
-          "title": "Create Base Waitlist Component Architecture",
-          "description": "Design and implement the foundational component architecture for all waitlist templates, including shared state management and customization options.",
+          "title": "Set up Waitlist Template Core Structure and State Management",
+          "description": "Create the foundational structure for the waitlist template editor with state management to handle all customization options.",
           "dependencies": [],
-          "details": "1. Create a base `WaitlistTemplate` component that will serve as the foundation for all templates.\n2. Implement a context provider for managing shared state across templates (user inputs, styling preferences, etc.).\n3. Define the common customization options interface that all templates will support (colors, fonts, spacing, etc.).\n4. Create reusable components for common elements (input fields, buttons, success messages, etc.).\n5. Implement responsive container layouts using Tailwind's breakpoint utilities.\n6. Test the base architecture by ensuring state changes properly propagate and components respond to customization options.\n7. Document the component API for other developers.",
+          "details": "Implementation steps:\n1. Create a new `waitlist-editor.tsx` component with a split layout for editor sidebar and preview area\n2. Set up a comprehensive state object using React's useState or useReducer to manage all customizable properties:\n   - Branding (brandName, logoPosition)\n   - Template Style (style, backgroundColor, foregroundColor, primaryColor, primaryForegroundColor, secondaryColor, secondaryForegroundColor, mutedColor)\n   - Hero Section (title, subtitle, inputPlaceholder, buttonText)\n   - Features Section (features array with title, description, icon)\n   - Product Showcase (images, captions)\n   - Social Media links\n   - Success Modal content\n   - SEO metadata\n3. Create a context provider to make this state accessible throughout the component tree\n4. Implement basic layout structure with responsive design considerations\n5. Add placeholder components for the editor sidebar and preview area\n\nTesting approach:\n- Verify state updates correctly when modified\n- Ensure context provider properly distributes state to child components\n- Test responsive layout at different breakpoints",
           "status": "pending",
           "parentTaskId": 6
         },
         {
           "id": 2,
-          "title": "Implement First Waitlist Template (Minimal)",
-          "description": "Design and implement the first waitlist template with a minimal, clean aesthetic using the base architecture.",
+          "title": "Implement Editor Sidebar Interface with Customization Panels",
+          "description": "Build the sidebar editor interface with expandable sections for all customization options, using form controls to modify the template state.",
           "dependencies": [
             1
           ],
-          "details": "1. Design a minimal, clean layout for the first template using Figma or similar tool.\n2. Implement the template using the base architecture created in subtask 1.\n3. Style the template using Tailwind CSS with a focus on whitespace, typography, and subtle animations.\n4. Incorporate Shadcn components like Form, Input, Button with appropriate styling.\n5. Ensure the template is fully responsive across all breakpoints (mobile, tablet, desktop).\n6. Implement form validation and submission handling.\n7. Test the template across different screen sizes and browsers.\n8. Verify all customization options work correctly for this specific template.",
+          "details": "Implementation steps:\n1. Create a `SidebarEditor` component with collapsible sections for each customization category\n2. Implement the following editor panels:\n   - Branding panel with text input for brand name and radio buttons for logo position\n   - Template Style panel with color pickers for all color options and style selector\n   - Hero Section panel with text inputs for title, subtitle, input placeholder, and button text\n   - Features Section panel with ability to add/remove/edit features\n   - Product Showcase panel with image upload/selection functionality\n   - Social Media panel with inputs for social links\n   - Success Modal panel with content customization\n   - SEO panel with metadata inputs\n3. Connect all form controls to the state management system created in subtask 1\n4. Add validation for required fields\n5. Implement a clean, organized UI with proper spacing and typography\n\nTesting approach:\n- Test each form control to ensure it updates the corresponding state\n- Verify collapsible sections expand/collapse correctly\n- Test validation logic for required fields\n- Ensure UI is responsive and usable on smaller screens",
           "status": "pending",
           "parentTaskId": 6
         },
         {
           "id": 3,
-          "title": "Implement Second Waitlist Template (Professional)",
-          "description": "Design and implement the second waitlist template with a more professional, business-oriented aesthetic.",
+          "title": "Develop Live Preview Area with Boilerplate Component Integration",
+          "description": "Create the live preview area that renders the waitlist template using the boilerplate components and reflects all customization changes in real-time.",
           "dependencies": [
             1
           ],
-          "details": "1. Design a professional business-oriented layout with more structured sections.\n2. Implement the template using the base architecture from subtask 1.\n3. Style using Tailwind CSS with a focus on grid layouts, card components, and professional color schemes.\n4. Incorporate Shadcn components like Card, Dialog, and Tabs where appropriate.\n5. Add business-specific features like company logo placement, testimonial sections, or feature highlights.\n6. Ensure responsive behavior across all breakpoints with special attention to tablet layouts.\n7. Test form submission flow and validation messages.\n8. Verify all customization options apply correctly to this template's unique elements.",
+          "details": "Implementation steps:\n1. Create a `LivePreview` component that consumes the template state from context\n2. Integrate the provided boilerplate components:\n   - Import and utilize demo.tsx, grid-background.tsx, avatar.tsx, input.tsx, icons.tsx, and button.tsx\n   - Apply the customization properties from state to these components\n3. Structure the preview to include:\n   - Header with brand name and logo\n   - Hero section with title, subtitle, email input, and submit button\n   - Features section with icons and descriptions\n   - Product showcase section\n   - Social media links\n   - Footer\n4. Implement responsive design for the preview area following the specified breakpoints\n5. Add a scaling mechanism to show the full template at a reduced size within the preview area\n\nTesting approach:\n- Verify all state changes immediately reflect in the preview\n- Test responsiveness at all required breakpoints\n- Ensure all boilerplate components render correctly with custom properties\n- Test with various content lengths to ensure layout remains stable",
           "status": "pending",
           "parentTaskId": 6
         },
         {
           "id": 4,
-          "title": "Implement Third Waitlist Template (Creative)",
-          "description": "Design and implement the third waitlist template with a creative, visually distinctive layout.",
+          "title": "Implement Save Changes and Full Preview Functionality",
+          "description": "Add functionality to save template customizations and view the waitlist template in full-screen preview mode.",
           "dependencies": [
-            1
+            1,
+            2,
+            3
           ],
-          "details": "1. Design a creative, visually distinctive layout with unique visual elements and interactions.\n2. Implement the template using the base architecture from subtask 1.\n3. Style using Tailwind CSS with advanced techniques like gradients, animations, and custom shapes.\n4. Incorporate Shadcn components with custom styling overrides to match the creative direction.\n5. Add distinctive interactive elements like animated backgrounds, micro-interactions, or progressive disclosure.\n6. Ensure responsive behavior with special attention to maintaining visual impact across screen sizes.\n7. Test performance to ensure animations and visual effects don't impact page load times.\n8. Verify all customization options work correctly with the more complex visual elements.",
+          "details": "Implementation steps:\n1. Create a persistent storage solution for saving template customizations:\n   - Implement a save function that stores the complete template state\n   - Use localStorage for client-side persistence or connect to an API endpoint\n   - Add loading functionality to retrieve saved templates\n2. Add a \"Save Changes\" button in the sidebar that persists the current state\n   - Include visual feedback for save operations (success/error states)\n   - Implement auto-save functionality (optional)\n3. Create an \"Open Full Preview\" button that opens the template in a new tab or modal:\n   - Implement a dedicated route or modal for full-screen preview\n   - Ensure the full preview uses the same state as the editor preview\n   - Add a way to return to the editor from full preview\n4. Add a preview mode toggle to show the template at different screen sizes\n5. Implement undo/redo functionality for editor changes\n\nTesting approach:\n- Test save and load operations with various template configurations\n- Verify full preview renders identically to the editor preview\n- Test preview at different screen sizes\n- Ensure undo/redo correctly reverts and reapplies changes",
           "status": "pending",
           "parentTaskId": 6
         },
         {
           "id": 5,
-          "title": "Implement Template Preview and Selection System",
-          "description": "Create a system for previewing, comparing and selecting between the three waitlist templates with live customization.",
+          "title": "Finalize Responsive Design and Add Advanced Customization Features",
+          "description": "Ensure full responsiveness across all breakpoints and implement advanced customization options for the waitlist template.",
           "dependencies": [
+            1,
             2,
             3,
             4
           ],
-          "details": "1. Design a template selection interface that showcases all three templates.\n2. Implement a preview system that renders miniature versions of each template.\n3. Create a template switching mechanism that preserves user input and customization settings.\n4. Build a customization panel that updates all templates in real-time as options change.\n5. Implement a responsive preview mode that shows how templates will appear at different screen sizes.\n6. Add the ability to save and load template configurations.\n7. Test the entire system for performance, especially when rapidly switching between templates.\n8. Ensure accessibility of the preview and selection interface.\n9. Add helpful tooltips or guidance for users to understand template differences.",
+          "details": "Implementation steps:\n1. Thoroughly test and refine responsive behavior across all specified breakpoints:\n   - Mobile (< 640px)\n   - Tablet (640px - 1024px)\n   - Desktop (> 1024px)\n2. Implement advanced customization features:\n   - Add template presets/themes that users can select as starting points\n   - Implement drag-and-drop reordering for sections and features\n   - Add animation options for elements (fade-in, slide-in, etc.)\n   - Create typography customization (font family, size, weight)\n   - Add spacing/padding controls for fine-tuning layout\n3. Implement a success modal that appears after waitlist signup:\n   - Make the success message and appearance customizable\n   - Add options for social sharing after signup\n4. Add SEO optimization features:\n   - Meta title and description fields\n   - Open Graph image selection\n   - Custom URL slug option\n5. Perform final polish and optimization:\n   - Optimize performance for large templates\n   - Add helpful tooltips and documentation\n   - Implement keyboard shortcuts for common actions\n\nTesting approach:\n- Comprehensive testing across all device sizes and browsers\n- Performance testing with complex templates\n- Usability testing of advanced features\n- Accessibility testing for WCAG compliance",
           "status": "pending",
           "parentTaskId": 6
         }

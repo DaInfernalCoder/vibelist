@@ -73,7 +73,7 @@
       "id": 2,
       "title": "Supabase Integration and Database Schema Implementation",
       "description": "Set up Supabase project and implement the required database schema",
-      "status": "pending",
+      "status": "done",
       "dependencies": [
         1
       ],
@@ -87,7 +87,7 @@
           "description": "Set up a new Supabase project and configure the authentication settings for the application",
           "dependencies": [],
           "details": "1. Create a new Supabase project in the Supabase dashboard\n2. Configure authentication settings (enable email/password, OAuth providers if needed)\n3. Set up password policies and email templates for authentication flows\n4. Store the Supabase URL and anon key in environment variables\n5. Test authentication by creating a test user account\n6. Document the project setup and authentication configuration",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 2
         },
         {
@@ -98,7 +98,7 @@
             1
           ],
           "details": "1. Create the Users table with fields: id, email, created_at, updated_at, name, avatar_url\n2. Create the Waitlists table with fields: id, owner_id (FK to Users), name, description, created_at, updated_at, status\n3. Create the Waitlist_Signups table with fields: id, waitlist_id (FK to Waitlists), email, name, signup_time, status, referral_code, referral_source\n4. Set up foreign key constraints between tables\n5. Add appropriate NOT NULL constraints and default values\n6. Test the schema by inserting and querying sample data\n7. Document the table structure and relationships",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 2
         },
         {
@@ -109,7 +109,7 @@
             2
           ],
           "details": "1. Create the Customization_Settings table with fields: id, waitlist_id (FK to Waitlists), theme_color, logo_url, custom_fields (JSONB), redirect_url, email_template, created_at, updated_at\n2. Set up foreign key constraint to Waitlists table\n3. Add appropriate default values for theme settings\n4. Create a database trigger to create default customization settings when a new waitlist is created\n5. Test the customization settings by inserting and querying sample data\n6. Verify the trigger works correctly when creating new waitlists\n7. Document the customization settings schema and trigger behavior",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 2
         },
         {
@@ -121,7 +121,7 @@
             3
           ],
           "details": "1. Enable RLS on all tables (Users, Waitlists, Waitlist_Signups, Customization_Settings)\n2. Create RLS policy for Users table to allow users to only access their own data\n3. Create RLS policy for Waitlists to allow access only to the owner\n4. Create RLS policy for Waitlist_Signups to allow access only to the waitlist owner\n5. Create RLS policy for Customization_Settings to allow access only to the related waitlist owner\n6. Test RLS policies by creating multiple user accounts and verifying proper access control\n7. Document all RLS policies and their expected behavior",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 2
         },
         {
@@ -134,7 +134,25 @@
             4
           ],
           "details": "1. Create a function to calculate waitlist statistics (total signups, signup rate, etc.)\n2. Implement a trigger to update analytics data when new signups occur\n3. Create a function to handle referral tracking and attribution\n4. Add indexes on frequently queried columns:\n   - email in Users and Waitlist_Signups\n   - waitlist_id in Waitlist_Signups\n   - owner_id in Waitlists\n   - created_at in all tables\n5. Test the performance of queries with and without indexes\n6. Test the analytics functions with sample data\n7. Document all functions, triggers, and indexes with their purpose and expected behavior",
+          "status": "done",
+          "parentTaskId": 2
+        },
+        {
+          "id": 6,
+          "title": "Explain Task 2 (Supabase Integration & DB Schema Implementation) in detail",
+          "description": "Provide a detailed explanation of the work done in Task 2, including what database migrations are, the schema created, and how it integrates with Supabase.",
+          "details": "\n\n<info added on 2025-05-18T04:31:21.409Z>\n# Detailed Explanation of Task 2: Supabase Integration & DB Schema Implementation\n\n## A. Understanding Task 2: Supabase Integration and Database Schema Implementation\n\n### 1. Supabase Project Setup (Subtask 2.1)\n- Created a new Supabase project through the Supabase dashboard\n- Configured authentication settings for email/password and potentially OAuth providers\n- Stored Supabase URL and anon key in `.env.local` for secure application connectivity\n- Set up proper CORS configuration to allow frontend access\n\n### 2. Core Database Schema Design & Implementation (Subtasks 2.2 & 2.3)\n**Tables Created:**\n- `Users`: Stores user profiles (id, email, name, avatar_url, created_at, updated_at)\n- `Waitlists`: Manages waitlists (id, owner_id, name, description, status, created_at, updated_at)\n- `Waitlist_Signups`: Tracks signups (id, waitlist_id, email, name, signup_time, status, referral_code, referred_by)\n- `Customization_Settings`: Defines waitlist appearance (id, waitlist_id, theme_color, logo_url, custom_fields, redirect_url, email_template)\n\n**Relationships and Constraints:**\n- Foreign key constraints link tables (e.g., `waitlist_id` references `Waitlists.id`)\n- `NOT NULL` constraints on critical fields ensure data integrity\n- Default timestamps using `now()` function\n- Unique constraints on emails within a waitlist\n\n**Database Trigger:**\n```sql\nCREATE OR REPLACE FUNCTION create_default_customization()\nRETURNS TRIGGER AS $$\nBEGIN\n  INSERT INTO customization_settings (waitlist_id, theme_color)\n  VALUES (NEW.id, '#4F46E5');\n  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql;\n\nCREATE TRIGGER on_waitlist_created\nAFTER INSERT ON waitlists\nFOR EACH ROW\nEXECUTE FUNCTION create_default_customization();\n```\n\n### 3. Security Configuration (Subtask 2.4)\n**Row-Level Security (RLS) Policies:**\n```sql\n-- Example RLS policy for waitlists\nCREATE POLICY \"Users can view their own waitlists\" \nON waitlists FOR SELECT \nUSING (auth.uid() = owner_id);\n\nCREATE POLICY \"Users can insert their own waitlists\" \nON waitlists FOR INSERT \nWITH CHECK (auth.uid() = owner_id);\n```\n\n### 4. Database Logic & Performance Optimization (Subtask 2.5)\n**Database Functions:**\n```sql\n-- Function to get waitlist statistics\nCREATE OR REPLACE FUNCTION get_waitlist_stats(waitlist_id UUID)\nRETURNS JSON AS $$\nDECLARE\n  result JSON;\nBEGIN\n  SELECT json_build_object(\n    'total_signups', COUNT(*),\n    'confirmed', COUNT(*) FILTER (WHERE status = 'confirmed'),\n    'pending', COUNT(*) FILTER (WHERE status = 'pending'),\n    'conversion_rate', CASE \n      WHEN COUNT(*) > 0 THEN \n        ROUND((COUNT(*) FILTER (WHERE status = 'confirmed')::FLOAT / COUNT(*)) * 100, 2)\n      ELSE 0\n    END\n  ) INTO result\n  FROM waitlist_signups\n  WHERE waitlist_id = $1;\n  \n  RETURN result;\nEND;\n$$ LANGUAGE plpgsql;\n```\n\n**Indexes for Performance:**\n```sql\nCREATE INDEX idx_waitlist_signups_email ON waitlist_signups(waitlist_id, email);\nCREATE INDEX idx_waitlist_signups_status ON waitlist_signups(waitlist_id, status);\nCREATE INDEX idx_waitlist_signups_signup_time ON waitlist_signups(signup_time);\n```\n\n## B. What are Database Migrations?\n\nDatabase migrations are version-controlled scripts that manage database schema changes over time:\n\n- **Implementation in this project:** Migration files in `scripts/migrations/` folder (e.g., `01_core_tables.sql`, `02_indexes.sql`)\n- **Migration tracking:** A `schema_migrations` table tracks which migrations have been applied\n- **Idempotency:** Migrations are designed to be safely re-runnable with checks like `CREATE TABLE IF NOT EXISTS`\n\n## C. Error Resolution: `TypeError: supabase.sql is not a function`\n\nThe error occurred because the Supabase JavaScript client doesn't support direct DDL execution. The solution uses direct PostgreSQL connection:\n\n```javascript\n// Modified apply_migrations_direct.js\nconst { Client } = require('pg');\nconst fs = require('fs');\nconst path = require('path');\n\nasync function applyMigrations() {\n  // Extract DB host from Supabase URL\n  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;\n  const dbHost = supabaseUrl.replace('https://', '').replace('.supabase.co', '.supabase.co:5432');\n  \n  // Create PostgreSQL connection string\n  const connectionString = `postgresql://postgres:${process.env.SUPABASE_DB_PASSWORD}@${dbHost}/postgres`;\n  const pgClient = new Client({ connectionString });\n  \n  try {\n    await pgClient.connect();\n    console.log('Connected to PostgreSQL database');\n    \n    // Read and apply migration files\n    const migrationsDir = path.join(__dirname, './');\n    const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();\n    \n    for (const file of files) {\n      console.log(`Applying migration: ${file}`);\n      const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');\n      await pgClient.query(sql);\n      console.log(`Successfully applied: ${file}`);\n    }\n  } catch (error) {\n    console.error('Migration error:', error);\n  } finally {\n    await pgClient.end();\n  }\n}\n\napplyMigrations();\n```\n\nThis approach ensures proper execution of DDL statements for creating and modifying the database schema.\n</info added on 2025-05-18T04:31:21.409Z>",
           "status": "pending",
+          "dependencies": [],
+          "parentTaskId": 2
+        },
+        {
+          "id": 7,
+          "title": "Fix migration script error (supabase.sql is not a function) and explain cause",
+          "description": "Diagnose and fix the 'TypeError: supabase.sql is not a function' in the migration script. Explain why the error occurs and the correct way to execute SQL with the Supabase JS client.",
+          "details": "\n\n<info added on 2025-05-18T04:31:39.519Z>\n# Diagnosis and Fix for 'TypeError: supabase.sql is not a function' in Migration Script:\n\n## 1. Cause of the Error:\n\nThe error occurs because the `supabase-js` client doesn't provide a direct `sql()` method for executing raw SQL DDL statements. The client is primarily designed for data operations (CRUD) and RPC function calls, not schema migrations.\n\n## 2. Correct Way to Execute SQL Migrations:\n\n```javascript\n// Before (incorrect approach)\nconst { createClient } = require('@supabase/supabase-js');\nconst supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);\n\n// In migration function\nawait supabase.sql(rawSqlString); // This fails with TypeError\n\n// After (correct approach)\nconst { Client } = require('pg');\nconst connectionString = `postgresql://postgres:${process.env.SUPABASE_DB_PASSWORD}@${dbHost}:5432/postgres`;\nconst pgClient = new Client({ connectionString });\n\n// In migration function\nawait pgClient.connect();\ntry {\n  await pgClient.query(rawSqlString); // This works correctly\n} finally {\n  await pgClient.end();\n}\n```\n\n## 3. Implementation Steps:\n\n1. Add `pg` package: `npm install pg`\n2. Update your `.env.local` to include `SUPABASE_DB_PASSWORD`\n3. Extract the database host from your Supabase URL:\n   ```javascript\n   const dbHost = process.env.NEXT_PUBLIC_SUPABASE_URL.replace('https://', '').split('.')[0] + '.supabase.co';\n   ```\n4. Replace the Supabase client SQL execution with direct PostgreSQL queries\n5. Ensure proper connection management with connect/end calls\n\n## 4. Testing the Fix:\n\nAfter implementing the fix, verify by running:\n```bash\nnode scripts/migrations/apply_migrations_direct.js\n```\n\nYou should see successful migration execution without the TypeError.\n</info added on 2025-05-18T04:31:39.519Z>",
+          "status": "pending",
+          "dependencies": [],
           "parentTaskId": 2
         }
       ]
@@ -143,7 +161,7 @@
       "id": 3,
       "title": "Authentication System Implementation",
       "description": "Implement user registration, login, and authentication flow using Supabase Auth",
-      "status": "pending",
+      "status": "done",
       "dependencies": [
         2
       ],
@@ -157,7 +175,7 @@
           "description": "Configure Supabase Auth service and set up the client for authentication operations",
           "dependencies": [],
           "details": "1. Install Supabase client library (`@supabase/supabase-js`)\n2. Create environment variables for Supabase URL and API key\n3. Initialize Supabase client with authentication configuration\n4. Set up auth state listener to track authentication changes\n5. Configure social auth providers in Supabase dashboard (Google, GitHub, etc.)\n6. Test the connection to Supabase Auth service\n7. Create a central auth utility file that exports the configured client\n\nTesting approach: Create a simple test that verifies the Supabase client is properly initialized and can connect to the auth service.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 3
         },
         {
@@ -167,8 +185,8 @@
           "dependencies": [
             1
           ],
-          "details": "1. Create a registration form component with fields for email, password, and password confirmation\n2. Implement form validation (password strength, email format, matching passwords)\n3. Create email/password registration function using Supabase Auth `signUp` method\n4. Add social authentication options (buttons for Google, GitHub, etc.)\n5. Implement social auth registration using Supabase Auth social providers\n6. Add proper error handling and user feedback for registration attempts\n7. Create success state and redirect logic after successful registration\n\nTesting approach: Test form validation, successful registration flow, error handling for invalid inputs, and social auth redirects.",
-          "status": "pending",
+          "details": "1. Create a registration form component with fields for email, password, and password confirmation\n2. Implement form validation (password strength, email format, matching passwords)\n3. Create email/password registration function using Supabase Auth `signUp` method\n4. Add social authentication options (buttons for Google, GitHub, etc.)\n5. Implement social auth registration using Supabase Auth social providers\n6. Add proper error handling and user feedback for registration attempts\n7. Create success state and redirect logic after successful registration\n\nTesting approach: Test form validation, successful registration flow, error handling for invalid inputs, and social auth redirects.\n\n<info added on 2025-05-18T06:08:29.055Z>\n## Detailed Implementation Plan for User Registration Functionality\n\n### 1. Form Component Structure\n```jsx\n// app/signup/page.js\n\"use client\";\nimport { useState } from \"react\";\nimport { useRouter } from \"next/navigation\";\nimport Link from \"next/link\";\nimport { supabase } from \"@/libs/supabase/client\";\n\nexport default function SignUp() {\n  const router = useRouter();\n  const [formData, setFormData] = useState({\n    email: \"\",\n    password: \"\",\n    confirmPassword: \"\"\n  });\n  const [loading, setLoading] = useState(false);\n  const [message, setMessage] = useState({ type: \"\", text: \"\" });\n\n  const handleChange = (e) => {\n    setFormData({ ...formData, [e.target.name]: e.target.value });\n  };\n\n  // Form submission and validation handlers will go here\n  \n  return (\n    <div className=\"card bg-base-100 shadow-xl\">\n      <div className=\"card-body\">\n        <h2 className=\"text-center text-2xl font-bold\">Create an account</h2>\n        {/* Form elements will go here */}\n      </div>\n    </div>\n  );\n}\n```\n\n### 2. Password Validation Utility\n```javascript\n// utils/validation.js\nexport function validatePassword(password) {\n  const minLength = 8;\n  const hasUpperCase = /[A-Z]/.test(password);\n  const hasLowerCase = /[a-z]/.test(password);\n  const hasNumber = /[0-9]/.test(password);\n  const hasSpecialChar = /[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]+/.test(password);\n  \n  const errors = [];\n  if (password.length < minLength) errors.push(`Password must be at least ${minLength} characters`);\n  if (!hasUpperCase) errors.push(\"Password must contain an uppercase letter\");\n  if (!hasLowerCase) errors.push(\"Password must contain a lowercase letter\");\n  if (!hasNumber) errors.push(\"Password must contain a number\");\n  if (!hasSpecialChar) errors.push(\"Password must contain a special character\");\n  \n  return {\n    isValid: errors.length === 0,\n    errors\n  };\n}\n```\n\n### 3. Email/Password Registration Implementation\n```javascript\nconst handleEmailSignUp = async (e) => {\n  e.preventDefault();\n  setMessage({ type: \"\", text: \"\" });\n  \n  // Validate form inputs\n  if (!formData.email || !formData.password || !formData.confirmPassword) {\n    return setMessage({ type: \"error\", text: \"All fields are required\" });\n  }\n  \n  // Validate email format\n  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n  if (!emailRegex.test(formData.email)) {\n    return setMessage({ type: \"error\", text: \"Please enter a valid email address\" });\n  }\n  \n  // Validate password\n  const { isValid, errors } = validatePassword(formData.password);\n  if (!isValid) {\n    return setMessage({ type: \"error\", text: errors.join(\". \") });\n  }\n  \n  // Check if passwords match\n  if (formData.password !== formData.confirmPassword) {\n    return setMessage({ type: \"error\", text: \"Passwords do not match\" });\n  }\n  \n  setLoading(true);\n  \n  try {\n    const { data, error } = await supabase.auth.signUp({\n      email: formData.email,\n      password: formData.password,\n      options: {\n        emailRedirectTo: `${window.location.origin}/auth/callback`\n      }\n    });\n    \n    if (error) throw error;\n    \n    setMessage({ \n      type: \"success\", \n      text: \"Registration successful! Please check your email to confirm your account.\" \n    });\n    \n    // Clear form\n    setFormData({ email: \"\", password: \"\", confirmPassword: \"\" });\n  } catch (error) {\n    setMessage({ type: \"error\", text: error.message || \"An error occurred during registration\" });\n  } finally {\n    setLoading(false);\n  }\n};\n```\n\n### 4. Social Authentication Implementation\n```javascript\nconst handleSocialSignUp = async (provider) => {\n  setLoading(true);\n  setMessage({ type: \"\", text: \"\" });\n  \n  try {\n    const { data, error } = await supabase.auth.signInWithOAuth({\n      provider,\n      options: {\n        redirectTo: `${window.location.origin}/auth/callback`\n      }\n    });\n    \n    if (error) throw error;\n    \n    // The user will be redirected to the provider's authentication page\n  } catch (error) {\n    setMessage({ type: \"error\", text: error.message || `Failed to sign up with ${provider}` });\n    setLoading(false);\n  }\n};\n```\n\n### 5. UI Components for Error/Success Messages\n```jsx\n{message.text && (\n  <div className={`alert ${message.type === \"error\" ? \"alert-error\" : \"alert-success\"}`}>\n    <div>\n      <span>{message.text}</span>\n    </div>\n  </div>\n)}\n```\n\n### 6. Testing Strategy\n```javascript\n// tests/signup.test.js\ndescribe('SignUp Component', () => {\n  test('validates email format', async () => {\n    // Test invalid email formats\n  });\n  \n  test('validates password requirements', async () => {\n    // Test password validation rules\n  });\n  \n  test('validates password matching', async () => {\n    // Test password confirmation matching\n  });\n  \n  test('handles successful registration', async () => {\n    // Mock Supabase response and test success flow\n  });\n  \n  test('handles registration errors', async () => {\n    // Mock Supabase errors and test error handling\n  });\n  \n  test('handles social auth redirects', async () => {\n    // Test social auth button clicks trigger correct Supabase calls\n  });\n});\n```\n</info added on 2025-05-18T06:08:29.055Z>\n\n<info added on 2025-05-18T06:08:49.429Z>\n## Implementation Plan Summary for User Registration\n\n### 7. Auth Callback Handler\n```jsx\n// app/auth/callback/route.js\nimport { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'\nimport { cookies } from 'next/headers'\nimport { NextResponse } from 'next/server'\n\nexport async function GET(request) {\n  const requestUrl = new URL(request.url)\n  const code = requestUrl.searchParams.get('code')\n  \n  if (code) {\n    const cookieStore = cookies()\n    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })\n    await supabase.auth.exchangeCodeForSession(code)\n  }\n\n  // Redirect to the dashboard or profile completion page\n  return NextResponse.redirect(new URL('/dashboard', request.url))\n}\n```\n\n### 8. User Onboarding Flow\nAfter successful registration, implement a guided onboarding flow:\n```jsx\n// app/onboarding/page.js\n\"use client\";\nimport { useState, useEffect } from \"react\";\nimport { useRouter } from \"next/navigation\";\nimport { supabase } from \"@/libs/supabase/client\";\n\nexport default function Onboarding() {\n  const [step, setStep] = useState(1);\n  const [profile, setProfile] = useState({\n    full_name: \"\",\n    username: \"\",\n    avatar_url: null,\n    preferences: {}\n  });\n  \n  // Multi-step form implementation with progress indicator\n  // Each step collects different user information\n  // Final step saves complete profile to Supabase profiles table\n}\n```\n\n### 9. Rate Limiting and Security\n```javascript\n// middleware.js - Add rate limiting for registration attempts\nimport { rateLimit } from '@/utils/rate-limit'\n\n// Create a rate limiter that allows 5 attempts per minute\nconst limiter = rateLimit({\n  interval: 60 * 1000, // 1 minute\n  uniqueTokenPerInterval: 500,\n  max: 5\n});\n\n// Apply in your API route or server action that handles registration\n```\n\n### 10. Testing E2E with Playwright\n```javascript\n// e2e/registration.spec.js\nimport { test, expect } from '@playwright/test';\n\ntest('complete registration flow', async ({ page }) => {\n  await page.goto('/signup');\n  \n  // Fill out registration form\n  await page.fill('input[name=\"email\"]', 'test@example.com');\n  await page.fill('input[name=\"password\"]', 'StrongP@ss123');\n  await page.fill('input[name=\"confirmPassword\"]', 'StrongP@ss123');\n  \n  // Submit form\n  await page.click('button[type=\"submit\"]');\n  \n  // Verify success message appears\n  await expect(page.locator('.alert-success')).toBeVisible();\n  await expect(page.locator('.alert-success')).toContainText('Registration successful');\n});\n```\n</info added on 2025-05-18T06:08:49.429Z>",
+          "status": "done",
           "parentTaskId": 3
         },
         {
@@ -180,7 +198,7 @@
             2
           ],
           "details": "1. Create a login form component with email and password fields\n2. Implement form validation for login inputs\n3. Create login function using Supabase Auth `signIn` method\n4. Add social login options using the configured providers\n5. Set up global authentication state management (context or state management library)\n6. Implement persistence of auth state using Supabase session storage\n7. Create loading and error states for the authentication process\n8. Add remember me functionality for extended sessions\n\nTesting approach: Test login with valid credentials, error handling for invalid credentials, social login flows, and persistence of authentication state across page reloads.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 3
         },
         {
@@ -191,7 +209,7 @@
             3
           ],
           "details": "1. Create a higher-order component or route wrapper for protected routes\n2. Implement redirect logic for unauthenticated users attempting to access protected routes\n3. Set up session timeout configuration in Supabase\n4. Add session refresh logic to maintain active sessions\n5. Implement idle timeout detection and handling\n6. Create a user session information component to display current auth status\n7. Add logout functionality using Supabase Auth `signOut` method\n8. Implement proper cleanup of user data and redirection after logout\n\nTesting approach: Test access to protected routes with and without authentication, session timeout behavior, and logout functionality.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 3
         },
         {
@@ -203,7 +221,7 @@
             3
           ],
           "details": "1. Create a password reset request form with email field\n2. Implement the password reset request using Supabase Auth `resetPasswordForEmail` method\n3. Create a password reset confirmation page with new password and confirmation fields\n4. Implement token validation from reset email link\n5. Create password update functionality using Supabase Auth `updateUser` method\n6. Add proper error handling and user feedback throughout the reset flow\n7. Implement redirect to login page after successful password reset\n8. Add security measures like rate limiting for password reset attempts\n\nTesting approach: Test the complete password reset flow, including request submission, token validation, password update, and error handling for invalid tokens or expired links.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 3
         }
       ]
@@ -225,7 +243,7 @@
           "title": "Create User Profile UI Components",
           "description": "Develop the UI components for the user profile page with editable fields for name, email, and password.",
           "dependencies": [],
-          "details": "Implementation details:\n1. Create a responsive profile page layout with appropriate sections for different settings\n2. Implement form components for name, email, and password fields with proper styling\n3. Add validation logic for each field (e.g., email format, password strength)\n4. Create edit/save toggle functionality for each field\n5. Implement form submission handling with loading states\n6. Add error message display for validation failures\n7. Testing approach: Test form validation with various inputs, verify responsive design on different screen sizes, and ensure proper focus management when editing fields.",
+          "details": "Implementation details:\n1. Create a responsive profile page layout with appropriate sections for different settings\n2. Implement form components for name, email, and password fields with proper styling\n3. Add validation logic for each field (e.g., email format, password strength)\n4. Create edit/save toggle functionality for each field\n5. Implement form submission handling with loading states\n6. Add error message display for validation failures\n7. Testing approach: Test form validation with various inputs, verify responsive design on different screen sizes, and ensure proper focus management when editing fields.\n\n<info added on 2025-05-18T12:49:04.464Z>\nAdditional implementation details:\n\n```jsx\n// Example component structure for profile section\nconst ProfileSection = ({ title, value, onSave }) => {\n  const [isEditing, setIsEditing] = useState(false);\n  const [currentValue, setCurrentValue] = useState(value);\n  const [isLoading, setIsLoading] = useState(false);\n  \n  const handleSave = async () => {\n    setIsLoading(true);\n    try {\n      await onSave(currentValue);\n      toast.success(`${title} updated successfully`);\n      setIsEditing(false);\n    } catch (error) {\n      toast.error(`Failed to update ${title}`);\n    } finally {\n      setIsLoading(false);\n    }\n  };\n  \n  return (\n    <div className=\"card bg-base-100 shadow-sm mb-4 p-4\">\n      <h3 className=\"text-lg font-medium mb-2\">{title}</h3>\n      {isEditing ? (\n        <div className=\"flex flex-col gap-2\">\n          <input \n            type=\"text\" \n            className=\"input input-bordered w-full\" \n            value={currentValue}\n            onChange={(e) => setCurrentValue(e.target.value)}\n          />\n          <div className=\"flex gap-2\">\n            <button \n              className=\"btn btn-primary btn-sm\" \n              onClick={handleSave}\n              disabled={isLoading}\n            >\n              {isLoading ? <span className=\"loading loading-spinner\"></span> : 'Save'}\n            </button>\n            <button \n              className=\"btn btn-ghost btn-sm\" \n              onClick={() => {\n                setIsEditing(false);\n                setCurrentValue(value);\n              }}\n            >\n              Cancel\n            </button>\n          </div>\n        </div>\n      ) : (\n        <div className=\"flex justify-between items-center\">\n          <p>{value}</p>\n          <button \n            className=\"btn btn-ghost btn-sm\" \n            onClick={() => setIsEditing(true)}\n          >\n            Edit\n          </button>\n        </div>\n      )}\n    </div>\n  );\n};\n```\n\nPassword validation implementation:\n```javascript\nconst validatePassword = (password, confirmPassword) => {\n  const errors = [];\n  \n  if (password.length < 8) {\n    errors.push(\"Password must be at least 8 characters\");\n  }\n  \n  if (!/[A-Z]/.test(password)) {\n    errors.push(\"Password must contain at least one uppercase letter\");\n  }\n  \n  if (!/[a-z]/.test(password)) {\n    errors.push(\"Password must contain at least one lowercase letter\");\n  }\n  \n  if (!/[0-9]/.test(password)) {\n    errors.push(\"Password must contain at least one number\");\n  }\n  \n  if (password !== confirmPassword) {\n    errors.push(\"Passwords do not match\");\n  }\n  \n  return errors;\n};\n```\n\nResponsive design considerations:\n- Mobile view uses stacked layout with full-width inputs\n- Tablet/desktop uses two-column grid for better space utilization\n- Form controls adapt to container width using flex-wrap\n- Added media queries for font size adjustments on smaller screens\n\nAccessibility improvements:\n- Added proper aria-labels to all form elements\n- Implemented keyboard navigation support for edit/save actions\n- Added focus management when toggling edit mode\n- Included error announcements for screen readers\n</info added on 2025-05-18T12:49:04.464Z>",
           "status": "pending",
           "parentTaskId": 4
         },
@@ -279,14 +297,14 @@
     {
       "id": 5,
       "title": "Sidebar Navigation and Application Layout",
-      "description": "Implement the application's main navigation structure and responsive layout",
-      "status": "pending",
+      "description": "Implement the application's main navigation structure and responsive layout by adapting the existing Shadcn UI sidebar component",
+      "status": "done",
       "dependencies": [
         3
       ],
       "priority": "high",
-      "details": "Create the sidebar navigation component with sections for Create, Analytics, Market, and Settings. Implement responsive behavior for all screen sizes. Create the main application layout with proper routing. Implement mobile navigation menu for small screens. Add active state styling for current route. Ensure consistent spacing and styling throughout the application.",
-      "testStrategy": "Test navigation functionality across all routes. Verify responsive behavior at all specified breakpoints. Test mobile menu functionality. Verify active state indicators work correctly.",
+      "details": "Adapt the existing sidebar.jsx component from Shadcn UI to fit our application needs. Set up proper Next.js pages and routing structure for the main application sections: Create, Analytics, Market, and Settings. Implement placeholder pages for these main sections. Configure the sidebar to correctly link to these pages with proper active state styling. Add waitlist selection dropdown without the product launch button. Implement account button showing user profile picture with options for billing changes and logout. Ensure responsive behavior for all screen sizes with proper mobile implementation. Create the main application layout with proper Next.js routing. Ensure consistent spacing and styling throughout the application.",
+      "testStrategy": "Test navigation functionality across all routes. Verify responsive behavior at all specified breakpoints. Test mobile menu functionality. Verify active state indicators work correctly. Test the waitlist dropdown selection functionality. Test account button functionality including profile picture display and dropdown options for billing and logout. Ensure the adapted sidebar component renders and functions properly within the Next.js application structure.",
       "subtasks": [
         {
           "id": 1,
@@ -294,55 +312,159 @@
           "description": "Set up the foundational layout components that will structure the entire application",
           "dependencies": [],
           "details": "Create a main Layout component that will wrap the entire application. Implement a basic grid or flex structure with placeholders for Sidebar and Content areas. Define CSS variables for consistent spacing, colors, and breakpoints. Set up the basic routing structure with React Router (or your preferred routing solution). Create empty placeholder components for each main section (Create, Analytics, Market, Settings). Test the basic routing between these empty components to ensure navigation works correctly.",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 5
         },
         {
-          "id": 2,
-          "title": "Implement Desktop Sidebar Navigation",
-          "description": "Build the sidebar navigation component for desktop view with all required sections",
+          "id": 8,
+          "title": "Adapt Existing Sidebar Component",
+          "description": "Modify the existing Shadcn UI sidebar.jsx component to fit our application needs",
           "dependencies": [
             1
           ],
-          "details": "Develop the Sidebar component with navigation links for Create, Analytics, Market, and Settings sections. Implement proper styling including icons for each navigation item. Add active state styling to highlight the current route. Implement proper spacing between navigation items. Connect the sidebar to the router to ensure clicking navigation items changes routes correctly. Test that all navigation links work and that the active state correctly reflects the current route.",
-          "status": "pending",
+          "details": "Import and review the existing sidebar.jsx component from Shadcn UI. Identify the necessary modifications to adapt it to our application structure. Customize the component to include our main navigation sections: Create, Analytics, and Settings. Ensure the component works with Next.js routing. Add proper icons for each navigation item. Implement active state styling for the current route. Test the adapted component to ensure it renders correctly and navigation works as expected.",
+          "status": "done",
           "parentTaskId": 5
         },
         {
-          "id": 3,
-          "title": "Add Responsive Behavior to Layout",
-          "description": "Make the layout responsive to different screen sizes with appropriate breakpoints",
+          "id": 9,
+          "title": "Set Up Next.js Pages and Routing",
+          "description": "Create the necessary Next.js page structure and routing for the main application sections",
           "dependencies": [
-            1,
-            2
+            1
           ],
-          "details": "Implement media queries for different screen sizes (mobile, tablet, desktop). Adjust the layout grid/flex properties to respond to screen size changes. For desktop: show sidebar permanently. For tablet: consider collapsible sidebar or modified layout. For mobile: hide sidebar and prepare for mobile menu implementation. Test the responsive behavior by resizing the browser window and using browser dev tools to simulate different devices. Ensure content remains accessible and properly formatted at all screen sizes.",
-          "status": "pending",
+          "details": "Set up the Next.js pages directory with appropriate structure. Create placeholder pages for Create, Analytics, and Settings sections. Implement proper routing between these pages. Configure layout components to work with Next.js app structure. Ensure the sidebar navigation correctly links to these pages. Test routing functionality to verify navigation between pages works correctly.",
+          "status": "done",
           "parentTaskId": 5
         },
         {
-          "id": 4,
-          "title": "Implement Mobile Navigation Menu",
-          "description": "Create a mobile-friendly navigation menu that appears on small screens",
+          "id": 10,
+          "title": "Implement Create Page Placeholder",
+          "description": "Create a basic placeholder for the Create page with minimal functionality",
           "dependencies": [
-            2,
-            3
+            9
           ],
-          "details": "Create a hamburger menu icon that appears only on mobile screen sizes. Implement a slide-out or dropdown mobile navigation menu that contains the same items as the sidebar. Add animations for smooth opening/closing of the mobile menu. Ensure the mobile menu is accessible and can be closed by clicking outside or using an X button. Test the mobile menu on various device sizes and ensure it opens/closes correctly and that all navigation items work properly.",
-          "status": "pending",
+          "details": "Develop a simple placeholder for the Create page. Include basic UI elements to represent the future functionality. Add a page title and description. Ensure the page is properly linked from the sidebar navigation. Test that the page renders correctly and is accessible via navigation.",
+          "status": "done",
           "parentTaskId": 5
         },
         {
-          "id": 5,
-          "title": "Finalize Styling and Consistency",
-          "description": "Ensure consistent styling, spacing, and behavior throughout the navigation and layout",
+          "id": 11,
+          "title": "Implement Analytics Page Placeholder",
+          "description": "Create a basic placeholder for the Analytics page with minimal functionality",
           "dependencies": [
-            2,
-            3,
-            4
+            9
           ],
-          "details": "Review and standardize all spacing using the CSS variables defined earlier. Implement consistent hover and focus states for all interactive elements. Ensure color scheme is consistent and meets accessibility standards (sufficient contrast). Add any missing transitions or animations for a polished feel. Test the entire navigation system across different browsers and devices. Verify that active states correctly update when navigating between routes. Conduct accessibility testing to ensure navigation is usable with keyboard and screen readers.",
-          "status": "pending",
+          "details": "Develop a simple placeholder for the Analytics page. Include basic UI elements to represent the future functionality. Add a page title and description. Ensure the page is properly linked from the sidebar navigation. Test that the page renders correctly and is accessible via navigation.",
+          "status": "done",
+          "parentTaskId": 5
+        },
+        {
+          "id": 12,
+          "title": "Implement Settings Page Placeholder",
+          "description": "Create a basic placeholder for the Settings page with minimal functionality",
+          "dependencies": [
+            9
+          ],
+          "details": "Develop a simple placeholder for the Settings page. Include basic UI elements to represent the future functionality. Add a page title and description. Ensure the page is properly linked from the sidebar navigation. Test that the page renders correctly and is accessible via navigation.",
+          "status": "done",
+          "parentTaskId": 5
+        },
+        {
+          "id": 13,
+          "title": "Implement Active State Styling",
+          "description": "Add active state styling to highlight the current route in the sidebar navigation",
+          "dependencies": [
+            8,
+            9
+          ],
+          "details": "Implement active state styling for navigation items in the sidebar. Use Next.js routing utilities to determine the current route. Apply appropriate styling to the active navigation item. Test active state functionality across different routes to ensure it correctly reflects the current page.",
+          "status": "done",
+          "parentTaskId": 5
+        },
+        {
+          "id": 14,
+          "title": "Add Conditional Waitlist Features (if needed)",
+          "description": "Implement waitlist selection dropdown and Edit/Submissions tabs if required by the application",
+          "dependencies": [
+            8
+          ],
+          "details": "Assess whether waitlist selection functionality is needed in the current implementation. If required, add a waitlist selection dropdown to the sidebar using dropdown-menu.jsx. Implement Edit and Submissions tabs for selected waitlists if needed. Ensure these components only appear when appropriate based on user context. Test the conditional rendering and functionality of these components.",
+          "status": "done",
+          "parentTaskId": 5
+        },
+        {
+          "id": 15,
+          "title": "Ensure Responsive Behavior",
+          "description": "Verify and enhance responsive behavior of the adapted sidebar component",
+          "dependencies": [
+            8
+          ],
+          "details": "Review the responsive behavior of the adapted sidebar component. Ensure it works correctly on desktop, tablet, and mobile screen sizes. Implement any necessary modifications to improve responsive behavior. Test the component across various screen sizes and devices to verify proper functionality and appearance.",
+          "status": "done",
+          "parentTaskId": 5
+        },
+        {
+          "id": 16,
+          "title": "Finalize and Integrate Components",
+          "description": "Integrate all components into a cohesive application layout",
+          "dependencies": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "details": "Integrate the adapted sidebar with the page components and Next.js routing. Ensure all components work together seamlessly. Verify navigation between pages functions correctly. Test the entire application layout across different browsers and devices. Conduct final review of styling, spacing, and consistency throughout the application.",
+          "status": "done",
+          "parentTaskId": 5
+        },
+        {
+          "id": 23,
+          "title": "Remove Dashboard from Sidebar Navigation",
+          "description": "Remove the dashboard link from the sidebar to reduce clutter and improve focus.",
+          "details": "1. Identify the dashboard link in the sidebar navigation component\n2. Remove the dashboard entry from the navigation items array/structure\n3. Update any related navigation state or logic that might reference the dashboard\n4. Test navigation to ensure removal doesn't cause any issues\n5. Ensure the application still has a proper default landing page after authentication\n6. Verify the sidebar appears cleaner without the dashboard link",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 5
+        },
+        {
+          "id": 24,
+          "title": "Add Market Section Placeholder to Sidebar",
+          "description": "Add a navigation link and placeholder for the Market section in the sidebar.",
+          "details": "1. Add a new navigation item for the Market section in the sidebar component\n2. Choose an appropriate icon that represents marketing or market functionality\n3. Link the Market item to the appropriate route (e.g., /market or /dashboard/market)\n4. Update the routing configuration to recognize this new route\n5. Create a basic placeholder page for the Market section (similar to other placeholder pages)\n6. Test navigation to ensure the Market link works correctly\n7. Verify that the Market section appears consistently with other navigation items",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 5
+        },
+        {
+          "id": 25,
+          "title": "Implement Account Button with Profile Picture",
+          "description": "Update the account button in the sidebar to show the user's profile picture and provide options for billing and logout, based on ButtonAccount.js.",
+          "details": "1. Study the ButtonAccount.js implementation for reference\n2. Modify the existing account functionality in the sidebar to incorporate profile picture display\n3. Implement a popover or dropdown menu for the account button with options for:\n   - Billing: Link to Stripe Customer Portal\n   - Logout: Sign out functionality\n4. Handle loading states and transitions properly\n5. Ensure the profile picture is correctly fetched from user metadata\n6. Implement a fallback for users without profile pictures (e.g., first letter of email as avatar)\n7. Test all functionality including:\n   - Profile picture display\n   - Dropdown/popover opening and closing\n   - Billing link functionality\n   - Logout functionality\n8. Style the component to match the overall design system",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 5
+        },
+        {
+          "id": 26,
+          "title": "Remove Edit and Submissions Tabs from Sidebar",
+          "description": "Remove the Edit and Submissions tabs from the sidebar as their purpose isn't clear and they add unnecessary complexity.",
+          "details": "1. Identify the Edit and Submissions tabs in the sidebar component\n2. Remove the tab structure and related tab components\n3. Update any state management related to these tabs\n4. Ensure the removal doesn't affect other functionality\n5. Test navigation and sidebar display to confirm tabs are completely removed\n6. Verify that the sidebar maintains a clean and focused appearance after removal\n7. Update any documentation or comments referencing these tabs",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 5
+        },
+        {
+          "id": 27,
+          "title": "Remove Product Launch Button and Keep Waitlist Dropdown",
+          "description": "Maintain the dropdown functionality for switching between waitlists, but remove the Product Launch button to reduce clutter.",
+          "details": "1. Identify the Product Launch button in the sidebar component\n2. Remove the Product Launch button while preserving the waitlist dropdown functionality\n3. Ensure the waitlist dropdown still works correctly for selecting different waitlists\n4. Update any state management or logic that might have referenced the Product Launch button\n5. Test the waitlist dropdown to verify it functions properly after the changes\n6. Verify that the sidebar appears cleaner without the removed button\n7. Make any necessary adjustments to layout or spacing following the button removal",
+          "status": "done",
+          "dependencies": [],
           "parentTaskId": 5
         }
       ]
@@ -350,71 +472,15 @@
     {
       "id": 6,
       "title": "Waitlist Template Creation",
-      "description": "Design and implement the three professional waitlist templates",
+      "description": "Design and implement a customizable waitlist template with editor interface",
       "status": "pending",
       "dependencies": [
         5
       ],
       "priority": "high",
-      "details": "Design and implement three distinct, professional waitlist templates using Tailwind CSS and Shadcn components. Ensure each template has a unique layout but consistent customization options. Make all templates fully responsive across all specified breakpoints. Implement template preview functionality. Create reusable components for common elements across templates.",
-      "testStrategy": "Verify visual appearance of each template. Test responsive behavior at all breakpoints. Validate HTML structure and accessibility. Test template preview functionality.",
-      "subtasks": [
-        {
-          "id": 1,
-          "title": "Create Base Waitlist Component Architecture",
-          "description": "Design and implement the foundational component architecture for all waitlist templates, including shared state management and customization options.",
-          "dependencies": [],
-          "details": "1. Create a base `WaitlistTemplate` component that will serve as the foundation for all templates.\n2. Implement a context provider for managing shared state across templates (user inputs, styling preferences, etc.).\n3. Define the common customization options interface that all templates will support (colors, fonts, spacing, etc.).\n4. Create reusable components for common elements (input fields, buttons, success messages, etc.).\n5. Implement responsive container layouts using Tailwind's breakpoint utilities.\n6. Test the base architecture by ensuring state changes properly propagate and components respond to customization options.\n7. Document the component API for other developers.",
-          "status": "pending",
-          "parentTaskId": 6
-        },
-        {
-          "id": 2,
-          "title": "Implement First Waitlist Template (Minimal)",
-          "description": "Design and implement the first waitlist template with a minimal, clean aesthetic using the base architecture.",
-          "dependencies": [
-            1
-          ],
-          "details": "1. Design a minimal, clean layout for the first template using Figma or similar tool.\n2. Implement the template using the base architecture created in subtask 1.\n3. Style the template using Tailwind CSS with a focus on whitespace, typography, and subtle animations.\n4. Incorporate Shadcn components like Form, Input, Button with appropriate styling.\n5. Ensure the template is fully responsive across all breakpoints (mobile, tablet, desktop).\n6. Implement form validation and submission handling.\n7. Test the template across different screen sizes and browsers.\n8. Verify all customization options work correctly for this specific template.",
-          "status": "pending",
-          "parentTaskId": 6
-        },
-        {
-          "id": 3,
-          "title": "Implement Second Waitlist Template (Professional)",
-          "description": "Design and implement the second waitlist template with a more professional, business-oriented aesthetic.",
-          "dependencies": [
-            1
-          ],
-          "details": "1. Design a professional business-oriented layout with more structured sections.\n2. Implement the template using the base architecture from subtask 1.\n3. Style using Tailwind CSS with a focus on grid layouts, card components, and professional color schemes.\n4. Incorporate Shadcn components like Card, Dialog, and Tabs where appropriate.\n5. Add business-specific features like company logo placement, testimonial sections, or feature highlights.\n6. Ensure responsive behavior across all breakpoints with special attention to tablet layouts.\n7. Test form submission flow and validation messages.\n8. Verify all customization options apply correctly to this template's unique elements.",
-          "status": "pending",
-          "parentTaskId": 6
-        },
-        {
-          "id": 4,
-          "title": "Implement Third Waitlist Template (Creative)",
-          "description": "Design and implement the third waitlist template with a creative, visually distinctive layout.",
-          "dependencies": [
-            1
-          ],
-          "details": "1. Design a creative, visually distinctive layout with unique visual elements and interactions.\n2. Implement the template using the base architecture from subtask 1.\n3. Style using Tailwind CSS with advanced techniques like gradients, animations, and custom shapes.\n4. Incorporate Shadcn components with custom styling overrides to match the creative direction.\n5. Add distinctive interactive elements like animated backgrounds, micro-interactions, or progressive disclosure.\n6. Ensure responsive behavior with special attention to maintaining visual impact across screen sizes.\n7. Test performance to ensure animations and visual effects don't impact page load times.\n8. Verify all customization options work correctly with the more complex visual elements.",
-          "status": "pending",
-          "parentTaskId": 6
-        },
-        {
-          "id": 5,
-          "title": "Implement Template Preview and Selection System",
-          "description": "Create a system for previewing, comparing and selecting between the three waitlist templates with live customization.",
-          "dependencies": [
-            2,
-            3,
-            4
-          ],
-          "details": "1. Design a template selection interface that showcases all three templates.\n2. Implement a preview system that renders miniature versions of each template.\n3. Create a template switching mechanism that preserves user input and customization settings.\n4. Build a customization panel that updates all templates in real-time as options change.\n5. Implement a responsive preview mode that shows how templates will appear at different screen sizes.\n6. Add the ability to save and load template configurations.\n7. Test the entire system for performance, especially when rapidly switching between templates.\n8. Ensure accessibility of the preview and selection interface.\n9. Add helpful tooltips or guidance for users to understand template differences.",
-          "status": "pending",
-          "parentTaskId": 6
-        }
-      ]
+      "details": "Design and implement a customizable waitlist template using the provided boilerplate components (demo.tsx, grid-background.tsx, avatar.tsx, input.tsx, icons.tsx, button.tsx). Create a side editor panel with comprehensive customization options for branding, template style, hero section, features section, and product showcase. Implement a live preview area that updates in real-time as users make changes. Focus on creating a single highly customizable template rather than three separate templates. Ensure the template is fully responsive across all specified breakpoints.",
+      "testStrategy": "Verify visual appearance of the template with different customization options. Test responsive behavior at all breakpoints. Validate HTML structure and accessibility. Test the live preview functionality and ensure changes in the editor panel correctly update the preview.",
+      "subtasks": []
     },
     {
       "id": 7,
@@ -1062,15 +1128,15 @@
     },
     {
       "id": 16,
-      "title": "Implement Dark Theme with DaisyUI and Enhance Landing Page Components",
-      "description": "Redesign the landing page components using DaisyUI's dark theme while improving visual appeal, adding animations, and ensuring responsive design across all device sizes.",
-      "details": "Refactor the landing page components in app/page.js (Hero, Problem, FeaturesAccordion, Pricing, FAQ, and CTA) to implement a cohesive dark theme using DaisyUI:\n\n1. Configure DaisyUI in tailwind.config.js to use a dark theme as the default. Create a custom theme that aligns with the 'vibe coded' aesthetic from waitlist.me screenshots.\n\n2. For each component:\n   - Update color schemes to use DaisyUI's dark theme variables\n   - Add subtle gradients for backgrounds and buttons (use tailwind's gradient utilities)\n   - Implement consistent spacing and typography\n   - Enhance with modern design elements like glass morphism where appropriate\n\n3. Create a new SocialProof component with:\n   - A placeholder design that can be populated with testimonials later\n   - A visually appealing layout that fits the overall theme\n   - Add it to the component flow in app/page.js\n\n4. Add subtle animations using CSS transitions or a lightweight library like Framer Motion:\n   - Hover effects on interactive elements\n   - Entrance animations for sections as they scroll into view\n   - Micro-interactions for buttons and form elements\n\n5. Ensure responsive design:\n   - Test and optimize for mobile, tablet, and desktop viewports\n   - Use DaisyUI's responsive utilities and Tailwind's breakpoint system\n   - Ensure text remains readable and elements properly spaced at all sizes\n\n6. Optimize component code:\n   - Extract repeated styling patterns into reusable Tailwind classes\n   - Use React.memo() for performance optimization where appropriate\n   - Ensure proper semantic HTML structure\n\n7. Implement consistent styling across all components:\n   - Create a shared styles file for common values\n   - Ensure consistent border-radius, shadows, and spacing\n   - Maintain visual hierarchy through consistent heading and text styles\n\nReference the waitlist.me screenshots for inspiration on clean layouts and effective CTAs.",
-      "testStrategy": "Testing should verify both the visual design implementation and technical performance:\n\n1. Visual Testing:\n   - Compare before/after screenshots of each component\n   - Verify dark theme is properly applied with no light theme elements showing\n   - Check that all components maintain the same design language and aesthetic\n   - Verify social proof placeholder is visually consistent with other components\n\n2. Responsive Testing:\n   - Test on multiple device sizes (320px, 768px, 1024px, 1440px widths)\n   - Verify no horizontal overflow or text cutoff issues\n   - Check that all interactive elements are properly sized for touch on mobile\n\n3. Performance Testing:\n   - Run Lighthouse performance tests before and after changes\n   - Verify no significant performance regression (target score >90)\n   - Check for animation performance issues using Chrome DevTools Performance tab\n\n4. Accessibility Testing:\n   - Verify color contrast meets WCAG AA standards using the axe DevTools extension\n   - Test keyboard navigation through all interactive elements\n   - Ensure proper semantic HTML structure is maintained\n\n5. Cross-browser Testing:\n   - Verify design renders correctly in Chrome, Firefox, Safari, and Edge\n   - Check that animations work consistently across browsers\n\n6. User Testing:\n   - Have at least 2 team members review the implementation for visual appeal\n   - Collect feedback on the effectiveness of the CTA components",
+      "title": "Implement Google OAuth Authentication Flow",
+      "description": "Set up Google OAuth for user authentication, allowing users to sign in and sign up using their Google accounts. This requires configuration in both Google Cloud Console and Supabase, plus UI implementation.",
+      "details": "This task involves implementing a complete Google OAuth authentication flow:\n\n1. Google Cloud Console setup:\n   - Create a new project in Google Cloud Console (if not already done)\n   - Configure the OAuth consent screen with appropriate app information\n   - Create OAuth 2.0 client credentials (client ID and secret)\n   - Add authorized JavaScript origins and redirect URIs for both development and production environments\n\n2. Supabase configuration:\n   - Navigate to Authentication > Providers in the Supabase dashboard\n   - Enable Google provider\n   - Add the Google client ID and secret from Google Cloud Console\n   - Configure the authorized redirect URL in Supabase\n   - Set up any additional security settings (e.g., allowed domains)\n\n3. Frontend implementation:\n   - Add a Google sign-in button to the login and registration pages following Google's branding guidelines\n   - Implement the OAuth flow using Supabase client library\n   - Handle the authentication response and redirect\n   - Implement proper error handling for failed authentication attempts\n   - Store authentication tokens securely\n   - Create user session management logic\n\n4. User profile handling:\n   - Determine how to handle user profile data received from Google\n   - Implement logic to create or update user records in your database\n   - Handle edge cases like existing emails with different auth methods\n\nEnsure the implementation follows security best practices and provides a smooth user experience.",
+      "testStrategy": "Testing should verify the complete authentication flow works correctly:\n\n1. Unit tests:\n   - Test the authentication service functions\n   - Verify proper token handling and storage\n   - Test error handling for various failure scenarios\n\n2. Integration tests:\n   - Mock Google OAuth responses to test the authentication flow\n   - Verify correct user creation/linking in Supabase\n   - Test session management after successful authentication\n\n3. End-to-end tests:\n   - Create test Google accounts specifically for testing\n   - Verify the complete sign-in flow works in development environment\n   - Test sign-up with a new Google account\n   - Test sign-in with an existing linked Google account\n   - Verify proper redirection after authentication\n   - Test sign-out functionality\n\n4. Security testing:\n   - Verify tokens are stored securely\n   - Ensure proper CSRF protection\n   - Check that authentication state persists correctly across page reloads\n   - Verify authentication errors are handled gracefully without exposing sensitive information\n\n5. UI testing:\n   - Verify the Google button appears correctly on both mobile and desktop views\n   - Test the UI for both light and dark themes if applicable\n   - Ensure loading states are properly displayed during authentication\n\nDocument all test cases and results for future reference.",
       "status": "pending",
       "dependencies": [
-        1
+        3
       ],
-      "priority": "high"
+      "priority": "medium"
     }
   ],
   "metadata": {
