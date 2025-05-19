@@ -33,12 +33,22 @@ export default function LivePreview() {
         {/* Logo */}
         {template.showLogo && (
           <div 
-            className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center mb-8"
+            className="mb-8"
             style={{ 
               transform: `scale(${template.logoSize === '1X' ? 1 : template.logoSize === '1.5X' ? 1.5 : 2})` 
             }}
           >
-            <span className="text-gray-600 text-sm font-medium">LOGO</span>
+            {template.logoUrl ? (
+              <img 
+                src={template.logoUrl} 
+                alt="Logo" 
+                className="max-w-[100px] max-h-[100px] object-contain"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-gray-600 text-sm font-medium">LOGO</span>
+              </div>
+            )}
           </div>
         )}
 

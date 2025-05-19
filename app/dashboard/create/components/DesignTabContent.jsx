@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useTemplate } from "../context/TemplateContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Bookmark } from "lucide-react";
+import LogoUploadSection from "./LogoUploadSection";
 
 export default function DesignTabContent() {
   const { template, updateTemplate, saveTemplate, isSaving, hasUnsavedChanges } = useTemplate();
@@ -19,6 +20,9 @@ export default function DesignTabContent() {
           Access your saved templates in the <strong>Themes & Saved</strong> tab.
         </AlertDescription>
       </Alert>
+
+      {/* Logo upload section */}
+      <LogoUploadSection />
 
       <div className="space-y-2">
         <Label htmlFor="bgColor">BG Color</Label>

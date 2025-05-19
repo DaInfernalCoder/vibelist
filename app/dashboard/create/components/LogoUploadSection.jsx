@@ -1,0 +1,245 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Upload, Trash2, Image, AlertCircle } from "lucide-react";
+import { useTemplate } from "../context/TemplateContext";
+import { createClient } from "@/libs/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+export default function LogoUploadSection() {
+  const { template, updateTemplate } = useTemplate();
+  const { toast } = useToast();
+  const supabase = createClient();
+  const fileInputRef = useRef(null);
+  
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  // Toggle logo visibility
+  const handleShowLogoToggle = (checked) => {
+    updateTemplate("showLogo", checked);
+  };
+
+  // Handle logo size change
+  const handleLogoSizeChange = (value) => {
+    updateTemplate("logoSize", value);
+  };
+
+  // Click the hidden file input
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  // Handle file selection
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/svg+xml"];
+    if (!validTypes.includes(file.type)) {
+      setUploadError("Invalid file type. Please upload a JPG, PNG, GIF, or SVG image.");
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError("File is too large. Maximum size is 2MB.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      setUploadError("");
+
+      // Get current user
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "You must be logged in to upload a logo.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create a unique file path
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${session.user.id}_${Date.now()}.${fileExt}`;
+      const filePath = `${session.user.id}/logos/${fileName}`;
+      
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('waitlist-assets')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      // Get the public URL for the uploaded image
+      const { data: publicUrlData } = supabase.storage
+        .from('waitlist-assets')
+        .getPublicUrl(filePath);
+      
+      // Update template with the logo URL
+      updateTemplate("logoUrl", publicUrlData.publicUrl);
+      updateTemplate("showLogo", true);
+      
+      toast({
+        title: "Logo Uploaded",
+        description: "Your logo has been uploaded successfully.",
+      });
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      setUploadError("Failed to upload logo. Please try again.");
+      toast({
+        title: "Upload Failed",
+        description: error.message || "There was a problem uploading your logo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Remove uploaded logo
+  const removeLogo = () => {
+    updateTemplate("logoUrl", "");
+    toast({
+      title: "Logo Removed",
+      description: "Your logo has been removed.",
+    });
+  };
+
+  return (
+    <div className="space-y-6 border-t pt-4">
+      <h3 className="font-medium">Logo Settings</h3>
+      
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <Label htmlFor="show-logo">Show Logo</Label>
+          <p className="text-sm text-muted-foreground">Display your brand logo on the waitlist page</p>
+        </div>
+        <Switch
+          id="show-logo"
+          checked={template.showLogo || false}
+          onCheckedChange={handleShowLogoToggle}
+        />
+      </div>
+
+      {template.showLogo && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="logo-size">Logo Size</Label>
+            <Select 
+              value={template.logoSize || "1X"} 
+              onValueChange={handleLogoSizeChange}
+            >
+              <SelectTrigger id="logo-size">
+                <SelectValue placeholder="Select size" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1X">Normal (1X)</SelectItem>
+                <SelectItem value="1.5X">Medium (1.5X)</SelectItem>
+                <SelectItem value="2X">Large (2X)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Upload Logo</Label>
+            
+            {/* Hidden file input */}
+            <Input 
+              ref={fileInputRef}
+              type="file" 
+              accept="image/jpeg,image/png,image/gif,image/svg+xml" 
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
+            {/* Preview and upload/remove buttons */}
+            <div className="border rounded-md p-4">
+              {template.logoUrl ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-32 h-32 flex items-center justify-center">
+                    <img 
+                      src={template.logoUrl} 
+                      alt="Uploaded logo" 
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      size="sm" 
+                      onClick={triggerFileInput}
+                      disabled={isUploading}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Replace
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={removeLogo}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-32 h-32 border-2 border-dashed rounded-md flex items-center justify-center bg-muted">
+                    <Image className="w-12 h-12 text-muted-foreground opacity-30" />
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={triggerFileInput}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? (
+                      <>
+                        <span className="loading loading-spinner loading-xs mr-2"></span>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Logo
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            {uploadError && (
+              <Alert variant="destructive" className="mt-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="ml-2">{uploadError}</AlertDescription>
+              </Alert>
+            )}
+            
+            <p className="text-sm text-muted-foreground mt-2">
+              Upload a JPG, PNG, GIF, or SVG (max 2MB). Recommended size: 200x200 pixels.
+            </p>
+          </div>
+        </>
+      )}
+    </div>
+  );
+} 

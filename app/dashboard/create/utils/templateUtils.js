@@ -46,6 +46,7 @@ export const defaultTemplate = {
   successMessage: "Success! You're on the waitlist 🎉",
   showLogo: true,
   logoSize: "1X",
+  logoUrl: "",
   showSocialProof: true,
   enableReferrals: false,
   whiteLabel: false,
