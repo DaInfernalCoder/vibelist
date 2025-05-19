@@ -556,6 +556,24 @@
           "status": "pending",
           "dependencies": [],
           "parentTaskId": 6
+        },
+        {
+          "id": 8,
+          "title": "Fix Supabase Template Saving Bug",
+          "description": "Resolve the error occurring when users attempt to save a waitlist template, which shows 'failed to save template undefined' and causes a 404 error.",
+          "details": "Implementation steps:\n1. Investigate the 404 error when saving templates to Supabase:\n   - Debug the POST request to `https://wejhvwzgymkaerwupjqn.supabase.co/rest/v1/waitlist_templates`\n   - Verify that the table `waitlist_templates` exists in the Supabase database\n   - Check if the columns match what's being passed in the request (`template_data`, `user_id`, `name`)\n\n2. Fix the database table configuration:\n   - If the table doesn't exist, create it with the required columns\n   - If it exists, verify column names and types match what the app is sending\n   - Ensure proper permissions are set on the table for authenticated users\n\n3. Fix the client-side error handling:\n   - Address the \"failed to save template undefined\" popup message\n   - Add proper error handling with specific error messages\n   - Implement retry logic for save operations\n   - Add fallback to localStorage if server save fails\n\n4. Update the saving function:\n   - Ensure template name is properly defined before saving\n   - Add validation to prevent saving without required fields\n   - Implement proper loading states during save operations\n   - Add success feedback after successful save\n\n5. Add comprehensive error logging:\n   - Capture detailed error information\n   - Log information about the template being saved\n   - Add user-friendly error messages\n   - Create a way to report errors to developers\n\nTesting approach:\n- Verify templates save successfully to Supabase\n- Test error handling with various failure scenarios\n- Ensure user receives appropriate feedback for different error types\n- Confirm error messages are clear and actionable",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 6
+        },
+        {
+          "id": 9,
+          "title": "Fix User Routing and Remove Dashboard",
+          "description": "Fix routing issues where users are sent to dashboard instead of advanced editor after basic setup, and remove the unnecessary dashboard page.",
+          "details": "Implementation steps:\n1. Fix the user flow routing issue:\n   - Identify where the redirect occurs after users complete the basic waitlist setup\n   - Change the redirect destination from dashboard to the advanced editor\n   - Ensure all user data from the basic setup is properly passed to the advanced editor\n\n2. Remove the dashboard functionality:\n   - Analyze the current dashboard implementation to identify any useful components\n   - Move any essential analytics features to an analytics tab accessible from the editor\n   - Remove dashboard-related routes from the routing configuration\n   - Update navigation components to remove dashboard links\n\n3. Create a streamlined application flow:\n   - Make the waitlist creation page the default landing page\n   - Ensure the basic setup leads directly to the advanced editor\n   - Add a clear navigation structure with editor and analytics as main sections\n   - Remove any references to the dashboard throughout the application\n\n4. Update app navigation:\n   - Modify the site header/navbar to reflect the new structure\n   - Update any menu items or breadcrumbs\n   - Ensure the logo/home link takes users to the waitlist creator\n   - Add proper active state indicators for current section\n\n5. Update analytics access:\n   - Create an easily accessible analytics view from the editor\n   - Ensure all dashboards metrics are available in the new location\n   - Add a toggle between editor and analytics view\n\nTesting approach:\n- Verify the user flow from basic setup to advanced editor works correctly\n- Confirm all dashboard URLs redirect to appropriate new locations\n- Test navigation between the editor and analytics sections\n- Ensure no broken links or references to the dashboard remain\n- Test that all analytics functionality works in the new location",
+          "status": "pending",
+          "dependencies": [],
+          "parentTaskId": 6
         }
       ]
     },
@@ -1213,6 +1231,16 @@
       "dependencies": [
         3
       ],
+      "priority": "medium"
+    },
+    {
+      "id": 17,
+      "title": "Implement Template Loading Functionality in Themes & Saved Tab",
+      "description": "Add functionality to allow users to load previously saved templates from the Themes & Saved tab. This feature will enable users to reuse their saved designs and configurations.",
+      "details": "Implement a template loading system with the following components:\n\n1. Create a UI component in the Themes & Saved tab that displays all saved templates with preview thumbnails\n2. Implement a search/filter functionality to help users find specific templates\n3. Add a 'Load Template' button for each template item\n4. When a template is selected, load all associated settings including:\n   - Color schemes\n   - Layout configurations\n   - Component settings\n   - Custom styles\n   - Any saved metadata\n5. Ensure the current work is properly handled before loading a template:\n   - Prompt users to save current work if unsaved changes exist\n   - Provide option to merge the template with current work or replace entirely\n6. Add proper error handling for corrupted or incompatible templates\n7. Implement a loading indicator during template retrieval\n8. Create a 'Recently Used' section for quick access to frequently used templates\n9. Ensure the template loading process maintains all template relationships and dependencies\n10. Add template version compatibility checking to handle templates created in different versions of the software",
+      "testStrategy": "Testing should verify all aspects of the template loading functionality:\n\n1. Unit Tests:\n   - Test template parsing and validation functions\n   - Verify error handling for invalid template data\n   - Test template version compatibility checking\n\n2. Integration Tests:\n   - Verify templates load correctly with all settings intact\n   - Test the merge functionality when combining templates with existing work\n   - Ensure the UI updates properly after template loading\n\n3. UI/UX Tests:\n   - Verify template thumbnails display correctly\n   - Test search/filter functionality with various queries\n   - Ensure loading indicators appear appropriately\n   - Verify prompts for unsaved work appear when needed\n\n4. Edge Cases:\n   - Test loading very large templates\n   - Test loading templates created in older/newer versions\n   - Verify behavior when loading templates with missing dependencies\n   - Test loading templates with custom components\n\n5. User Acceptance Testing:\n   - Have users test the template loading with their own saved templates\n   - Gather feedback on the intuitiveness of the loading process\n   - Verify the loaded templates match user expectations",
+      "status": "done",
+      "dependencies": [],
       "priority": "medium"
     }
   ],

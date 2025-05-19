@@ -315,3 +315,82 @@ Testing approach:
 - Test versioning system with multiple changes
 - Confirm performance remains smooth with many saved templates
 
+## 8. Fix Supabase Template Saving Bug [done]
+### Dependencies: None
+### Description: Resolve the error occurring when users attempt to save a waitlist template, which shows 'failed to save template undefined' and causes a 404 error.
+### Details:
+Implementation steps:
+1. Investigate the 404 error when saving templates to Supabase:
+   - Debug the POST request to `https://wejhvwzgymkaerwupjqn.supabase.co/rest/v1/waitlist_templates`
+   - Verify that the table `waitlist_templates` exists in the Supabase database
+   - Check if the columns match what's being passed in the request (`template_data`, `user_id`, `name`)
+
+2. Fix the database table configuration:
+   - If the table doesn't exist, create it with the required columns
+   - If it exists, verify column names and types match what the app is sending
+   - Ensure proper permissions are set on the table for authenticated users
+
+3. Fix the client-side error handling:
+   - Address the "failed to save template undefined" popup message
+   - Add proper error handling with specific error messages
+   - Implement retry logic for save operations
+   - Add fallback to localStorage if server save fails
+
+4. Update the saving function:
+   - Ensure template name is properly defined before saving
+   - Add validation to prevent saving without required fields
+   - Implement proper loading states during save operations
+   - Add success feedback after successful save
+
+5. Add comprehensive error logging:
+   - Capture detailed error information
+   - Log information about the template being saved
+   - Add user-friendly error messages
+   - Create a way to report errors to developers
+
+Testing approach:
+- Verify templates save successfully to Supabase
+- Test error handling with various failure scenarios
+- Ensure user receives appropriate feedback for different error types
+- Confirm error messages are clear and actionable
+
+## 9. Fix User Routing and Remove Dashboard [pending]
+### Dependencies: None
+### Description: Fix routing issues where users are sent to dashboard instead of advanced editor after basic setup, and remove the unnecessary dashboard page.
+### Details:
+Implementation steps:
+1. Fix the user flow routing issue:
+   - Identify where the redirect occurs after users complete the basic waitlist setup
+   - Change the redirect destination from dashboard to the advanced editor
+   - Ensure all user data from the basic setup is properly passed to the advanced editor
+
+2. Remove the dashboard functionality:
+   - Analyze the current dashboard implementation to identify any useful components
+   - Move any essential analytics features to an analytics tab accessible from the editor
+   - Remove dashboard-related routes from the routing configuration
+   - Update navigation components to remove dashboard links
+
+3. Create a streamlined application flow:
+   - Make the waitlist creation page the default landing page
+   - Ensure the basic setup leads directly to the advanced editor
+   - Add a clear navigation structure with editor and analytics as main sections
+   - Remove any references to the dashboard throughout the application
+
+4. Update app navigation:
+   - Modify the site header/navbar to reflect the new structure
+   - Update any menu items or breadcrumbs
+   - Ensure the logo/home link takes users to the waitlist creator
+   - Add proper active state indicators for current section
+
+5. Update analytics access:
+   - Create an easily accessible analytics view from the editor
+   - Ensure all dashboards metrics are available in the new location
+   - Add a toggle between editor and analytics view
+
+Testing approach:
+- Verify the user flow from basic setup to advanced editor works correctly
+- Confirm all dashboard URLs redirect to appropriate new locations
+- Test navigation between the editor and analytics sections
+- Ensure no broken links or references to the dashboard remain
+- Test that all analytics functionality works in the new location
+

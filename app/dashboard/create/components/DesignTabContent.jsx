@@ -4,12 +4,22 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTemplate } from "../context/TemplateContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Bookmark } from "lucide-react";
 
 export default function DesignTabContent() {
   const { template, updateTemplate, saveTemplate, isSaving, hasUnsavedChanges } = useTemplate();
 
   return (
     <div className="space-y-6">
+      {/* Saved templates tip */}
+      <Alert className="bg-muted">
+        <Bookmark className="h-4 w-4 mr-2" />
+        <AlertDescription>
+          Access your saved templates in the <strong>Themes & Saved</strong> tab.
+        </AlertDescription>
+      </Alert>
+
       <div className="space-y-2">
         <Label htmlFor="bgColor">BG Color</Label>
         <div className="flex gap-2">

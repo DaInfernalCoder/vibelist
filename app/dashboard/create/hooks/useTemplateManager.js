@@ -79,6 +79,17 @@ export default function useTemplateManager({ onToast }) {
     try {
       setIsSaving(true);
 
+      // Validate template has a name
+      if (!template.projectTitle) {
+        onToast({
+          title: "Validation Error",
+          description: "Please provide a title for your template before saving",
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
+
       // Save to localStorage
       localStorage.setItem("waitlistTemplate", JSON.stringify(template));
       setSavedTemplate(template);
@@ -91,7 +102,8 @@ export default function useTemplateManager({ onToast }) {
       if (user) {
         const templateData = {
           user_id: user.id,
-          template_data: template,
+          template_data: JSON.stringify(template),
+          name: template.projectTitle || "Unnamed Template",
           updated_at: new Date().toISOString(),
         };
 
@@ -102,7 +114,10 @@ export default function useTemplateManager({ onToast }) {
             .update(templateData)
             .eq("id", templateId);
 
-          if (error) throw error;
+          if (error)
+            throw new Error(
+              error.message || "Failed to update template in database"
+            );
         } else {
           templateData.created_at = new Date().toISOString();
           const { data, error } = await supabase
@@ -110,7 +125,10 @@ export default function useTemplateManager({ onToast }) {
             .insert(templateData)
             .select();
 
-          if (error) throw error;
+          if (error)
+            throw new Error(
+              error.message || "Failed to create template in database"
+            );
           if (data && data.length > 0) {
             setTemplateId(data[0].id);
           }
@@ -125,8 +143,7 @@ export default function useTemplateManager({ onToast }) {
       console.error("Error saving template:", error);
       onToast({
         title: "Save failed",
-        description:
-          "There was an error saving your template. Please try again.",
+        description: error.message || "An unknown error occurred while saving",
         variant: "destructive",
       });
     } finally {
