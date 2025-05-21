@@ -1,4 +1,6 @@
-import { updateSession } from "@/libs/supabase/middleware";
+// middleware.js
+import { NextRequest } from "next/server";
+import { updateSession } from "@/libs/supabase/middleware"; // Corrected path based on your examples
 
 export async function middleware(request) {
   return await updateSession(request);

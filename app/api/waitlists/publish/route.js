@@ -1,4 +1,5 @@
-import { createRouteHandlerClient } from "@supabase/ssr";
+// app/api/waitlists/publish/route.js
+import { createClient } from "@/libs/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import slugify from "slugify";
@@ -6,7 +7,7 @@ import { nanoid } from "nanoid";
 import {
   validateCustomizationData,
   mergeCustomizationSettings,
-  getTemplateById,
+  // getTemplateById, // Not used directly here, but available
   updateCustomizationSettings,
 } from "@/lib/waitlist-templates";
 
@@ -24,12 +25,22 @@ import {
 export async function POST(request) {
   try {
     // Initialize Supabase client
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = createClient();
 
+    console.log("Attempting to get session...");
     // Check authentication
     const {
       data: { session },
+      error: sessionError,
     } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      console.error("Error getting session:", sessionError.message);
+      return NextResponse.json(
+        { error: "Failed to authenticate session" },
+        { status: 500 }
+      );
+    }
 
     if (!session) {
       return NextResponse.json(
@@ -39,21 +50,25 @@ export async function POST(request) {
     }
 
     const userId = session.user.id;
+    console.log(
+      `Session retrieved for UserID: ${userId}. Parsing request body...`
+    );
 
     // Parse request body
     const requestData = await request.json().catch((err) => {
-      console.error("Error parsing request body:", err);
-      return {};
+      console.error("Error parsing request body:", err.message);
+      // Return a marker or throw to be caught by the main try-catch
+      throw new Error("Invalid JSON in request body");
     });
 
-    // Log request for debugging
     console.log(
-      "Publish waitlist request:",
+      "Publish waitlist request payload:",
       JSON.stringify(requestData, null, 2)
     );
 
     const { name, description, templateId, customizationData } = requestData;
 
+    console.log("Basic validation: Checking name and customizationData...");
     // Validate required fields
     if (!name || name.trim() === "") {
       return NextResponse.json(
@@ -62,123 +77,157 @@ export async function POST(request) {
       );
     }
 
-    // Validate customization data - make sure it exists
     if (!customizationData) {
       return NextResponse.json(
         { error: "Customization data is required" },
         { status: 400 }
       );
     }
+    console.log(
+      "Name and customizationData exist. Validating customizationData format..."
+    );
 
-    // Validate customization data format
     const validationError = validateCustomizationData(customizationData);
     if (validationError) {
+      console.error(
+        "Customization data validation failed:",
+        validationError.error
+      );
       return NextResponse.json(
         { error: validationError.error },
         { status: validationError.status }
       );
     }
+    console.log(
+      "CustomizationData format valid. Validating templateId if provided..."
+    );
 
     // Validate template ownership if templateId is provided
-    let templateData = null;
+    let dbTemplate = null; // Renamed to avoid confusion with `templateData` from context/editor
     if (templateId) {
-      // Validate templateId format
       if (
         !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
           templateId
         )
       ) {
+        console.error("Invalid template ID format:", templateId);
         return NextResponse.json(
           { error: "Invalid template ID format" },
           { status: 400 }
         );
       }
 
-      // Fetch template and check ownership
-      const { data: template, error: templateError } = await supabase
-        .from("waitlist_templates")
-        .select("*")
-        .eq("id", templateId)
-        .single();
+      console.log(`Fetching template with ID: ${templateId}`);
+      const { data: fetchedTemplate, error: templateFetchError } =
+        await supabase
+          .from("waitlist_templates")
+          .select("*")
+          .eq("id", templateId)
+          .single();
 
-      if (templateError) {
-        console.error("Error fetching template:", templateError);
+      if (templateFetchError) {
+        console.error(
+          "Error fetching template from DB:",
+          templateFetchError.message
+        );
         return NextResponse.json(
           { error: "Error validating template" },
           { status: 500 }
         );
       }
 
-      if (!template) {
+      if (!fetchedTemplate) {
+        console.warn("Template not found in DB for ID:", templateId);
         return NextResponse.json(
           { error: "Template not found" },
           { status: 404 }
         );
       }
 
-      if (template.user_id !== userId) {
+      if (fetchedTemplate.user_id !== userId) {
+        console.error(
+          "Template ownership validation failed. User does not own template."
+        );
         return NextResponse.json(
           { error: "You do not have permission to use this template" },
           { status: 403 }
         );
       }
-
-      templateData = template;
+      dbTemplate = fetchedTemplate;
+      console.log("Template validation successful.");
+    } else {
+      console.log("No templateId provided, proceeding without DB template.");
     }
 
+    console.log("Generating slug...");
     // Generate slug from name
     let baseSlug = slugify(name, {
-      lower: true, // Convert to lowercase
-      strict: true, // Strip special characters
-      locale: "en", // Use English locale rules
-      trim: true, // Trim leading/trailing spaces
+      lower: true,
+      strict: true,
+      locale: "en",
+      trim: true,
     });
 
-    // Limit slug length to reasonable number
-    if (baseSlug.length > 50) {
-      baseSlug = baseSlug.substring(0, 50);
+    if (!baseSlug) {
+      // Handle cases where name results in empty slug (e.g. name is all special chars)
+      baseSlug = `waitlist-${nanoid(8).toLowerCase()}`;
     }
 
-    // Handle slug collision
+    if (baseSlug.length > 50) {
+      baseSlug = baseSlug.substring(0, 50);
+      if (baseSlug.endsWith("-")) {
+        // Avoid ending with a dash after truncation
+        baseSlug = baseSlug.slice(0, -1);
+      }
+    }
+
     let slug = baseSlug;
     let slugExists = true;
     let attempts = 0;
+    const maxAttempts = 10;
 
-    // Try up to 10 times to find a unique slug
-    while (slugExists && attempts < 10) {
-      // Check if slug exists in database
-      const { data, error } = await supabase
+    while (slugExists && attempts < maxAttempts) {
+      console.log(
+        `Checking slug availability (attempt ${attempts + 1}): ${slug}`
+      );
+      const { data: existingSlug, error: slugCheckError } = await supabase
         .from("waitlists")
         .select("id")
-        .eq("url_slug", slug) // Using url_slug instead of slug
+        .eq("url_slug", slug)
         .maybeSingle();
 
-      if (error) {
-        console.error("Error checking slug availability:", error);
+      if (slugCheckError) {
+        console.error(
+          "Error checking slug availability:",
+          slugCheckError.message
+        );
         return NextResponse.json(
           { error: "Error checking slug availability" },
           { status: 500 }
         );
       }
 
-      // If no data returned, slug is available
-      if (!data) {
+      if (!existingSlug) {
         slugExists = false;
       } else {
-        // Append random string for uniqueness
         attempts++;
-        // Use nanoid to generate a random 6-character string
         slug = `${baseSlug}-${nanoid(6).toLowerCase()}`;
       }
     }
 
-    // If we couldn't find a unique slug after all attempts
     if (slugExists) {
+      console.error(
+        `Unable to generate a unique slug after ${maxAttempts} attempts for base: ${baseSlug}`
+      );
       return NextResponse.json(
-        { error: "Unable to generate a unique slug, please try again" },
+        {
+          error:
+            "Unable to generate a unique slug, please try a different name or try again",
+        },
         { status: 500 }
       );
     }
+    console.log(`Slug generated: ${slug}. Inserting waitlist into DB...`);
 
     // Insert the new waitlist record
     const { data: waitlist, error: insertError } = await supabase
@@ -187,7 +236,7 @@ export async function POST(request) {
         {
           name,
           description: description || null,
-          url_slug: slug, // Using url_slug instead of slug
+          url_slug: slug,
           owner_id: userId,
           status: "published",
           published: true,
@@ -197,18 +246,24 @@ export async function POST(request) {
       .single();
 
     if (insertError) {
-      console.error("Error creating waitlist:", insertError);
+      console.error("Error creating waitlist in DB:", insertError.message);
       return NextResponse.json(
-        { error: "Failed to create waitlist" },
+        { error: `Failed to create waitlist: ${insertError.message}` },
         { status: 500 }
       );
     }
+    console.log(
+      `Waitlist inserted with ID: ${waitlist.id}. Preparing final settings...`
+    );
 
     // Prepare final customization settings
+    // dbTemplate is the template loaded from DB (if templateId was provided)
+    // customizationData is from the request body (current editor state)
     let finalSettings = mergeCustomizationSettings(
-      templateData,
+      dbTemplate,
       customizationData
     );
+    console.log("Settings merged. Updating customization settings in DB...");
 
     // Update customization settings
     const settingsResult = await updateCustomizationSettings(
@@ -218,16 +273,29 @@ export async function POST(request) {
     );
 
     if (!settingsResult.success) {
-      console.error("Error with customization settings:", settingsResult.error);
-      // Don't fail the whole request due to settings issues
+      // Log the error but don't necessarily fail the whole request,
+      // as the waitlist itself was created.
+      console.error(
+        "Error with customization settings (non-fatal for waitlist creation):",
+        settingsResult.error
+      );
+    } else {
+      console.log("Customization settings updated successfully.");
     }
 
-    // Return the created waitlist with success status
+    console.log("Publish process complete. Returning response...");
     return NextResponse.json(waitlist, { status: 201 });
   } catch (err) {
-    console.error("Unexpected error creating waitlist:", err);
+    console.error(
+      "Unexpected error in /api/waitlists/publish:",
+      err.message,
+      "Stack:",
+      err.stack,
+      "Full Error:",
+      JSON.stringify(err, Object.getOwnPropertyNames(err))
+    );
     return NextResponse.json(
-      { error: "An unexpected error occurred" },
+      { error: "An unexpected error occurred during publishing" },
       { status: 500 }
     );
   }

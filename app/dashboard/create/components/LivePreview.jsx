@@ -2,6 +2,7 @@
 
 import { useTemplate } from "../context/TemplateContext";
 import { getBorderRadiusClass, getFontWeightClass } from "../utils/templateUtils";
+import Image from "next/image";
 
 export default function LivePreview() {
   const { template, previewSize } = useTemplate();
@@ -39,9 +40,11 @@ export default function LivePreview() {
             }}
           >
             {template.logoUrl ? (
-              <img 
+              <Image 
                 src={template.logoUrl} 
                 alt="Logo" 
+                width={100}
+                height={100}
                 className="max-w-[100px] max-h-[100px] object-contain"
               />
             ) : (

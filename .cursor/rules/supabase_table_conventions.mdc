@@ -1,0 +1,293 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Supabase Database Conventions
+
+This document outlines the structure, conventions, and usage patterns for the Supabase database in the VibeList application.
+
+## Database Schema Overview
+
+The application uses a Supabase PostgreSQL database with the following key tables:
+
+- **profiles**: User profile information linked to auth.users
+- **waitlists**: Main waitlist data
+- **waitlist_signups**: Signups for waitlists
+- **customization_settings**: UI/UX settings for waitlists
+- **waitlist_analytics**: Analytics data for waitlists
+- **waitlist_templates**: Reusable templates for waitlists
+
+## Table Structure Details
+
+### Profiles Table
+
+```sql
+CREATE TABLE public.profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  email TEXT NOT NULL,
+  name TEXT,
+  avatar_url TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+- User profile data linked to Supabase Auth users
+- Primary key `id` is the same as Auth user ID 
+- RLS enabled for data protection
+
+### Waitlists Table
+
+```sql
+CREATE TABLE public.waitlists (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_id UUID NOT NULL REFERENCES public.profiles(id),
+  name TEXT NOT NULL,
+  description TEXT,
+  status TEXT NOT NULL DEFAULT 'draft',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  url_slug VARCHAR UNIQUE,
+  published BOOLEAN DEFAULT false
+);
+```
+
+- Central table for waitlist data
+- Status values: 'draft', 'published'
+- URL slugs are unique and used for public sharing
+- Owned by a user (via owner_id)
+
+### Waitlist Signups Table
+
+```sql
+CREATE TABLE public.waitlist_signups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  waitlist_id UUID NOT NULL REFERENCES public.waitlists(id),
+  email TEXT NOT NULL,
+  name TEXT,
+  signup_time TIMESTAMPTZ NOT NULL DEFAULT now(),
+  status TEXT NOT NULL DEFAULT 'pending',
+  referral_code TEXT,
+  referral_source TEXT
+);
+```
+
+- Stores user signups for waitlists
+- Status values: 'pending', 'approved', 'rejected'
+- Tracks referral information
+
+### Customization Settings Table
+
+```sql
+CREATE TABLE public.customization_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  waitlist_id UUID NOT NULL REFERENCES public.waitlists(id) UNIQUE,
+  theme_color TEXT DEFAULT '#3B82F6',
+  logo_url TEXT,
+  custom_fields JSONB DEFAULT '{}',
+  redirect_url TEXT,
+  email_template TEXT,
+  show_social_proof BOOLEAN DEFAULT true,
+  show_referral BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+- One-to-one relationship with waitlists
+- Stores appearance and behavior settings
+- JSONB field for flexible custom fields
+
+### Waitlist Analytics Table
+
+```sql
+CREATE TABLE public.waitlist_analytics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  waitlist_id UUID NOT NULL REFERENCES public.waitlists(id) UNIQUE,
+  total_signups INTEGER DEFAULT 0,
+  daily_signups JSONB DEFAULT '[]',
+  referral_sources JSONB DEFAULT '{}',
+  last_calculated TIMESTAMPTZ DEFAULT now()
+);
+```
+
+- Stores aggregated analytics data
+- JSONB fields for complex data structures
+- Updated via database functions
+
+### Waitlist Templates Table
+
+```sql
+CREATE TABLE public.waitlist_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+  name TEXT NOT NULL,
+  template_data JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+- Stores reusable waitlist templates
+- Owned by a user
+- Template data stored as JSONB
+
+## Database Functions
+
+The database includes several helper functions:
+
+- **calculate_daily_signups(p_waitlist_id UUID)**: Returns daily signup statistics 
+- **calculate_referral_sources(p_waitlist_id UUID)**: Aggregates referral source data
+- **ensure_unique_slug(p_base_slug TEXT)**: Ensures slugs are unique
+- **generate_slug_from_name(p_name TEXT)**: Creates URL-friendly slugs
+- **get_waitlist_analytics(p_waitlist_id UUID)**: Retrieves analytics data
+- **get_waitlist_signup_count(p_waitlist_id UUID)**: Counts signups
+- **update_waitlist_analytics(p_waitlist_id UUID)**: Updates analytics data
+
+## Security & RLS Policies
+
+All tables have Row Level Security (RLS) enabled:
+
+- Users can only access their own profile data
+- Waitlist owners can only access their own waitlists and related data
+- Public users can view published waitlists
+- Insert/update/delete operations are restricted by ownership
+
+## Supabase Client Usage
+
+### Client Initialization
+
+#### Server Components
+```javascript
+// Server-side Supabase client
+import { createClient } from "@/libs/supabase/server";
+
+export async function MyServerComponent() {
+  const supabase = createClient();
+  // Use supabase client...
+}
+```
+
+#### Client Components
+```javascript
+// Client-side Supabase client
+"use client";
+import { createClient } from "@/libs/supabase/client";
+
+export default function MyClientComponent() {
+  const supabase = createClient();
+  // Use supabase client...
+}
+```
+
+### Common Query Patterns
+
+#### Fetching User-Owned Waitlists
+```javascript
+const { data: waitlists, error } = await supabase
+  .from("waitlists")
+  .select("*")
+  .eq("owner_id", userId)
+  .order("created_at", { ascending: false });
+```
+
+#### Creating a Waitlist
+```javascript
+const { data: waitlist, error } = await supabase
+  .from("waitlists")
+  .insert([{
+    name: "My Waitlist",
+    description: "Description here",
+    owner_id: userId,
+    status: "draft" 
+  }])
+  .select()
+  .single();
+```
+
+#### Updating Waitlist Status
+```javascript
+const { data, error } = await supabase
+  .from("waitlists")
+  .update({ status: "published", published: true })
+  .eq("id", waitlistId)
+  .eq("owner_id", userId)
+  .select()
+  .single();
+```
+
+#### Adding a Waitlist Signup
+```javascript
+const { data: signup, error } = await supabase
+  .from("waitlist_signups")
+  .insert([{
+    waitlist_id: waitlistId,
+    email: userEmail,
+    name: userName,
+    referral_source: referralSource
+  }])
+  .select()
+  .single();
+```
+
+#### Updating Customization Settings
+```javascript
+const { data, error } = await supabase
+  .from("customization_settings")
+  .upsert({
+    waitlist_id: waitlistId,
+    theme_color: customizationData.themeColor,
+    logo_url: customizationData.logoUrl,
+    custom_fields: customizationData.customFields,
+    show_social_proof: customizationData.showSocialProof,
+    show_referral: customizationData.showReferral
+  })
+  .select()
+  .single();
+```
+
+## Data Types and Relationships
+
+### UUID Primary Keys
+All tables use UUID primary keys, typically with `gen_random_uuid()` defaults.
+
+### Foreign Key Relationships
+- waitlists.owner_id → profiles.id
+- waitlist_signups.waitlist_id → waitlists.id
+- customization_settings.waitlist_id → waitlists.id (one-to-one)
+- waitlist_analytics.waitlist_id → waitlists.id (one-to-one)
+- profiles.id → auth.users.id
+
+### Timestamp Conventions
+All tables include:
+- created_at: TIMESTAMPTZ NOT NULL DEFAULT now()
+- updated_at: TIMESTAMPTZ NOT NULL DEFAULT now()
+
+### JSONB Fields
+Several tables use JSONB for flexible data structures:
+- customization_settings.custom_fields
+- waitlist_analytics.daily_signups
+- waitlist_analytics.referral_sources
+- waitlist_templates.template_data
+
+## Best Practices
+
+- Always include error handling for Supabase queries
+- Use RLS policies instead of manual filtering where possible
+- Use `.single()` when expecting one record
+- Use `.maybeSingle()` when record might not exist
+- Always check for both data and error in query responses
+- Prefer server-side queries for sensitive operations
+- Validate data before inserting/updating
+
+## Common Status Values
+
+### Waitlist Status
+- `draft`: Initial creation, not publicly visible
+- `published`: Publicly accessible
+
+### Signup Status
+- `pending`: Initial signup state
+- `approved`: User has been approved
+- `rejected`: User has been rejected

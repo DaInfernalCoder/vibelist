@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Trash2, Image, AlertCircle } from "lucide-react";
+import { Upload, Trash2, AlertCircle, Image as ImageIcon } from "lucide-react";
 import { useTemplate } from "../context/TemplateContext";
 import { createClient } from "@/libs/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
 
 export default function LogoUploadSection() {
   const { template, updateTemplate } = useTemplate();
@@ -175,9 +176,11 @@ export default function LogoUploadSection() {
               {template.logoUrl ? (
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-32 h-32 flex items-center justify-center">
-                    <img 
+                    <Image 
                       src={template.logoUrl} 
                       alt="Uploaded logo" 
+                      width={128}
+                      height={128}
                       className="max-w-full max-h-full object-contain"
                     />
                   </div>
@@ -204,7 +207,7 @@ export default function LogoUploadSection() {
               ) : (
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-32 h-32 border-2 border-dashed rounded-md flex items-center justify-center bg-muted">
-                    <Image className="w-12 h-12 text-muted-foreground opacity-30" />
+                    <ImageIcon className="w-12 h-12 text-muted-foreground opacity-30" alt="Logo placeholder" />
                   </div>
                   <Button 
                     variant="outline" 

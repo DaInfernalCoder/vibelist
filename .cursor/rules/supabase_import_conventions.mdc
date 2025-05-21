@@ -1,0 +1,116 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Supabase SSR Client Implementation Guidelines
+
+This rule outlines the correct way to initialize Supabase SSR clients for different contexts (client-side, server-side, middleware) within a Next.js application. Following these guidelines will prevent common import errors, naming conflicts, and usage of incorrect client types.
+
+-   **Client-Side Supabase Helper (`libs/supabase/client.js`)**
+    -   **DO**: Import `createBrowserClient` from `@supabase/ssr`.
+    -   **DO**: Your exported helper function should be named `createClient`. This function will call the imported `createBrowserClient`.
+    ```javascript
+    // ✅ CORRECT: libs/supabase/client.js
+    import { createBrowserClient } from "@supabase/ssr";
+
+    export function createClient() {
+      return createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
+    }
+    ```
+    -   **DON'T**: Import `createClient` from `@supabase/ssr` and then declare your own `createClient` function in this file. This causes a naming collision.
+    ```javascript
+    // ❌ INCORRECT: libs/supabase/client.js
+    import { createClient } from "@supabase/ssr"; // Problematic import name
+
+    export function createClient() { // Redeclaration of 'createClient'
+      // This call is ambiguous or might lead to recursion
+      return createClient( /* ... */ );
+    }
+    ```
+
+-   **Server-Side Supabase Helper (`libs/supabase/server.js`)**
+    -   **DO**: Import `createServerClient` from `@supabase/ssr`.
+    -   **DO**: Import `cookies` from `next/headers`.
+    -   **DO**: Your exported helper function (typically named `createClient`) must initialize `createServerClient` using the `cookieStore` from `next/headers`.
+    ```javascript
+    // ✅ CORRECT: libs/supabase/server.js
+    import { createServerClient } from '@supabase/ssr';
+    import { cookies } from 'next/headers';
+
+    export function createClient() {
+      const cookieStore = cookies();
+      return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        {
+          cookies: {
+            getAll() { return cookieStore.getAll(); },
+            setAll(cookiesToSet) {
+              try {
+                cookiesToSet.forEach(({ name, value, options }) =>
+                  cookieStore.set(name, value, options)
+                );
+              } catch { /* ... */ }
+            },
+          },
+        }
+      );
+    }
+    ```
+
+-   **API Routes (`app/api/**/*.js`) & Server Components**
+    -   **DO**: Use your server-side Supabase client helper. Example: `import { createClient } from "@/libs/supabase/server";`.
+    -   **DON'T**: Use the client-side Supabase helper (`@/libs/supabase/client.js`) in API routes or Server Components.
+    -   **CRITICAL IMPORT**: If initializing `createServerClient` directly within an API route or Server Component (not recommended, prefer a helper), `cookies` **must** be imported from `next/headers`.
+    -   **AVOID TYPOS**: Ensure `next/headers` is correctly spelled.
+    ```javascript
+    // ✅ CORRECT: app/api/some/route.js
+    import { createClient } from "@/libs/supabase/server"; // Using server helper
+    import { NextResponse } from "next/server";
+
+    export async function GET(request, { params }) {
+      const supabase = createClient();
+      // ... supabase logic ...
+    }
+    ```
+    ```javascript
+    // ❌ INCORRECT: app/api/some/route.js
+    import { cookies } from "next/headenpm..."; // Typo in import path
+    // or
+    import { createBrowserClient } from "@supabase/ssr"; // Wrong client for server context
+    ```
+
+-   **Middleware Helper (`libs/supabase/middleware.js`)**
+    -   **DO**: Import `createServerClient` from `@supabase/ssr`.
+    -   **DO**: Import `NextResponse` (and `NextRequest` if type hinting, but without the `type` keyword in `.js` files) from `next/server`.
+    -   **DO**: Ensure the `updateSession` function (or similar) correctly uses `createServerClient` and handles `request.cookies` and `supabaseResponse.cookies` as per Supabase SSR documentation.
+    ```javascript
+    // ✅ CORRECT: libs/supabase/middleware.js
+    import { createServerClient } from "@supabase/ssr";
+    import { NextResponse } from "next/server";
+
+    export async function updateSession(request) {
+      // ... standard Supabase SSR middleware logic ...
+      // Example: const supabase = createServerClient(...)
+      return supabaseResponse;
+    }
+    ```
+
+-   **Middleware File (`middleware.js`)**
+    -   **DO**: Import your Supabase middleware helper (e.g., `import { updateSession } from "@/libs/supabase/middleware";`).
+    -   **DON'T**: Use the `type` keyword for imports in `.js` files (e.g., `import { type NextRequest } ...`). Use `import { NextRequest } ...` instead.
+    ```javascript
+    // ✅ CORRECT: middleware.js
+    import { NextRequest } from 'next/server'; // No 'type' keyword
+    import { updateSession } from '@/libs/supabase/middleware';
+
+    export async function middleware(request) {
+      return await updateSession(request);
+    }
+    ```
+
+By adhering to these specific import patterns and helper function structures, you can avoid the previous errors and maintain a clear separation between client-side and server-side Supabase client initializations.

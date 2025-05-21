@@ -1,10 +1,10 @@
-import { createRouteHandlerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+// app/api/waitlists/[id]/route.js
+import { createClient } from "@/libs/supabase/server"; // Use the server client
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = createClient(); // Correctly initializes server client
 
     // Verify user is authenticated
     const {

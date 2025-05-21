@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Send } from "lucide-react";
 import { WaitlistPreview } from "./WaitlistPreview";
+import { getWaitlistDashboardUrl } from "@/lib/url-utils";
 
 /**
  * Modal component for publishing a waitlist
@@ -100,7 +101,8 @@ export default function PublishWaitlistModal({
       onClose();
       
       // Redirect to the sharing page for this waitlist
-      router.push(`/dashboard/waitlist/${data.id}/share`);
+      const sharePageUrl = getWaitlistDashboardUrl(data.id);
+      router.push(sharePageUrl);
     } catch (err) {
       console.error("Error publishing waitlist:", err);
       setError(err.message || "An unexpected error occurred");

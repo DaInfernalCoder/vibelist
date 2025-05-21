@@ -1,0 +1,218 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Testing Best Practices
+
+This guide provides best practices for creating and running tests in our application, particularly focusing on common issues with Supabase, RLS policies, and environment variables.
+
+## Pre-Test Checklist
+
+- **Environment Variables**
+  - Ensure all necessary environment variables are available in your testing environment
+  - For local testing, check both `.env` and `.env.local` files
+  - Required variables for Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+  - Override `NEXT_PUBLIC_URL` with `http://localhost:3000` for local testing
+
+- **Server Status**
+  - Ensure your local development server is running with `npm run dev`
+  - Note the actual port (Next.js may use 3001 if 3000 is occupied)
+  - Update test URL to match the actual port if needed
+
+## Supabase Testing Strategies
+
+### Row Level Security (RLS) Considerations
+
+- **Understanding RLS Context**
+  - Remember that RLS policies apply even to server components
+  - When testing, the server-side Supabase client is subject to RLS policies
+  - For API routes, the authentication context is determined by the route's JWT cookie
+
+- **RLS Testing Approaches**
+  1. **Admin Client Approach** (For development/testing)
+     ```javascript
+     // Create an admin client that bypasses RLS
+     import { createClient } from "@supabase/supabase-js";
+     
+     const adminSupabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+       ? createClient(
+           process.env.NEXT_PUBLIC_SUPABASE_URL,
+           process.env.SUPABASE_SERVICE_ROLE_KEY
+         )
+       : null;
+     
+     // Use conditionally in development environment
+     const supabase = process.env.NODE_ENV === "development" && adminSupabase
+       ? adminSupabase
+       : createClient(); // Regular client
+     ```
+
+  2. **RLS Policy Modification** (Preferred for production)
+     - Ensure RLS policies allow the operations needed by public users
+     - Example policy for public waitlist signups:
+     ```sql
+     CREATE POLICY waitlist_signups_insert_policy 
+       ON waitlist_signups 
+       FOR INSERT 
+       TO public 
+       WITH CHECK (
+         waitlist_id IN (
+           SELECT id FROM waitlists WHERE published = true
+         )
+       );
+     ```
+
+  3. **Temporary Trigger Disabling** (For dealing with problematic triggers)
+     - Create a toggle function for enabling/disabling triggers during tests
+     ```sql
+     CREATE OR REPLACE FUNCTION toggle_analytics_triggers(p_enable boolean)
+     RETURNS void LANGUAGE plpgsql AS $$
+     BEGIN
+       IF p_enable THEN
+         ALTER TABLE waitlist_signups ENABLE TRIGGER update_analytics_on_signup_change;
+       ELSE
+         ALTER TABLE waitlist_signups DISABLE TRIGGER update_analytics_on_signup_change;
+       END IF;
+     END; $$;
+     
+     -- Usage before tests
+     SELECT toggle_analytics_triggers(false);
+     
+     -- Usage after tests
+     SELECT toggle_analytics_triggers(true);
+     ```
+
+### Database Function Testing
+
+- **Check Group By Clauses**
+  - Always ensure GROUP BY clauses include all non-aggregated columns 
+  - Example fix:
+  ```sql
+  -- Incorrect
+  GROUP BY 1
+  
+  -- Correct
+  GROUP BY date_trunc('day', signup_time)
+  ```
+
+- **Test Complex Queries Separately**
+  - Test complex database functions directly in the database before triggering from code
+  - Use `mcp_supabase_execute_sql` to run SQL queries during development
+
+## API Testing Structure
+
+### Setup & Teardown Pattern
+
+```javascript
+// Create a test setup
+async function setupTest() {
+  // Find or create test data
+  // Use adminSupabase when needed
+  return testData;
+}
+
+// Test validation first
+async function testValidation(testData) {
+  // Test missing fields
+  // Test invalid formats
+  // Test access control
+}
+
+// Test core functionality
+async function testCore(testData) {
+  // Test successful operations
+  // Test business logic
+}
+
+// Test edge cases
+async function testEdgeCases(testData) {
+  // Test duplicates
+  // Test concurrent operations
+}
+
+// Clean up
+async function cleanup(testData) {
+  // Only if test data was created for this test
+  // Use adminSupabase to ensure no RLS issues
+}
+
+// Main test flow
+async function runTests() {
+  const testData = await setupTest();
+  try {
+    await testValidation(testData);
+    await testCore(testData);
+    await testEdgeCases(testData);
+  } finally {
+    await cleanup(testData);
+  }
+}
+```
+
+## Test Script Best Practices
+
+- **Use CommonJS with ESM Compatibility**
+  ```javascript
+  // Handle ESM modules in CommonJS
+  const fetch = (...args) => 
+    import('node-fetch').then(({default: fetch}) => fetch(...args));
+  ```
+
+- **Environment Loading**
+  ```javascript
+  // Load environment from both .env and .env.local
+  const dotenv = require("dotenv");
+  const path = require("path");
+  const fs = require("fs");
+  
+  // Load .env
+  dotenv.config();
+  
+  // Also load .env.local
+  const envLocalPath = path.resolve(process.cwd(), '.env.local');
+  if (fs.existsSync(envLocalPath)) {
+    const envLocal = dotenv.parse(fs.readFileSync(envLocalPath));
+    for (const k in envLocal) {
+      process.env[k] = envLocal[k];
+    }
+  }
+  ```
+
+- **Detailed Logging**
+  ```javascript
+  // Log parameters being used
+  console.log(`Using waitlist ID: ${waitlistId}`);
+  console.log(`Using test email: ${testEmail}`);
+  
+  // Log both status and full response body
+  console.log(`Status: ${response.status}`);
+  console.log(`Response: ${JSON.stringify(data)}`);
+  ```
+
+## Testing Database Migrations
+
+- Always test migrations in development before applying to production
+- Consider adding `up` and `down` migrations for reversibility
+- Test complex database functions using simple, direct SQL queries
+- Verify trigger functions by directly calling the function being triggered
+
+## Common Issues & Solutions
+
+1. **RLS Policy Issues**
+   - Error: `new row violates row-level security policy for table`
+   - Solution: Use admin client or update RLS policies
+
+2. **Database Function Errors**
+   - Error: `column must appear in the GROUP BY clause or be used in an aggregate function`
+   - Solution: Fix GROUP BY clauses to include all selected columns
+
+3. **Environment Variable Issues**
+   - Error: `supabaseUrl is required` or similar initialization errors
+   - Solution: Ensure all required env variables are properly loaded
+
+4. **Authentication Issues**
+   - Error: `JWT expired` or `Invalid JWT`
+   - Solution: For testing APIs requiring auth, create a test session or mock authentication
+
+By following these guidelines, we can create more robust tests that avoid common pitfalls and better simulate real-world usage of our application.

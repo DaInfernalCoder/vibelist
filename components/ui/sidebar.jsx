@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/libs/supabase/client";
+import Image from "next/image";
 
 const sidebarVariants = {
   open: {
@@ -270,9 +271,11 @@ export function SessionNavBar() {
                         className="flex h-8 w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary">
                         <Avatar className="size-4">
                           {user?.user_metadata?.avatar_url ? (
-                            <img
+                            <Image
                               src={user.user_metadata.avatar_url}
                               alt="Profile"
+                              width={16}
+                              height={16}
                               className="w-full h-full object-cover rounded-full"
                               referrerPolicy="no-referrer"
                             />
@@ -296,9 +299,11 @@ export function SessionNavBar() {
                       <div className="flex flex-row items-center gap-2 p-2">
                         <Avatar className="size-6">
                           {user?.user_metadata?.avatar_url ? (
-                            <img 
+                            <Image 
                               src={user.user_metadata.avatar_url} 
                               alt="Profile"
+                              width={24}
+                              height={24}
                               className="w-full h-full object-cover rounded-full"
                               referrerPolicy="no-referrer"
                             />

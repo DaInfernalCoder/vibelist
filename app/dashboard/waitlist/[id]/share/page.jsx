@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast";
-import { Copy, ExternalLink, Facebook, Linkedin, Twitter } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Copy, ExternalLink, Facebook, Linkedin, Twitter, Download, QrCode, Image as ImageIcon } from "lucide-react";
 import { CircleCheck } from "lucide-react";
+import { getWaitlistUrl, getSocialShareUrls } from "@/lib/url-utils";
+import QRCode from 'qrcode';
+import * as htmlToImage from 'html-to-image';
 
 export default function WaitlistSharePage() {
   const { id } = useParams();
@@ -18,6 +21,12 @@ export default function WaitlistSharePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [showShareImage, setShowShareImage] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const qrCanvasRef = useRef(null);
+  const shareImageRef = useRef(null);
   
   // Fetch waitlist data
   useEffect(() => {
@@ -46,8 +55,135 @@ export default function WaitlistSharePage() {
   
   // Generate the waitlist URL
   const waitlistUrl = waitlist?.url_slug 
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/waitlist/${waitlist.url_slug}`
+    ? getWaitlistUrl(waitlist.url_slug)
     : "";
+  
+  // Generate QR code when waitlist URL is available
+  useEffect(() => {
+    if (waitlistUrl) {
+      generateQRCode();
+    }
+  }, [waitlistUrl]);
+
+  // Generate QR code
+  const generateQRCode = async () => {
+    try {
+      if (!waitlistUrl) return;
+      
+      // Generate QR code as data URL
+      const dataUrl = await QRCode.toDataURL(waitlistUrl, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
+        }
+      });
+      
+      setQrCodeUrl(dataUrl);
+      
+      // Also render to canvas for better quality when downloading
+      if (qrCanvasRef.current) {
+        await QRCode.toCanvas(qrCanvasRef.current, waitlistUrl, {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#ffffff'
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error generating QR code:", err);
+      toast({
+        title: "QR Code Error",
+        description: "Could not generate QR code",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Download QR code image
+  const downloadQRCode = () => {
+    try {
+      if (!qrCanvasRef.current) return;
+      
+      // Convert canvas to data URL
+      const dataUrl = qrCanvasRef.current.toDataURL('image/png');
+      
+      // Create download link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = dataUrl;
+      downloadLink.download = `${waitlist.name || 'waitlist'}-qrcode.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      
+      toast({
+        title: "Download Started",
+        description: "QR code image download started",
+        variant: "success",
+      });
+    } catch (err) {
+      console.error("Error downloading QR code:", err);
+      toast({
+        title: "Download Failed",
+        description: "Could not download QR code image",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Generate shareable image
+  const generateShareImage = async () => {
+    if (!shareImageRef.current) return;
+    
+    setIsGeneratingImage(true);
+    
+    try {
+      const dataUrl = await htmlToImage.toPng(shareImageRef.current, {
+        quality: 0.95,
+        backgroundColor: '#ffffff',
+        width: 1200,
+        height: 630,
+      });
+      
+      // Create download link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = dataUrl;
+      downloadLink.download = `${waitlist.name || 'waitlist'}-share.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      
+      toast({
+        title: "Image Downloaded",
+        description: "Shareable image has been downloaded",
+        variant: "success",
+      });
+    } catch (err) {
+      console.error("Error generating share image:", err);
+      toast({
+        title: "Image Generation Failed",
+        description: "Could not generate shareable image",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  // Toggle QR code display
+  const toggleQrCode = () => {
+    setShowQrCode(!showQrCode);
+    if (showShareImage) setShowShareImage(false);
+  };
+  
+  // Toggle share image display
+  const toggleShareImage = () => {
+    setShowShareImage(!showShareImage);
+    if (showQrCode) setShowQrCode(false);
+  };
   
   // Copy to clipboard function
   const copyToClipboard = async () => {
@@ -73,18 +209,30 @@ export default function WaitlistSharePage() {
   
   // Social media sharing functions
   const shareOnTwitter = () => {
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join my waitlist: ${waitlist.name}`)}&url=${encodeURIComponent(waitlistUrl)}`;
-    window.open(twitterUrl, '_blank');
+    const shareUrls = getSocialShareUrls({
+      url: waitlistUrl,
+      title: waitlist?.name || 'Join our waitlist',
+      description: `Join my waitlist: ${waitlist?.name || 'New waitlist'}`
+    });
+    window.open(shareUrls.twitter, '_blank');
   };
   
   const shareOnFacebook = () => {
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(waitlistUrl)}`;
-    window.open(facebookUrl, '_blank');
+    const shareUrls = getSocialShareUrls({
+      url: waitlistUrl,
+      title: waitlist?.name || 'Join our waitlist',
+      description: waitlist?.description || 'Sign up to get early access'
+    });
+    window.open(shareUrls.facebook, '_blank');
   };
   
   const shareOnLinkedIn = () => {
-    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(waitlistUrl)}`;
-    window.open(linkedinUrl, '_blank');
+    const shareUrls = getSocialShareUrls({
+      url: waitlistUrl,
+      title: waitlist?.name || 'Join our waitlist',
+      description: waitlist?.description || 'Sign up to get early access'
+    });
+    window.open(shareUrls.linkedin, '_blank');
   };
   
   // Open waitlist preview
@@ -144,7 +292,7 @@ export default function WaitlistSharePage() {
           
           <div>
             <h3 className="text-sm font-medium mb-2">Share on social media</h3>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button onClick={shareOnTwitter} variant="outline" size="sm">
                 <Twitter className="h-4 w-4 mr-2" />
                 Twitter
@@ -157,8 +305,111 @@ export default function WaitlistSharePage() {
                 <Linkedin className="h-4 w-4 mr-2" />
                 LinkedIn
               </Button>
+              <Button onClick={toggleQrCode} variant="outline" size="sm">
+                <QrCode className="h-4 w-4 mr-2" />
+                QR Code
+              </Button>
+              <Button onClick={toggleShareImage} variant="outline" size="sm">
+                <ImageIcon className="h-4 w-4 mr-2" />
+                Share Image
+              </Button>
             </div>
           </div>
+          
+          {showQrCode && (
+            <div className="bg-muted p-4 rounded-lg">
+              <h3 className="text-sm font-medium mb-3">QR Code</h3>
+              <div className="flex flex-col items-center gap-3">
+                {qrCodeUrl ? (
+                  <>
+                    <div className="bg-white p-3 rounded-md">
+                      <img 
+                        src={qrCodeUrl} 
+                        alt="Waitlist QR Code" 
+                        className="w-48 h-48"
+                      />
+                      <canvas ref={qrCanvasRef} className="hidden" width="300" height="300"></canvas>
+                    </div>
+                    <Button onClick={downloadQRCode} variant="secondary" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download QR Code
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center mt-1">
+                      Use this QR code on printed materials or displays to let people easily join your waitlist
+                    </p>
+                  </>
+                ) : (
+                  <div className="w-48 h-48 bg-muted animate-pulse flex items-center justify-center">
+                    <span className="text-sm text-muted-foreground">Generating QR code...</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {showShareImage && (
+            <div className="bg-muted p-4 rounded-lg">
+              <h3 className="text-sm font-medium mb-3">Shareable Image</h3>
+              <div className="flex flex-col items-center gap-3">
+                <div 
+                  ref={shareImageRef} 
+                  className="relative w-full aspect-[1200/630] bg-white p-8 rounded-md overflow-hidden shadow-sm"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50"></div>
+                  <div className="relative z-10 flex flex-col h-full justify-between">
+                    <div className="flex flex-col space-y-4">
+                      <div className="text-3xl font-bold text-blue-900">{waitlist.name}</div>
+                      <div className="text-lg text-gray-700">
+                        {waitlist.description || "Join our exclusive waitlist"}
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col space-y-6">
+                      <div className="flex items-center bg-white p-3 rounded-lg shadow-sm">
+                        {qrCodeUrl && (
+                          <img 
+                            src={qrCodeUrl} 
+                            alt="QR Code" 
+                            className="w-20 h-20 mr-3"
+                          />
+                        )}
+                        <div>
+                          <div className="text-sm font-medium text-gray-700 mb-1">Scan to join the waitlist</div>
+                          <div className="text-xs text-gray-500 break-all">{waitlistUrl}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-sm text-right text-gray-500">
+                        Powered by Vibelist
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={generateShareImage} 
+                  variant="secondary" 
+                  size="sm"
+                  disabled={isGeneratingImage}
+                >
+                  {isGeneratingImage ? (
+                    <>
+                      <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Image
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-1">
+                  Download this image to share on social media or in marketing materials
+                </p>
+              </div>
+            </div>
+          )}
           
           <div className="flex gap-2 pt-4 border-t">
             <Button onClick={openPreview} variant="outline">

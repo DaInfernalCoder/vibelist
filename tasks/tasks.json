@@ -1380,6 +1380,142 @@
           "parentTaskId": 19
         }
       ]
+    },
+    {
+      "id": 20,
+      "title": "Implement Waitlist URL Sharing with Dynamic Content and Social Features",
+      "description": "Create a system for generating and sharing unique waitlist URLs that dynamically display waitlist information fetched from Supabase, with copy-to-clipboard and social sharing functionality.",
+      "details": "Implement a complete waitlist URL sharing system that connects to the vibe-list.com domain with the following components:\n\n1. **Slug Generation**:\n   - Create a function that generates a unique, human-readable slug based on the waitlist project name\n   - Slugs should be URL-safe (lowercase, no special characters except hyphens)\n   - Add validation to ensure slugs are unique in the database\n   - Store the slug in the waitlists table\n\n2. **Dynamic Waitlist Page**:\n   - Create app/waitlist/[slug]/page.jsx to render the public-facing waitlist\n   - The page should fetch waitlist data using the API endpoint\n   - Apply styling based on the customization settings from the database\n   - Include a signup form that connects to the lead API endpoint\n   - Add proper SEO metadata based on waitlist information\n\n3. **API Endpoints**:\n   - Implement app/api/waitlists/slug/[slug]/route.js to fetch waitlist data by slug\n   - This endpoint should only return data for waitlists marked as \"published\"\n   - Return a 404 response for unpublished waitlists or invalid slugs\n   - Update app/api/lead/route.js to save signups to waitlist_signups table with the correct waitlist_id\n\n4. **Sharing Features**:\n   - After publishing a waitlist, display the full URL (https://vibe-list.com/waitlist/[slug]) to the user\n   - Implement a copy-to-clipboard button using the Clipboard API\n   - Add social sharing buttons for Twitter, Facebook, LinkedIn, and email\n   - Include visual feedback when the URL is copied\n\n5. **Database Updates**:\n   - Ensure the waitlists table has a published boolean field\n   - Add a slug field to the waitlists table\n   - Update any relevant database triggers or functions\n\nThe implementation should handle edge cases such as duplicate slugs, unpublished waitlists, and invalid URLs gracefully.",
+      "testStrategy": "1. **Slug Generation Testing**:\n   - Test that slugs are properly generated from various project names (including those with special characters)\n   - Verify slugs are unique when multiple waitlists have similar names\n   - Confirm slugs are URL-safe and follow the expected format\n\n2. **API Endpoint Testing**:\n   - Test the slug API endpoint with valid published waitlist slugs and verify correct data is returned\n   - Test with unpublished waitlist slugs and verify a 404 response\n   - Test with non-existent slugs and verify a 404 response\n   - Test the lead API with various input data and verify correct storage in the database\n\n3. **UI Testing**:\n   - Verify the waitlist page correctly renders with the styling from the database\n   - Test the signup form submits correctly and shows appropriate success/error messages\n   - Verify the copy-to-clipboard functionality works across different browsers\n   - Test social sharing buttons to ensure they generate correct sharing links\n\n4. **Integration Testing**:\n   - Create a new waitlist, publish it, and verify the shareable link is displayed\n   - Use the generated link to access the waitlist page and verify all content is displayed correctly\n   - Submit a signup through the public page and verify it's recorded in the database with the correct waitlist_id\n   - Test the entire flow from waitlist creation to receiving signups\n\n5. **Cross-browser Testing**:\n   - Verify all functionality works correctly in Chrome, Firefox, Safari, and Edge\n   - Test on mobile devices to ensure responsive design and functionality",
+      "status": "pending",
+      "dependencies": [
+        3,
+        5
+      ],
+      "priority": "high"
+    },
+    {
+      "id": 21,
+      "title": "Implement Complete Waitlist URL Sharing System",
+      "description": "Finalize the waitlist URL system to enable users to create, customize, and share functional waitlist URLs using the domain from NEXT_PUBLIC_URL environment variable, with proper lead capture functionality.",
+      "details": "This task requires completing several interconnected components to create a seamless waitlist URL sharing system:\n\n1. **Update the /api/lead API route:**\n   - Modify the route to save waitlist signups to the `waitlist_signups` table\n   - Ensure it captures email, name, and any custom fields configured for the waitlist\n   - Add validation to prevent duplicate signups\n   - Return appropriate success/error responses\n\n2. **Enhance the public waitlist page (app/waitlist/[slug]/page.jsx):**\n   - Fetch and apply the waitlist's customization settings (colors, logo, header text, etc.)\n   - Implement responsive design for mobile and desktop views\n   - Create a form component that dynamically renders custom fields based on waitlist configuration\n   - Add form validation with appropriate error messages\n   - Implement success/confirmation state after signup\n   - Add social sharing buttons for visitors to share the waitlist\n\n3. **Add sharing functionality to the dashboard:**\n   - Create a new UI component showing the published URL after a waitlist is published\n   - Implement a copy-to-clipboard button with visual feedback\n   - Add social sharing buttons for major platforms (Twitter, Facebook, LinkedIn)\n   - Display waitlist signup statistics if available\n   - Include a QR code generator for the waitlist URL\n\n4. **Integration and user experience:**\n   - Ensure consistent styling between dashboard and public pages\n   - Add appropriate loading states during API calls\n   - Implement error handling for all network requests\n   - Create smooth transitions between states (unpublished → published → shared)\n   - Add analytics tracking for waitlist views and conversion rates\n\n5. **Environment-based URL configuration:**\n   - Use `process.env.NEXT_PUBLIC_URL` for all URL generation instead of hardcoded domains\n   - Implement fallback mechanism (window.location.origin) for client components when environment variable is not available\n   - Create URL utility functions to centralize domain logic and ensure consistent URL formatting\n   - Ensure all sharing links, redirects, and API calls use the configured domain\n   - Test URL generation across different environments (development, staging, production)\n   - IMPORTANT: Do not hardcode any domain names anywhere in the code\n\nUse the existing slug generation function from the publish API and the database schema that already includes the url_slug in the waitlists table.",
+      "testStrategy": "Testing should verify all components of the waitlist URL system work correctly:\n\n1. **API Testing:**\n   - Test the /api/lead endpoint with valid data and verify it creates entries in the waitlist_signups table\n   - Test with invalid data (missing required fields, malformed email) and verify appropriate error responses\n   - Test duplicate signup prevention by submitting the same email twice\n   - Verify the API correctly associates signups with the correct waitlist via the slug\n\n2. **Public Waitlist Page Testing:**\n   - Test page rendering with various customization settings (different colors, logos, text)\n   - Verify the page loads correctly with valid and invalid slugs\n   - Test form submission with valid and invalid data\n   - Verify custom fields render and validate correctly\n   - Test responsive design on multiple device sizes\n   - Verify success state appears after successful signup\n\n3. **Dashboard Sharing Testing:**\n   - Verify the published URL appears correctly after publishing\n   - Test the copy-to-clipboard functionality\n   - Verify the copied URL works when pasted in a new browser tab\n   - Test social sharing buttons generate correct sharing links\n   - Verify QR code correctly encodes the waitlist URL\n\n4. **Environment Variable Testing:**\n   - Test URL generation with different values of NEXT_PUBLIC_URL\n   - Verify fallback mechanism works when environment variable is not set\n   - Test across different environments (development, staging, production)\n   - Ensure all generated URLs use the correct domain from the environment variable\n   - Verify social sharing links contain properly formatted URLs with the correct domain\n   - Confirm no hardcoded domain names exist in the codebase\n   - Test URL utility functions with various input scenarios\n\n5. **End-to-End Testing:**\n   - Create a new waitlist, publish it, and verify the URL is generated using the correct domain\n   - Visit the public URL and submit a signup\n   - Verify the signup appears in the database and dashboard\n   - Test the entire flow on different browsers (Chrome, Firefox, Safari)\n   - Verify all components work together seamlessly\n   - Test with different NEXT_PUBLIC_URL values to ensure portability\n   - Verify the application works correctly when deployed to different domains\n\nManual testing should be performed on multiple devices and browsers to ensure cross-platform compatibility.",
+      "status": "pending",
+      "dependencies": [
+        18
+      ],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Update the /api/lead API Route for Waitlist Signups",
+          "description": "Modify the API route to properly handle waitlist signups, including validation, data storage, and appropriate responses.",
+          "dependencies": [],
+          "details": "Implementation details:\n1. Modify the /api/lead route to accept POST requests with email, name, and custom fields\n2. Add validation logic to check for required fields and validate email format\n3. Implement duplicate signup prevention by checking existing entries in waitlist_signups table\n4. Create database queries to save valid submissions to the waitlist_signups table with proper relationships\n5. Structure response objects for success (200) and various error cases (400 for validation errors, 409 for duplicates)\n6. Add logging for debugging and monitoring purposes\n\nTesting approach:\n- Unit test validation logic with various input combinations\n- Test duplicate prevention with sequential identical submissions\n- Verify database entries are created correctly\n- Confirm appropriate error responses for invalid submissions",
+          "status": "done",
+          "parentTaskId": 21
+        },
+        {
+          "id": 3,
+          "title": "Implement Social Sharing Features for Public Waitlist",
+          "description": "Add social sharing capabilities to the public waitlist page to allow visitors to share the waitlist on social platforms.",
+          "dependencies": [],
+          "details": "Implementation details:\n1. Add social sharing buttons (Twitter, Facebook, LinkedIn) to the public waitlist page\n2. Configure share buttons with appropriate metadata (title, description, URL)\n3. Create share message templates that include the waitlist name and URL\n4. Implement click tracking for share button interactions\n5. Add Open Graph and Twitter Card meta tags to the page for better social media previews\n6. Ensure sharing works correctly on mobile devices\n\nTesting approach:\n- Verify each social sharing button opens the correct sharing dialog\n- Test share functionality across different browsers\n- Confirm meta tags are correctly rendered for social previews\n- Test sharing on mobile devices\n- Verify tracking events are fired when share buttons are clicked",
+          "status": "done",
+          "parentTaskId": 21
+        },
+        {
+          "id": 4,
+          "title": "Create Dashboard Waitlist Sharing Interface",
+          "description": "Develop a user interface in the dashboard for users to manage and share their published waitlist URLs.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation details:\n1. Create a new UI component in the dashboard to display the published waitlist URL\n2. Implement a copy-to-clipboard button with visual feedback\n3. Add social sharing buttons for major platforms that pre-populate share content\n5. Design and implement a waitlist statistics section showing signup counts and conversion rates inside the analytics page\n6. Add a visual indicator showing the waitlist's published/unpublished status\n7. Create a preview button that opens the public waitlist page in a new tab\n\nTesting approach:\n- Test copy-to-clipboard functionality across browsers\n- Verify QR code generation and scanning functionality\n- Test social sharing buttons open correct dialogs with pre-populated content\n- Confirm statistics display correctly with various data scenarios\n- Verify all interactive elements have appropriate hover/focus states\n\n<info added on 2025-05-21T16:34:01.057Z>\nImplementation details for QR code and shareable image functionality:\n\n8. Integrate the `qrcode` library to generate QR codes for waitlist URLs\n9. Add a QR code display component with download functionality for PNG export\n10. Implement the `html-to-image` library to create shareable waitlist images\n11. Design a shareable image template (1200x630px) containing:\n   - Waitlist name and description\n   - Embedded QR code\n   - Waitlist URL in text form\n   - Gradient background with Vibelist branding\n12. Add image generation controls with appropriate loading states\n13. Implement download handlers for both QR codes and shareable images\n\nTesting approach additions:\n- Verify QR code scanning works across multiple device types\n- Test image generation with various waitlist content lengths\n- Confirm downloaded images maintain quality and dimensions\n- Test accessibility of QR and image generation features\n</info added on 2025-05-21T16:34:01.057Z>",
+          "status": "done",
+          "parentTaskId": 21
+        },
+        {
+          "id": 6,
+          "title": "Implement Environment-Based URL Configuration",
+          "description": "Update the system to use NEXT_PUBLIC_URL environment variable for all URL generation instead of hardcoded domains to ensure portability across environments.",
+          "dependencies": [],
+          "details": "Implementation details:\n1. Create a utility function to generate URLs using process.env.NEXT_PUBLIC_URL\n2. Implement a fallback mechanism using window.location.origin for client components when the environment variable is not available\n3. Update all URL generation throughout the application to use this utility function\n4. Modify sharing components to use the environment-based URL generation\n5. Update Open Graph and Twitter Card meta tags to use the dynamic domain\n6. Ensure all API calls and redirects use the configured domain\n7. Add environment variable validation during application startup\n8. Document the URL configuration approach in the codebase\n9. Scan the entire codebase to identify and remove any hardcoded domain references\n10. Create a centralized URL utility module to handle all domain-related logic\n\nTesting approach:\n- Test URL generation with different values of NEXT_PUBLIC_URL\n- Verify fallback mechanism works correctly in client components\n- Test across different environments (development, staging, production)\n- Ensure all generated URLs use the correct domain from the environment variable\n- Verify social sharing links contain properly formatted URLs with the correct domain\n- Test with missing environment variable to ensure graceful fallback\n- Confirm no hardcoded domain names exist in the codebase\n- Verify URL utility functions handle edge cases properly",
+          "status": "done",
+          "parentTaskId": 21
+        },
+        {
+          "id": 7,
+          "title": "Implement Responsive Layout for Public Waitlist Page",
+          "description": "Create a responsive layout for the public waitlist page that adapts to different screen sizes while maintaining usability and visual appeal.",
+          "details": "Implementation details:\n1. Modify the existing app/waitlist/[slug]/page.jsx component to use a mobile-first responsive design approach\n2. Create a responsive container with appropriate width constraints and padding for different device sizes\n3. Implement responsive typography that scales appropriately across devices\n4. Design and implement a responsive header section with logo and waitlist title\n5. Create a responsive card component to contain the main waitlist content and signup form\n6. Implement responsive spacing using relative units (rem, em, vh, vw) instead of fixed pixel values\n7. Use CSS Grid and/or Flexbox for responsive layouts that reflow based on screen size\n8. Add appropriate media queries for key breakpoints (mobile, tablet, desktop)\n9. Ensure touch targets are appropriately sized for mobile devices (minimum 44x44px)\n10. Test the layout on various screen sizes and orientations\n\nTesting approach:\n- Test the responsive design on various screen sizes and device types\n- Verify that all content is accessible and readable on small screens\n- Confirm that interactive elements remain usable on touch devices\n- Ensure that the layout adapts smoothly between breakpoints\n- Check for layout issues at unusual screen dimensions and orientations\n- Validate that there are no horizontal scrollbars on mobile views",
+          "status": "pending",
+          "dependencies": [
+            1
+          ],
+          "parentTaskId": 21
+        },
+        {
+          "id": 8,
+          "title": "Implement Dynamic Form Generation for Waitlist Signup",
+          "description": "Create a dynamic form component that renders input fields based on waitlist configuration, with proper validation and error handling.",
+          "details": "Implementation details:\n1. Create a reusable form component that accepts a configuration object to determine which fields to render\n2. Implement client-side form state management using React's useState or a form library (like react-hook-form)\n3. Build dynamic field rendering logic that creates appropriate input components based on field type (text, email, checkbox, etc.)\n4. Add validation schema generation that adapts to the dynamic fields configuration\n5. Implement real-time validation feedback for each field with appropriate error messages\n6. Create required field indicators and help text support for custom fields\n7. Add keyboard navigation and accessibility attributes (aria-invalid, aria-describedby, etc.)\n8. Implement form submission handling with loading state and error reporting\n9. Create a submission success state with appropriate visual feedback\n10. Add form analytics tracking to monitor conversion rates and identify problematic fields\n\nTesting approach:\n- Test form rendering with various field configurations\n- Verify validation works correctly for different field types\n- Test keyboard navigation and tab order through the form\n- Check form accessibility using screen readers and keyboard-only navigation\n- Test form submission with valid and invalid data\n- Verify error messages display correctly for each validation failure\n- Test form reset and resubmission scenarios\n- Ensure success state displays correctly after successful submission",
+          "status": "pending",
+          "dependencies": [
+            7
+          ],
+          "parentTaskId": 21
+        },
+        {
+          "id": 9,
+          "title": "Apply Custom Styling Based on Waitlist Configuration",
+          "description": "Implement the application of custom styling from waitlist configuration settings to the public waitlist page.",
+          "details": "Implementation details:\n1. Modify the waitlist page to extract theming information from the API response (theme_color, background_color, text_color, etc.)\n2. Create a theme context or styling mechanism to apply these custom styles to the appropriate components\n3. Implement inline style application for dynamically customized elements\n4. Create CSS custom properties (variables) based on the theme settings for consistent application throughout the page\n5. Ensure proper color contrast ratios for accessibility, even with custom colors\n6. Add graceful fallbacks for missing style properties\n7. Implement custom font loading and application if specified in the configuration\n8. Create smooth transitions when applying custom styles to prevent visual flicker\n9. Handle edge cases like very light or dark custom colors with appropriate text contrast adjustment\n10. Add preview/sampling of the custom styles in the dashboard interface\n\nTesting approach:\n- Test styling application with various color schemes and configurations\n- Verify color contrast meets WCAG accessibility guidelines\n- Test with missing or incomplete styling configurations\n- Check performance impact of dynamic styling\n- Ensure consistent styling across different browsers\n- Verify custom fonts load and apply correctly\n- Test edge cases like extremely light or dark theme colors\n- Confirm styling works correctly on high-contrast and reduced-motion settings",
+          "status": "pending",
+          "dependencies": [
+            7
+          ],
+          "parentTaskId": 21
+        },
+        {
+          "id": 10,
+          "title": "Add Loading, Success, and Error States to Waitlist Page",
+          "description": "Implement proper UI states for loading, success, and error scenarios in the public waitlist page to provide clear feedback to users.",
+          "details": "Implementation details:\n1. Create loading state components with appropriate animations (spinners, skeleton screens, or progress indicators)\n2. Implement loading states for initial page load while fetching waitlist data\n3. Add loading indicators during form submission to prevent multiple submissions\n4. Create success state UI with clear confirmation message and next steps (if any)\n5. Implement error states for various failure scenarios:\n   - Waitlist not found (invalid slug)\n   - Waitlist exists but is not published\n   - Network errors during data fetching\n   - Form validation errors\n   - Submission errors (duplicate email, server issues)\n6. Design and implement appropriate error messages for each error scenario\n7. Add retry mechanisms where appropriate (network errors, temporary server issues)\n8. Implement transition animations between different states for a smooth user experience\n9. Add error reporting/logging for monitoring and debugging purposes\n10. Ensure all states are accessible and provide appropriate ARIA attributes\n\nTesting approach:\n- Test each state (loading, success, error) with corresponding scenarios\n- Verify loading indicators display during network operations\n- Confirm success state appears after successful operations\n- Test error handling by triggering various error conditions\n- Verify appropriate error messages display for each error type\n- Test screen reader announcements for state changes\n- Ensure focus management works correctly after state transitions\n- Confirm retry mechanisms function as expected\n- Test with slow network connections to validate loading state behavior",
+          "status": "pending",
+          "dependencies": [
+            8,
+            9
+          ],
+          "parentTaskId": 21
+        },
+        {
+          "id": 11,
+          "title": "Implement Performance Optimization and SEO",
+          "description": "Optimize the public waitlist page for performance and search engine visibility to enhance user experience and discoverability.",
+          "details": "Implementation details:\n1. Implement dynamic metadata generation based on waitlist information:\n   - Page title using waitlist name\n   - Meta description using waitlist description\n   - Open Graph and Twitter Card meta tags for social sharing preview\n   - Canonical URL tag for SEO\n2. Add structured data (JSON-LD) where appropriate to enhance search engine understanding\n3. Optimize image loading with:\n   - Appropriate image formats (WebP with fallbacks)\n   - Responsive images using srcset and sizes attributes\n   - Lazy loading for below-the-fold images\n4. Implement performance optimizations:\n   - Component code splitting where beneficial\n   - Efficient state management to prevent unnecessary re-renders\n   - Memoization of expensive calculations\n   - Resource prioritization (critical CSS, deferred non-critical JS)\n5. Add core web vitals improvements:\n   - Optimize LCP (Largest Contentful Paint) by prioritizing main content\n   - Improve CLS (Cumulative Layout Shift) by reserving space for dynamic content\n   - Enhance FID (First Input Delay) by minimizing main thread blocking\n6. Create a sitemap entry for published waitlists (if applicable)\n7. Implement server-side rendering (SSR) or static site generation (SSG) as appropriate for the waitlist page\n8. Add analytics event tracking for key user interactions\n9. Optimize time-to-interactive for the form component\n10. Add appropriate caching strategies for waitlist data\n\nTesting approach:\n- Run Lighthouse audits to benchmark performance, accessibility, and SEO scores\n- Test page load performance on various devices and connection speeds\n- Verify meta tags render correctly and preview properly on social platforms\n- Check Core Web Vitals metrics in lab and field environments\n- Ensure SEO elements are correctly implemented\n- Test that analytics events are properly tracked\n- Verify image optimization functions as expected\n- Measure and validate improvements in key performance metrics",
+          "status": "pending",
+          "dependencies": [
+            8,
+            9
+          ],
+          "parentTaskId": 21
+        },
+        {
+          "id": 12,
+          "title": "Create Analytics Tracking System for Waitlist Performance",
+          "description": "Implement comprehensive analytics tracking for waitlist pages to measure performance, conversions, and user behavior.",
+          "details": "Implementation details:\n1. Set up analytics events for key user interactions on the waitlist page:\n   - Page views with waitlist ID and slug\n   - Form interactions (field focus, validation errors)\n   - Form submissions (successful and failed)\n   - Form conversion rate (views to submissions)\n   - Button clicks and user engagement\n   - Error occurrences and types\n2. Implement waitlist performance dashboard in the admin interface:\n   - Total views counter\n   - Signup conversion rate visualization\n   - Time-based trends (daily, weekly, monthly views and signups)\n   - Traffic source tracking (referrer analysis)\n   - User device and browser statistics\n3. Create custom events for:\n   - Time to first interaction\n   - Form completion time\n   - Scroll depth on the page\n   - Exit intent tracking\n4. Implement A/B testing infrastructure for:\n   - Different form layouts\n   - Call-to-action variations\n   - Color scheme effectiveness\n5. Add real-time tracking for newly published waitlists\n6. Create automated reports/notifications for:\n   - Significant traffic spikes\n   - Conversion rate changes\n   - Error rate increases\n7. Implement user journey tracking across the waitlist funnel\n8. Add heatmap capability or integration for user behavior analysis\n9. Create data visualization components for analytics insights\n10. Ensure all tracking is privacy-compliant with appropriate consent mechanisms\n\nTesting approach:\n- Verify all analytics events are properly triggered and recorded\n- Test tracking across different browsers and devices\n- Validate data accuracy in the analytics dashboard\n- Ensure privacy compliance with relevant regulations\n- Test that consent mechanisms work correctly\n- Verify conversion tracking accuracy with test submissions\n- Check that custom events capture the intended metrics\n- Test A/B testing functionality with sample scenarios",
+          "status": "pending",
+          "dependencies": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "parentTaskId": 21
+        }
+      ]
     }
   ],
   "metadata": {

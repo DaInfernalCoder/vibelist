@@ -22,7 +22,7 @@ const fetch = (...args) =>
 require("dotenv").config({ path: path.resolve(process.cwd(), ".env.local") });
 
 // Set base URL for API requests
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
 console.log("Test environment:");
 console.log("- Base URL:", BASE_URL);
