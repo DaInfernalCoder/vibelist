@@ -1,0 +1,16 @@
+{
+  "name": "vibelist-tests",
+  "version": "1.0.0",
+  "description": "Tests for Vibelist application",
+  "private": true,
+  "scripts": {
+    "test:customization": "node waitlist/customization.test.js",
+    "test:visual": "node waitlist/visual-test.js",
+    "test": "npm run test:customization && npm run test:visual"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1",
+    "puppeteer": "^21.5.2"
+  }
+}

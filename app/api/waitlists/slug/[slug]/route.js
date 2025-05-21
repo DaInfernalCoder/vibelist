@@ -1,13 +1,48 @@
-// app/api/waitlists/slug/[slug]/route.js
-import { createClient } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+// Generate a unique request ID for API tracing
+const generateRequestId = () => {
+  return `api_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+};
+
+// Helper to convert snake_case to camelCase
+const snakeToCamel = (str) =>
+  str.replace(/([-_][a-z])/g, (group) =>
+    group.toUpperCase().replace("-", "").replace("_", "")
+  );
+
 export async function GET(request, { params }) {
-  const supabase = createClient({ cookies });
+  const requestId = generateRequestId();
+  console.log(`[${requestId}] API: GET /api/waitlists/slug/${params.slug}`);
+
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch (e) {
+            console.error(`[${requestId}] Error setting cookies:`, e);
+          }
+        },
+      },
+    }
+  );
+
   const { slug } = params;
 
   if (!slug) {
+    console.warn(`[${requestId}] Missing slug parameter`);
     return NextResponse.json(
       { error: "Waitlist slug is required" },
       { status: 400 }
@@ -15,7 +50,8 @@ export async function GET(request, { params }) {
   }
 
   try {
-    // Fetch the waitlist data by slug, and join with customization_settings
+    console.log(`[${requestId}] Fetching waitlist data for slug: ${slug}`);
+
     const { data: waitlistData, error } = await supabase
       .from("waitlists")
       .select(
@@ -38,13 +74,12 @@ export async function GET(request, { params }) {
       `
       )
       .eq("url_slug", slug)
-      .eq("published", true) // Ensure only published waitlists are fetched
+      .eq("published", true)
       .single();
 
     if (error) {
-      console.error("Error fetching waitlist by slug from DB:", error.message);
+      console.error(`[${requestId}] Database error:`, error.message);
       if (error.code === "PGRST116") {
-        // PGRST116: "JSON object requested, multiple (or no) rows returned"
         return NextResponse.json(
           { error: "Waitlist not found or is not published" },
           { status: 404 }
@@ -57,59 +92,75 @@ export async function GET(request, { params }) {
     }
 
     if (!waitlistData) {
+      console.warn(`[${requestId}] No waitlist found for slug: ${slug}`);
       return NextResponse.json(
         { error: "Waitlist not found or is not published" },
         { status: 404 }
       );
     }
 
-    // Process customization settings
-    // The Supabase JS client, when using a foreign key relationship like `customization_settings(*)`
-    // and it's a one-to-one (enforced by UNIQUE(waitlist_id) on customization_settings),
-    // should return `customization_settings` as an object, not an array.
-    // If it were an array, `waitlistData.customization_settings[0]` would be needed.
-    const settings = waitlistData.customization_settings || {};
+    console.log(`[${requestId}] Waitlist found:`, {
+      id: waitlistData.id,
+      name: waitlistData.name,
+      hasCustomizationSettings: !!waitlistData.customization_settings,
+    });
 
-    const template_data_for_public_page = {
-      ...(settings.custom_fields || {}), // Spread fields from JSONB custom_fields first
-    };
+    const settingsFromDB = waitlistData.customization_settings || {};
+    const customFieldsFromJSONB = settingsFromDB.custom_fields || {};
 
-    // Explicitly add known direct columns from customization_settings, potentially overriding if they were also in custom_fields
-    if (settings.theme_color !== undefined)
-      template_data_for_public_page.theme_color = settings.theme_color;
-    if (settings.logo_url !== undefined)
-      template_data_for_public_page.logo_url = settings.logo_url;
-    if (settings.redirect_url !== undefined)
-      template_data_for_public_page.redirect_url = settings.redirect_url;
-    if (settings.email_template !== undefined)
-      template_data_for_public_page.email_template = settings.email_template;
-    if (settings.show_social_proof !== undefined)
-      template_data_for_public_page.show_social_proof =
-        settings.show_social_proof;
-    if (settings.show_referral !== undefined)
-      template_data_for_public_page.show_referral = settings.show_referral;
+    const template_data_for_public_page = {};
 
-    // Construct the public data
+    // 1. Add all direct properties from settingsFromDB, converting keys to camelCase
+    for (const key in settingsFromDB) {
+      if (
+        Object.hasOwnProperty.call(settingsFromDB, key) &&
+        ![
+          "id",
+          "waitlist_id",
+          "created_at",
+          "updated_at",
+          "custom_fields",
+        ].includes(key) &&
+        settingsFromDB[key] !== null &&
+        settingsFromDB[key] !== undefined
+      ) {
+        template_data_for_public_page[snakeToCamel(key)] = settingsFromDB[key];
+      }
+    }
+
+    // 2. Merge/override with everything from customFieldsFromJSONB (assuming these are already camelCase)
+    // This ensures custom_fields from JSONB take precedence if keys conflict.
+    Object.assign(template_data_for_public_page, customFieldsFromJSONB);
+
+    console.log(
+      `[${requestId}] Merged template_data:`,
+      Object.keys(template_data_for_public_page)
+    );
+
     const publicData = {
       id: waitlistData.id,
       name: waitlistData.name,
       description: waitlistData.description,
-      slug: waitlistData.url_slug, // Use url_slug consistently
-      template_data: template_data_for_public_page, // This contains all merged settings
+      slug: waitlistData.url_slug,
+      template_data: template_data_for_public_page,
       created_at: waitlistData.created_at,
       updated_at: waitlistData.updated_at,
     };
 
+    console.log(
+      `[${requestId}] Returning public data with template fields:`,
+      Object.keys(publicData.template_data)
+    );
+
     return NextResponse.json(publicData);
   } catch (err) {
     console.error(
-      "Unexpected error in /api/waitlists/slug/[slug]:",
+      `[${requestId}] Unexpected error in /api/waitlists/slug/[slug]:`,
       err.message,
-      "Stack:",
-      err.stack
+      err.stack // Log stack for more details
     );
     return NextResponse.json(
-      { error: "An unexpected error occurred" },
+      { error: "An unexpected error occurred", details: err.message },
       { status: 500 }
     );
   }

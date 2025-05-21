@@ -1,48 +1,53 @@
 "use client";
 
 import { useTemplate } from "../context/TemplateContext";
-import { getBorderRadiusClass, getFontWeightClass } from "../utils/templateUtils";
+import {
+  getBorderRadiusClass,
+  getFontWeightClass,
+} from "../utils/templateUtils";
 import Image from "next/image";
 
 export default function LivePreview() {
   const { template, previewSize } = useTemplate();
 
   // Adjust font sizes based on preview size
-  const titleSize = previewSize === "mobile" 
-    ? "text-3xl" 
-    : previewSize === "tablet" 
-    ? "text-4xl" 
-    : "text-5xl";
-  
-  const subtitleSize = previewSize === "mobile" 
-    ? "text-base" 
-    : previewSize === "tablet" 
-    ? "text-lg" 
-    : "text-xl";
+  const titleSize =
+    previewSize === "mobile"
+      ? "text-3xl"
+      : previewSize === "tablet"
+        ? "text-4xl"
+        : "text-5xl";
+
+  const subtitleSize =
+    previewSize === "mobile"
+      ? "text-base"
+      : previewSize === "tablet"
+        ? "text-lg"
+        : "text-xl";
 
   // Adjust layout for mobile
-  const formLayout = previewSize === "mobile" 
-    ? "flex-col" 
-    : "sm:flex-row";
+  const formLayout = previewSize === "mobile" ? "flex-col" : "sm:flex-row";
 
   return (
-    <div 
+    <div
       className="w-full h-full flex flex-col items-center justify-center overflow-auto"
       style={{ backgroundColor: template.bgColor }}
     >
-      <div className={`flex flex-col items-center text-center p-4 ${previewSize === "mobile" ? "w-full" : "max-w-3xl mx-auto"}`}>
+      <div
+        className={`flex flex-col items-center text-center p-4 ${previewSize === "mobile" ? "w-full" : "max-w-3xl mx-auto"}`}
+      >
         {/* Logo */}
         {template.showLogo && (
-          <div 
+          <div
             className="mb-8"
-            style={{ 
-              transform: `scale(${template.logoSize === '1X' ? 1 : template.logoSize === '1.5X' ? 1.5 : 2})` 
+            style={{
+              transform: `scale(${template.logoSize === "1X" ? 1 : template.logoSize === "1.5X" ? 1.5 : 2})`,
             }}
           >
             {template.logoUrl ? (
-              <Image 
-                src={template.logoUrl} 
-                alt="Logo" 
+              <Image
+                src={template.logoUrl}
+                alt="Logo"
                 width={100}
                 height={100}
                 className="max-w-[100px] max-h-[100px] object-contain"
@@ -56,7 +61,7 @@ export default function LivePreview() {
         )}
 
         {/* Title */}
-        <h1 
+        <h1
           className={`${titleSize} font-bold mb-4`}
           style={{ color: template.headingTextColor }}
         >
@@ -64,7 +69,7 @@ export default function LivePreview() {
         </h1>
 
         {/* Subtitle */}
-        <p 
+        <p
           className={`${subtitleSize} max-w-lg mb-8`}
           style={{ color: template.signupTextColor }}
         >
@@ -81,7 +86,7 @@ export default function LivePreview() {
               backgroundColor: template.inputColor,
               borderWidth: template.inputBorderWidth,
               borderColor: template.inputBorderColor,
-              color: template.signupTextColor
+              color: template.signupTextColor,
             }}
           />
           <button
@@ -89,7 +94,7 @@ export default function LivePreview() {
             style={{
               backgroundColor: template.buttonColor,
               color: template.buttonTextColor,
-              borderWidth: template.buttonBorderWidth
+              borderWidth: template.buttonBorderWidth,
             }}
           >
             {template.buttonText}
@@ -101,19 +106,24 @@ export default function LivePreview() {
           <div className="flex items-center gap-2 text-sm">
             <div className="flex -space-x-2">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-8 h-8 rounded-full bg-gray-200 border border-white"></div>
+                <div
+                  key={i}
+                  className="w-8 h-8 rounded-full bg-gray-200 border border-white"
+                ></div>
               ))}
             </div>
             <div className="flex items-center">
-              <span 
+              <span
                 className="inline-block w-2 h-2 rounded-full mr-2"
                 style={{ backgroundColor: template.pingDotColor }}
               ></span>
-              <span style={{ color: template.signupTextColor }}>Be the first to join</span>
+              <span style={{ color: template.signupTextColor }}>
+                Be the first to join
+              </span>
             </div>
           </div>
         )}
-        
+
         {/* Success Message Preview (only shown when in fullscreen preview) */}
         {false && (
           <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-md">
@@ -123,4 +133,4 @@ export default function LivePreview() {
       </div>
     </div>
   );
-} 
+}

@@ -12,15 +12,15 @@ let autosaveTimer;
 export default function TemplateProvider({ children }) {
   const { toast } = useToast();
   const supabase = createClient();
-  
+
   // Template state
   const [template, setTemplate] = useState(defaultTemplate);
-  
+
   // History for undo/redo functionality
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [savedTemplate, setSavedTemplate] = useState(null); // Tracks the last manually saved state
-  
+
   // Preview state
   const [isFullPreview, setIsFullPreview] = useState(false);
   const [previewSize, setPreviewSize] = useState("desktop");
@@ -50,33 +50,38 @@ export default function TemplateProvider({ children }) {
             // If autosave is loaded, we might not need to hit Supabase for the *initial* editor state,
             // but we still need templateId if it was previously saved to Supabase.
           } catch (parseError) {
-            console.error('Error parsing autosaved template:', parseError);
+            console.error("Error parsing autosaved template:", parseError);
             // If autosave data is corrupt, ignore it
             localStorage.removeItem("autosaved_template_draft");
           }
         }
 
         // 2. Try to load the last manually saved version from Supabase (and get templateId)
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (session) {
           try {
             const { data: supabaseData, error } = await supabase
-              .from('waitlist_templates')
-              .select('*')
-              .eq('user_id', session.user.id)
-              .order('updated_at', { ascending: false })
+              .from("waitlist_templates")
+              .select("*")
+              .eq("user_id", session.user.id)
+              .order("updated_at", { ascending: false })
               .limit(1);
 
             if (error) {
-              console.error('Error loading template from Supabase:', error);
+              console.error("Error loading template from Supabase:", error);
               toast({
                 title: "Warning",
-                description: "Could not load saved templates. Using local data only.",
+                description:
+                  "Could not load saved templates. Using local data only.",
                 variant: "destructive",
               });
             } else if (supabaseData && supabaseData.length > 0) {
               try {
-                const loadedSupabaseTemplate = JSON.parse(supabaseData[0].template_data);
+                const loadedSupabaseTemplate = JSON.parse(
+                  supabaseData[0].template_data
+                );
                 setTemplateId(supabaseData[0].id);
                 setSavedTemplate(loadedSupabaseTemplate); // This is the true "last manually saved" state
 
@@ -88,43 +93,50 @@ export default function TemplateProvider({ children }) {
                   console.log("Loaded template from Supabase.");
                 } else {
                   // If autosave was loaded, it's already set. `savedTemplate` is correctly set to Supabase version.
-                  console.log("Autosave loaded, Supabase version set as 'savedTemplate'.");
+                  console.log(
+                    "Autosave loaded, Supabase version set as 'savedTemplate'."
+                  );
                 }
               } catch (parseError) {
-                console.error('Error parsing template from Supabase:', parseError);
+                console.error(
+                  "Error parsing template from Supabase:",
+                  parseError
+                );
                 toast({
                   title: "Warning",
-                  description: "Saved template could not be loaded correctly. Using backup data.",
+                  description:
+                    "Saved template could not be loaded correctly. Using backup data.",
                   variant: "destructive",
                 });
               }
             }
           } catch (supabaseError) {
-            console.error('Error communicating with Supabase:', supabaseError);
+            console.error("Error communicating with Supabase:", supabaseError);
             toast({
               title: "Connection Error",
-              description: "Could not connect to the database. Using local data only.",
+              description:
+                "Could not connect to the database. Using local data only.",
               variant: "destructive",
             });
           }
         }
-        
+
         // If nothing loaded from autosave or Supabase, template remains defaultTemplate
         if (!loadedFromAutosave && (!session || !templateId)) {
-            setHistory([defaultTemplate]);
-            setHistoryIndex(0);
-            console.log("Initialized with default template.");
+          setHistory([defaultTemplate]);
+          setHistoryIndex(0);
+          console.log("Initialized with default template.");
         }
-
       } catch (err) {
-        console.error('Error during initial template load:', err);
+        console.error("Error during initial template load:", err);
         // Fallback to default template if any error occurs
         setTemplate(defaultTemplate);
         setHistory([defaultTemplate]);
         setHistoryIndex(0);
         toast({
           title: "Error",
-          description: "There was a problem loading your template. Starting with a fresh template.",
+          description:
+            "There was a problem loading your template. Starting with a fresh template.",
           variant: "destructive",
         });
       }
@@ -142,28 +154,32 @@ export default function TemplateProvider({ children }) {
     // or if it's the same as the last *manually* saved state to avoid unnecessary autosaves.
     // However, for simplicity and ensuring any intermediate work is caught, we'll autosave.
     // A more sophisticated check could compare with defaultTemplate or savedTemplate.
-    if (template && historyIndex > -1) { // Ensure there's a valid template to save
-        autosaveTimer = setTimeout(() => {
-            try {
-                localStorage.setItem("autosaved_template_draft", JSON.stringify(template));
-                console.log("Template autosaved to localStorage draft.");
-            } catch (error) {
-                console.error("Error autosaving template to localStorage:", error);
-            }
-        }, 1500); // Autosave after 1.5 seconds of inactivity
+    if (template && historyIndex > -1) {
+      // Ensure there's a valid template to save
+      autosaveTimer = setTimeout(() => {
+        try {
+          localStorage.setItem(
+            "autosaved_template_draft",
+            JSON.stringify(template)
+          );
+          console.log("Template autosaved to localStorage draft.");
+        } catch (error) {
+          console.error("Error autosaving template to localStorage:", error);
+        }
+      }, 1500); // Autosave after 1.5 seconds of inactivity
     }
 
     // Cleanup timer on component unmount
     return () => {
-        clearTimeout(autosaveTimer);
+      clearTimeout(autosaveTimer);
     };
   }, [template, historyIndex]);
 
   // Update template property and track history
   const updateTemplate = (key, value) => {
-    setTemplate(prev => {
+    setTemplate((prev) => {
       const updated = { ...prev, [key]: value };
-      
+
       // Only add to history if it's different from the last item
       if (JSON.stringify(updated) !== JSON.stringify(template)) {
         // If we're in the middle of the history, truncate it
@@ -171,7 +187,7 @@ export default function TemplateProvider({ children }) {
         setHistory([...newHistory, updated]);
         setHistoryIndex(newHistory.length);
       }
-      
+
       return updated;
     });
   };
@@ -195,8 +211,10 @@ export default function TemplateProvider({ children }) {
   const saveTemplate = async () => {
     try {
       setIsSaving(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
         toast({
           title: "Error",
@@ -221,21 +239,21 @@ export default function TemplateProvider({ children }) {
       const templateDataToSave = {
         template_data: JSON.stringify(template),
         user_id: session.user.id,
-        name: template.projectTitle || 'Unnamed Template'
+        name: template.projectTitle || "Unnamed Template",
       };
 
       let result;
-      
+
       if (templateId) {
         // Update existing template
         result = await supabase
-          .from('waitlist_templates')
+          .from("waitlist_templates")
           .update(templateDataToSave)
-          .eq('id', templateId);
+          .eq("id", templateId);
       } else {
         // Create new template
         result = await supabase
-          .from('waitlist_templates')
+          .from("waitlist_templates")
           .insert([templateDataToSave])
           .select();
 
@@ -257,7 +275,7 @@ export default function TemplateProvider({ children }) {
         description: "Template saved successfully!",
       });
     } catch (err) {
-      console.error('Error saving template:', err);
+      console.error("Error saving template:", err);
       toast({
         title: "Save Failed",
         description: err.message || "An unknown error occurred while saving",
@@ -291,14 +309,18 @@ export default function TemplateProvider({ children }) {
   };
 
   // Check if there are unsaved changes against the last *manually* saved state
-  const hasUnsavedChanges = savedTemplate ? JSON.stringify(template) !== JSON.stringify(savedTemplate) : JSON.stringify(template) !== JSON.stringify(defaultTemplate);
+  const hasUnsavedChanges = savedTemplate
+    ? JSON.stringify(template) !== JSON.stringify(savedTemplate)
+    : JSON.stringify(template) !== JSON.stringify(defaultTemplate);
 
   // Load saved templates from Supabase
   const loadSavedTemplates = async () => {
     setIsLoadingSavedTemplates(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
         toast({
           title: "Error",
@@ -307,21 +329,21 @@ export default function TemplateProvider({ children }) {
         });
         return [];
       }
-      
+
       const { data, error } = await supabase
-        .from('waitlist_templates')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('updated_at', { ascending: false });
-        
+        .from("waitlist_templates")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .order("updated_at", { ascending: false });
+
       if (error) {
         throw new Error(error.message || "Failed to load saved templates");
       }
-      
+
       setSavedTemplates(data || []);
       return data || [];
     } catch (err) {
-      console.error('Error loading saved templates:', err);
+      console.error("Error loading saved templates:", err);
       toast({
         title: "Error",
         description: "Failed to load saved templates: " + err.message,
@@ -332,48 +354,48 @@ export default function TemplateProvider({ children }) {
       setIsLoadingSavedTemplates(false);
     }
   };
-  
+
   // Load a specific template
   const loadTemplate = async (id) => {
     try {
       setIsSaving(true);
-      
+
       const { data, error } = await supabase
-        .from('waitlist_templates')
-        .select('*')
-        .eq('id', id)
+        .from("waitlist_templates")
+        .select("*")
+        .eq("id", id)
         .single();
-        
+
       if (error) {
         throw new Error(error.message || "Failed to load template");
       }
-      
+
       if (!data) {
         throw new Error("Template not found");
       }
-      
+
       const loadedTemplate = JSON.parse(data.template_data);
-      
+
       // Update state
       setTemplate(loadedTemplate);
       setSavedTemplate(loadedTemplate);
       setTemplateId(data.id);
-      
+
       // Reset history with this template
       setHistory([loadedTemplate]);
       setHistoryIndex(0);
-      
+
       toast({
         title: "Success",
         description: `Template "${data.name}" loaded successfully!`,
       });
-      
+
       // Clear autosave since we've loaded a fresh template
       localStorage.removeItem("autosaved_template_draft");
-      
+
       return true;
     } catch (err) {
-      console.error('Error loading template:', err);
+      console.error("Error loading template:", err);
       toast({
         title: "Error",
         description: "Failed to load template: " + err.message,
@@ -407,7 +429,7 @@ export default function TemplateProvider({ children }) {
     savedTemplates,
     loadSavedTemplates,
     loadTemplate,
-    isLoadingSavedTemplates
+    isLoadingSavedTemplates,
   };
 
   return (
@@ -415,4 +437,4 @@ export default function TemplateProvider({ children }) {
       {children}
     </TemplateContext.Provider>
   );
-} 
+}

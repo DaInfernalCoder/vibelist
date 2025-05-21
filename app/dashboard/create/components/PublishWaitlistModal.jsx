@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Send } from "lucide-react";
-import { WaitlistPreview } from "./WaitlistPreview";
 import { getWaitlistDashboardUrl } from "@/lib/url-utils";
 
 /**
@@ -145,13 +144,6 @@ export default function PublishWaitlistModal({
               className="w-full min-h-[100px]"
             />
           </div>
-          
-          {/* Use the WaitlistPreview component */}
-          <WaitlistPreview 
-            name={name || "Your Waitlist"}
-            customizationData={templateData}
-            className="w-full border rounded-md overflow-hidden"
-          />
           
           {error && (
             <Alert variant="destructive">

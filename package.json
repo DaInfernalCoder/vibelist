@@ -10,7 +10,10 @@
     "lint": "next lint",
     "db:migrate": "node scripts/migrations/apply_migrations_direct.js",
     "db:test": "node scripts/migrations/test_schema.js",
-    "test:lead-api": "node scripts/test-lead-api.js"
+    "test:lead-api": "node scripts/test-lead-api.js",
+    "test:dynamic-form": "node scripts/tests/dynamic-form-rendering.test.js",
+    "test:dynamic-form-api": "node scripts/tests/dynamic-form-api.test.js",
+    "test:waitlist-forms": "npm run test:dynamic-form && npm run test:dynamic-form-api"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",
