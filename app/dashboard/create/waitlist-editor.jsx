@@ -5,8 +5,8 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
-import { Maximize2, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Maximize2, Save, Send } from "lucide-react";
 
 // Import context provider
 import TemplateProvider from "./context/TemplateProvider";
@@ -21,6 +21,7 @@ import ThemesTabContent from "./components/ThemesTabContent";
 import LivePreview from "./components/LivePreview";
 import PreviewControls from "./components/PreviewControls";
 import FullPreviewDialog from "./components/FullPreviewDialog";
+import PublishWaitlistModal from "./components/PublishWaitlistModal";
 
 // Inner component to access TemplateContext
 function EditorLayout() {
@@ -32,8 +33,11 @@ function EditorLayout() {
     redo,
     setIsFullPreview,
     canUndo,
-    canRedo
+    canRedo,
+    template
   } = useTemplate();
+
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   // Set up keyboard shortcuts
   useEffect(() => {
@@ -146,12 +150,27 @@ function EditorLayout() {
                 </>
               )}
             </Button>
+            <Button 
+              variant="primary"
+              className="px-6"
+              onClick={() => setIsPublishModalOpen(true)}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Publish
+            </Button>
           </div>
         </div>
       </div>
       
       {/* Full-screen preview dialog */}
       <FullPreviewDialog />
+      
+      {/* Publish waitlist modal */}
+      <PublishWaitlistModal 
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        templateData={template}
+      />
       
       {/* Keyboard shortcuts hint */}
       <div className="mt-8 text-sm text-muted-foreground">

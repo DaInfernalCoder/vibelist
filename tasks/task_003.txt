@@ -230,7 +230,7 @@ describe('SignUp Component', () => {
 ### 7. Auth Callback Handler
 ```jsx
 // app/auth/callback/route.js
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createRouteHandlerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
