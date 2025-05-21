@@ -2,17 +2,16 @@
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 import {
   BarChart3,
   ChevronsUpDown,
   PlusCircle,
-  Settings,
   Users,
   LogOut,
   Megaphone,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -72,20 +71,19 @@ const staggerVariants = {
   },
 };
 
-
 export function SessionNavBar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const pathname = usePathname();
   const supabase = createClient();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Check if user has waitlists (this would be replaced with actual logic)
   const hasWaitlists = true; // Simulate having waitlists
-  
+
   // Current selected waitlist (this would be replaced with actual state management)
   const [selectedWaitlist, setSelectedWaitlist] = useState("My First Waitlist");
-  
+
   useEffect(() => {
     const getUser = async () => {
       const {
@@ -108,37 +106,39 @@ export function SessionNavBar() {
   const handleBilling = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/stripe/create-portal', {
-        method: 'POST',
+      const response = await fetch("/api/stripe/create-portal", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           returnUrl: window.location.href,
         }),
       });
-      
+
       const { url } = await response.json();
       window.location.href = url;
     } catch (error) {
-      console.error('Error creating billing portal:', error);
+      console.error("Error creating billing portal:", error);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
-    (<motion.div
+    <motion.div
       className={cn("sidebar fixed left-0 z-40 h-full shrink-0 border-r")}
       initial={isCollapsed ? "closed" : "open"}
       animate={isCollapsed ? "closed" : "open"}
       variants={sidebarVariants}
       transition={transitionProps}
       onMouseEnter={() => setIsCollapsed(false)}
-      onMouseLeave={() => setIsCollapsed(true)}>
+      onMouseLeave={() => setIsCollapsed(true)}
+    >
       <motion.div
         className={`relative z-40 flex text-muted-foreground h-full shrink-0 flex-col bg-white dark:bg-black transition-all`}
-        variants={contentVariants}>
+        variants={contentVariants}
+      >
         <motion.ul variants={staggerVariants} className="flex h-full flex-col">
           <div className="flex grow flex-col items-center">
             <div className="flex h-[54px] w-full shrink-0 border-b p-2">
@@ -146,11 +146,18 @@ export function SessionNavBar() {
                 {hasWaitlists ? (
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger className="w-full" asChild>
-                      <Button variant="ghost" size="sm" className="flex w-fit items-center gap-2 px-2">
-                        <Avatar className='rounded size-4'>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex w-fit items-center gap-2 px-2"
+                      >
+                        <Avatar className="rounded size-4">
                           <AvatarFallback>W</AvatarFallback>
                         </Avatar>
-                        <motion.li variants={variants} className="flex w-fit items-center gap-2">
+                        <motion.li
+                          variants={variants}
+                          className="flex w-fit items-center gap-2"
+                        >
                           {!isCollapsed && (
                             <>
                               <p className="text-sm font-medium truncate max-w-[120px]">
@@ -163,13 +170,17 @@ export function SessionNavBar() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => setSelectedWaitlist("My First Waitlist")}
-                        className="flex items-center gap-2">
+                        className="flex items-center gap-2"
+                      >
                         <Users className="h-4 w-4" /> My First Waitlist
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild className="flex items-center gap-2">
+                      <DropdownMenuItem
+                        asChild
+                        className="flex items-center gap-2"
+                      >
                         <Link href="/dashboard/create">
                           <PlusCircle className="h-4 w-4" /> Create new waitlist
                         </Link>
@@ -177,11 +188,17 @@ export function SessionNavBar() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Link href="/dashboard/create" className="flex items-center gap-2 px-2">
-                    <Avatar className='rounded size-4'>
+                  <Link
+                    href="/dashboard/create"
+                    className="flex items-center gap-2 px-2"
+                  >
+                    <Avatar className="rounded size-4">
                       <AvatarFallback>+</AvatarFallback>
                     </Avatar>
-                    <motion.li variants={variants} className="flex w-fit items-center gap-2">
+                    <motion.li
+                      variants={variants}
+                      className="flex w-fit items-center gap-2"
+                    >
                       {!isCollapsed && (
                         <p className="text-sm font-medium">Create Waitlist</p>
                       )}
@@ -202,7 +219,8 @@ export function SessionNavBar() {
                         "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
                         pathname?.includes("/dashboard/create") &&
                           "bg-muted text-primary"
-                      )}>
+                      )}
+                    >
                       <PlusCircle className="h-4 w-4" />{" "}
                       <motion.li variants={variants}>
                         {!isCollapsed && (
@@ -210,31 +228,35 @@ export function SessionNavBar() {
                         )}
                       </motion.li>
                     </Link>
-                    
+
                     <Link
                       href="/dashboard/analytics"
                       className={cn(
                         "flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
                         pathname?.includes("/dashboard/analytics") &&
                           "bg-muted text-primary"
-                      )}>
+                      )}
+                    >
                       <BarChart3 className="h-4 w-4" />{" "}
                       <motion.li variants={variants}>
                         {!isCollapsed && (
                           <div className="flex items-center gap-2">
-                            <p className="ml-2 text-sm font-medium">Analytics</p>
+                            <p className="ml-2 text-sm font-medium">
+                              Analytics
+                            </p>
                           </div>
                         )}
                       </motion.li>
                     </Link>
-                    
+
                     <Link
                       href="/dashboard/market"
                       className={cn(
                         "flex h-8 flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                        pathname?.includes("/dashboard/market") && 
+                        pathname?.includes("/dashboard/market") &&
                           "bg-muted text-primary"
-                      )}>
+                      )}
+                    >
                       <Megaphone className="h-4 w-4" />
                       <motion.li variants={variants}>
                         {!isCollapsed && (
@@ -244,31 +266,16 @@ export function SessionNavBar() {
                         )}
                       </motion.li>
                     </Link>
-                    
+
                     {/* Add More Nav Items Here */}
                   </div>
                 </ScrollArea>
               </div>
               <div className="flex flex-col p-2">
-                <Link
-                  href="/dashboard/settings"
-                  className={cn(
-                    "mt-auto flex h-8 w-full flex-row items-center rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary",
-                    pathname?.includes("/dashboard/settings") &&
-                      "bg-muted text-primary"
-                  )}>
-                  <Settings className="h-4 w-4 shrink-0" />{" "}
-                  <motion.li variants={variants}>
-                    {!isCollapsed && (
-                      <p className="ml-2 text-sm font-medium">Settings</p>
-                    )}
-                  </motion.li>
-                </Link>
                 <div>
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger className="w-full">
-                      <div
-                        className="flex h-8 w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary">
+                      <div className="flex h-8 w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-muted hover:text-primary">
                         <Avatar className="size-4">
                           {user?.user_metadata?.avatar_url ? (
                             <Image
@@ -281,11 +288,16 @@ export function SessionNavBar() {
                             />
                           ) : (
                             <AvatarFallback>
-                              {user?.email ? user.email.charAt(0).toUpperCase() : "U"}
+                              {user?.email
+                                ? user.email.charAt(0).toUpperCase()
+                                : "U"}
                             </AvatarFallback>
                           )}
                         </Avatar>
-                        <motion.li variants={variants} className="flex w-full items-center gap-2">
+                        <motion.li
+                          variants={variants}
+                          className="flex w-full items-center gap-2"
+                        >
                           {!isCollapsed && (
                             <>
                               <p className="text-sm font-medium">Account</p>
@@ -299,8 +311,8 @@ export function SessionNavBar() {
                       <div className="flex flex-row items-center gap-2 p-2">
                         <Avatar className="size-6">
                           {user?.user_metadata?.avatar_url ? (
-                            <Image 
-                              src={user.user_metadata.avatar_url} 
+                            <Image
+                              src={user.user_metadata.avatar_url}
                               alt="Profile"
                               width={24}
                               height={24}
@@ -309,13 +321,17 @@ export function SessionNavBar() {
                             />
                           ) : (
                             <AvatarFallback>
-                              {user?.email ? user.email.charAt(0).toUpperCase() : "U"}
+                              {user?.email
+                                ? user.email.charAt(0).toUpperCase()
+                                : "U"}
                             </AvatarFallback>
                           )}
                         </Avatar>
                         <div className="flex flex-col text-left">
                           <span className="text-sm font-medium">
-                            {user?.user_metadata?.name || user?.email?.split("@")[0] || "User"}
+                            {user?.user_metadata?.name ||
+                              user?.email?.split("@")[0] ||
+                              "User"}
                           </span>
                           <span className="line-clamp-1 text-xs text-muted-foreground">
                             {user?.email || ""}
@@ -323,7 +339,7 @@ export function SessionNavBar() {
                         </div>
                       </div>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={handleBilling}
                         className="flex items-center gap-2 cursor-pointer"
                       >
@@ -340,14 +356,18 @@ export function SessionNavBar() {
                           />
                         </svg>
                         Billing
-                        {isLoading && <span className="loading loading-spinner loading-xs ml-2"></span>}
+                        {isLoading && (
+                          <span className="loading loading-spinner loading-xs ml-2"></span>
+                        )}
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={handleSignOut}
                         className="flex items-center gap-2 cursor-pointer"
                       >
                         <LogOut className="h-4 w-4" /> Sign out
-                        {isLoading && <span className="loading loading-spinner loading-xs ml-2"></span>}
+                        {isLoading && (
+                          <span className="loading loading-spinner loading-xs ml-2"></span>
+                        )}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -357,6 +377,6 @@ export function SessionNavBar() {
           </div>
         </motion.ul>
       </motion.div>
-    </motion.div>)
+    </motion.div>
   );
 }
