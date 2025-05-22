@@ -17,6 +17,10 @@ export default function MarketPage() {
             Marketing tools are coming soon to help you grow your audience and
             promote your waitlist.
           </p>
+
+          <p>
+            We&apos;ll be breaking down the different templates to grow fast!
+          </p>
         </div>
       </div>
 

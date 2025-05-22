@@ -1,15 +1,17 @@
 import ButtonAccount from "@/components/ButtonAccount";
+import { createClient } from "@/libs/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 // This is a private page: It's protected by the layout.js component which ensures the user is authenticated.
 // It's a server compoment which means you can fetch data (like the user profile) before the page is rendered.
 // See https://shipfa.st/docs/tutorials/private-page
-export default function Dashboard() {
+export default async function Dashboard() {
+  const user = await getUser();
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">Welcome back {user?.name || ""}</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -55,6 +57,26 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+// Function to get the current user profile
+async function getUser() {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.user) {
+    return null;
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", session.user.id)
+    .single();
+
+  return profile;
 }
 
 function DashboardCard({ title, value, description, href, linkText }) {

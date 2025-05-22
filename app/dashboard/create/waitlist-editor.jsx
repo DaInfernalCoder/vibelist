@@ -25,16 +25,16 @@ import PublishWaitlistModal from "./components/PublishWaitlistModal";
 
 // Inner component to access TemplateContext
 function EditorLayout() {
-  const { 
-    saveTemplate, 
-    isSaving, 
+  const {
+    saveTemplate,
+    isSaving,
     hasUnsavedChanges,
     undo,
     redo,
     setIsFullPreview,
     canUndo,
     canRedo,
-    template
+    template,
   } = useTemplate();
 
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
@@ -43,49 +43,59 @@ function EditorLayout() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Save - Ctrl+S / Cmd+S
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
         e.preventDefault(); // Prevent browser save dialog
         if (!isSaving && hasUnsavedChanges) {
           saveTemplate();
         }
       }
-      
+
       // Undo - Ctrl+Z / Cmd+Z
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         e.preventDefault();
         if (canUndo) {
           undo();
         }
       }
-      
+
       // Redo - Ctrl+Y / Cmd+Y or Ctrl+Shift+Z / Cmd+Shift+Z
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        (e.key === "y" || (e.shiftKey && e.key === "z"))
+      ) {
         e.preventDefault();
         if (canRedo) {
           redo();
         }
       }
-      
+
       // Fullscreen Preview - Ctrl+P / Cmd+P
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "p") {
         e.preventDefault();
         setIsFullPreview(true);
       }
     };
-    
+
     // Add event listener
-    window.addEventListener('keydown', handleKeyDown);
-    
+    window.addEventListener("keydown", handleKeyDown);
+
     // Clean up
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [saveTemplate, isSaving, hasUnsavedChanges, undo, redo, canUndo, canRedo, setIsFullPreview]);
+  }, [
+    saveTemplate,
+    isSaving,
+    hasUnsavedChanges,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    setIsFullPreview,
+  ]);
 
   return (
-    <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-8">Waitlist Page Editor</h1>
-      
+    <div className="container">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Editor Panel */}
         <div>
@@ -95,17 +105,17 @@ function EditorLayout() {
               <TabsTrigger value="design">Design</TabsTrigger>
               <TabsTrigger value="themes">Themes & Saved</TabsTrigger>
             </TabsList>
-            
+
             <Card className="p-6">
-              <ScrollArea className="h-[calc(100vh-280px)] pr-4"> {/* Adjusted height */}
+              <ScrollArea className="h-[calc(100vh-280px)] pr-4">
+                {" "}
+                {/* Adjusted height */}
                 <TabsContent value="setup">
                   <SetupTabContent />
                 </TabsContent>
-                
                 <TabsContent value="design">
                   <DesignTabContent />
                 </TabsContent>
-                
                 <TabsContent value="themes">
                   <ThemesTabContent />
                 </TabsContent>
@@ -113,27 +123,27 @@ function EditorLayout() {
             </Card>
           </Tabs>
         </div>
-        
+
         {/* Preview Panel */}
         <div className="flex flex-col">
           <PreviewControls />
-          
+
           <Card className="rounded-lg flex-grow overflow-hidden flex flex-col items-center justify-center mb-4">
             <LivePreview />
           </Card>
-          
+
           {/* Action buttons below preview */}
           <div className="flex justify-center gap-4 p-6 bg-muted rounded-lg">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="px-6"
               onClick={() => setIsFullPreview(true)}
             >
               <Maximize2 className="h-4 w-4 mr-2" />
               Fullscreen
             </Button>
-            <Button 
-              variant="default" 
+            <Button
+              variant="default"
               className="px-6"
               onClick={saveTemplate}
               disabled={isSaving || !hasUnsavedChanges}
@@ -150,7 +160,7 @@ function EditorLayout() {
                 </>
               )}
             </Button>
-            <Button 
+            <Button
               variant="primary"
               className="px-6"
               onClick={() => setIsPublishModalOpen(true)}
@@ -161,21 +171,16 @@ function EditorLayout() {
           </div>
         </div>
       </div>
-      
+
       {/* Full-screen preview dialog */}
       <FullPreviewDialog />
-      
+
       {/* Publish waitlist modal */}
-      <PublishWaitlistModal 
+      <PublishWaitlistModal
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
         templateData={template}
       />
-      
-      {/* Keyboard shortcuts hint */}
-      <div className="mt-8 text-sm text-muted-foreground">
-        <p>Keyboard shortcuts: <kbd className="px-2 py-1 rounded bg-muted">Ctrl+S</kbd> Save, <kbd className="px-2 py-1 rounded bg-muted">Ctrl+Z</kbd> Undo, <kbd className="px-2 py-1 rounded bg-muted">Ctrl+Y</kbd> Redo, <kbd className="px-2 py-1 rounded bg-muted">Ctrl+P</kbd> Preview</p>
-      </div>
     </div>
   );
 }
@@ -187,4 +192,4 @@ export default function WaitlistEditor() {
       <Toaster />
     </TemplateProvider>
   );
-} 
+}
