@@ -9,7 +9,13 @@ import { Bookmark } from "lucide-react";
 import LogoUploadSection from "./LogoUploadSection";
 
 export default function DesignTabContent() {
-  const { template, updateTemplate, saveTemplate, isSaving, hasUnsavedChanges } = useTemplate();
+  const {
+    template,
+    updateTemplate,
+    saveTemplate,
+    isSaving,
+    hasUnsavedChanges,
+  } = useTemplate();
 
   return (
     <div className="space-y-6">
@@ -17,7 +23,8 @@ export default function DesignTabContent() {
       <Alert className="bg-muted">
         <Bookmark className="h-4 w-4 mr-2" />
         <AlertDescription>
-          Access your saved templates in the <strong>Themes & Saved</strong> tab.
+          Access your saved templates in the <strong>Themes & Saved</strong>{" "}
+          tab.
         </AlertDescription>
       </Alert>
 
@@ -185,6 +192,76 @@ export default function DesignTabContent() {
         </select>
       </div>
 
+      {/* Card Styling Section */}
+      <div className="space-y-4 pt-4 border-t">
+        <h3 className="text-sm font-medium text-gray-700">Card Styling</h3>
+
+        <div className="space-y-2">
+          <Label htmlFor="cardBackgroundColor">Card Background Color</Label>
+          <div className="flex gap-2">
+            <Input
+              id="cardBackgroundColor"
+              value={template.cardBackgroundColor || "#ffffff"}
+              onChange={(e) =>
+                updateTemplate("cardBackgroundColor", e.target.value)
+              }
+              placeholder="Auto-detected based on theme"
+            />
+            <input
+              type="color"
+              value={template.cardBackgroundColor || "#ffffff"}
+              onChange={(e) =>
+                updateTemplate("cardBackgroundColor", e.target.value)
+              }
+              className="w-10 h-10 p-1 border rounded"
+            />
+          </div>
+          <p className="text-xs text-gray-500">
+            Leave empty to auto-detect based on background color
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="cardBorderColor">Card Border Color</Label>
+          <div className="flex gap-2">
+            <Input
+              id="cardBorderColor"
+              value={template.cardBorderColor || "#e2e8f0"}
+              onChange={(e) =>
+                updateTemplate("cardBorderColor", e.target.value)
+              }
+              placeholder="Auto-detected based on theme"
+            />
+            <input
+              type="color"
+              value={template.cardBorderColor || "#e2e8f0"}
+              onChange={(e) =>
+                updateTemplate("cardBorderColor", e.target.value)
+              }
+              className="w-10 h-10 p-1 border rounded"
+            />
+          </div>
+          <p className="text-xs text-gray-500">
+            Leave empty to auto-detect based on background color
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="cardBorderRadius">Card Border Radius</Label>
+          <select
+            id="cardBorderRadius"
+            className="w-full p-2 border rounded-md"
+            value={template.cardBorderRadius || "Medium"}
+            onChange={(e) => updateTemplate("cardBorderRadius", e.target.value)}
+          >
+            <option value="None">None</option>
+            <option value="Small">Small</option>
+            <option value="Medium">Medium</option>
+            <option value="Large">Large</option>
+          </select>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="signupTextColor">Signup Text Color</Label>
         <div className="flex gap-2">
@@ -220,4 +297,4 @@ export default function DesignTabContent() {
       </div>
     </div>
   );
-} 
+}

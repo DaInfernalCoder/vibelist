@@ -1,0 +1,6 @@
+{
+  "success": false,
+  "error": "Failed to fetch customization settings: TypeError: fetch failed",
+  "timestamp": "2025-05-23T15:43:11.292Z",
+  "stack": "Error: Failed to fetch customization settings: TypeError: fetch failed\n    at auditCustomFields (/Users/sumit/Documents/nextjs/vibelist/scripts/migrations/audit-custom-fields.js:93:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async performMigration (/Users/sumit/Documents/nextjs/vibelist/scripts/migrations/migrate-custom-fields.js:270:25)"
+}

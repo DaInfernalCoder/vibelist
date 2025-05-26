@@ -1,0 +1,6 @@
+{
+  "success": false,
+  "error": "Batch 1 failed: null value in column \"waitlist_id\" of relation \"customization_settings\" violates not-null constraint",
+  "timestamp": "2025-05-23T15:41:33.596Z",
+  "stack": "Error: Batch 1 failed: null value in column \"waitlist_id\" of relation \"customization_settings\" violates not-null constraint\n    at migrateBatch (/Users/sumit/Documents/nextjs/vibelist/scripts/migrations/migrate-custom-fields.js:115:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async performMigration (/Users/sumit/Documents/nextjs/vibelist/scripts/migrations/migrate-custom-fields.js:360:24)"
+}

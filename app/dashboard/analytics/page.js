@@ -64,147 +64,162 @@ export default function AnalyticsPage() {
   const chartData = timeRange === "weekly" ? weeklyData : monthlyData;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Analytics</h1>
-          <p className="text-muted-foreground mt-2">
-            Track and analyze your waitlist performance
+    <div className="relative">
+      {/* Blur Overlay with Coming Soon */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-white/30 backdrop-blur-md rounded-lg">
+        <div className="text-center p-8 rounded-lg">
+          <h2 className="text-4xl font-bold mb-4">Coming Soon</h2>
+          <p className="text-lg mb-6 max-w-md">
+            Advanced analytics are coming soon to help you track and optimize
+            your waitlist performance.
           </p>
-        </div>
-        <div className="mt-4 sm:mt-0">
-          <Tabs
-            value={timeRange}
-            onValueChange={setTimeRange}
-            className="w-full sm:w-auto"
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="weekly">Weekly</TabsTrigger>
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <p>We&apos;ll be adding detailed insights and reporting tools!</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Signups"
-          value="1,248"
-          change="+12.5%"
-          trend="increase"
-        />
-        <MetricCard
-          title="Conversion Rate"
-          value="68.4%"
-          change="+3.2%"
-          trend="increase"
-        />
-        <MetricCard
-          title="Avg. Time on Waitlist"
-          value="14.2 days"
-          change="-1.5 days"
-          trend="decrease"
-        />
-        <MetricCard
-          title="Waitlist Size"
-          value="943"
-          change="+22"
-          trend="increase"
-        />
-      </div>
+      {/* Blurred Content */}
+      <div className="filter blur-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Analytics</h1>
+            <p className="text-muted-foreground mt-2">
+              Track and analyze your waitlist performance
+            </p>
+          </div>
+          <div className="mt-4 sm:mt-0">
+            <Tabs
+              value={timeRange}
+              onValueChange={setTimeRange}
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Total Signups"
+            value="1,248"
+            change="+12.5%"
+            trend="increase"
+          />
+          <MetricCard
+            title="Conversion Rate"
+            value="68.4%"
+            change="+3.2%"
+            trend="increase"
+          />
+          <MetricCard
+            title="Avg. Time on Waitlist"
+            value="14.2 days"
+            change="-1.5 days"
+            trend="decrease"
+          />
+          <MetricCard
+            title="Waitlist Size"
+            value="943"
+            change="+22"
+            trend="increase"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Signups & Completions</CardTitle>
+              <CardDescription>
+                Track signups and completed registrations over time
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="signups"
+                      stroke="#8884d8"
+                      activeDot={{ r: 8 }}
+                      name="Signups"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="completions"
+                      stroke="#82ca9d"
+                      name="Completions"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Referral Sources</CardTitle>
+              <CardDescription>
+                See where your waitlist signups are coming from
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={referralData}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" fill="#8884d8" name="Signups" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>Signups & Completions</CardTitle>
+            <CardTitle>Conversion Funnel</CardTitle>
             <CardDescription>
-              Track signups and completed registrations over time
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="signups"
-                    stroke="#8884d8"
-                    activeDot={{ r: 8 }}
-                    name="Signups"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="completions"
-                    stroke="#82ca9d"
-                    name="Completions"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Referral Sources</CardTitle>
-            <CardDescription>
-              See where your waitlist signups are coming from
+              Track user journey through the waitlist process
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={referralData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  data={conversionData}
+                  layout="vertical"
+                  margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="value" fill="#8884d8" name="Signups" />
+                  <Bar dataKey="value" fill="#82ca9d" name="Users" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Conversion Funnel</CardTitle>
-          <CardDescription>
-            Track user journey through the waitlist process
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={conversionData}
-                layout="vertical"
-                margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" fill="#82ca9d" name="Users" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

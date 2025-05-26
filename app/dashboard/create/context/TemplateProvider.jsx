@@ -58,14 +58,15 @@ export default function TemplateProvider({ children }) {
 
         // 2. Try to load the last manually saved version from Supabase (and get templateId)
         const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session) {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+        if (!authError && user) {
           try {
             const { data: supabaseData, error } = await supabase
               .from("waitlist_templates")
               .select("*")
-              .eq("user_id", session.user.id)
+              .eq("user_id", user.id)
               .order("updated_at", { ascending: false })
               .limit(1);
 
@@ -122,7 +123,7 @@ export default function TemplateProvider({ children }) {
         }
 
         // If nothing loaded from autosave or Supabase, template remains defaultTemplate
-        if (!loadedFromAutosave && (!session || !templateId)) {
+        if (!loadedFromAutosave && (!user || !templateId)) {
           setHistory([defaultTemplate]);
           setHistoryIndex(0);
           console.log("Initialized with default template.");
@@ -212,10 +213,10 @@ export default function TemplateProvider({ children }) {
     try {
       setIsSaving(true);
       const {
-        data: { session },
-      } = await supabase.auth.getSession();
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      if (!session) {
+      if (!user) {
         toast({
           title: "Error",
           description: "You must be logged in to save a template",
@@ -238,7 +239,7 @@ export default function TemplateProvider({ children }) {
 
       const templateDataToSave = {
         template_data: JSON.stringify(template),
-        user_id: session.user.id,
+        user_id: user.id,
         name: template.projectTitle || "Unnamed Template",
       };
 
@@ -318,10 +319,10 @@ export default function TemplateProvider({ children }) {
     setIsLoadingSavedTemplates(true);
     try {
       const {
-        data: { session },
-      } = await supabase.auth.getSession();
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      if (!session) {
+      if (!user) {
         toast({
           title: "Error",
           description: "You must be logged in to view saved templates",
@@ -333,7 +334,7 @@ export default function TemplateProvider({ children }) {
       const { data, error } = await supabase
         .from("waitlist_templates")
         .select("*")
-        .eq("user_id", session.user.id)
+        .eq("user_id", user.id)
         .order("updated_at", { ascending: false });
 
       if (error) {

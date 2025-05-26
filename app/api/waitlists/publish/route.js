@@ -30,29 +30,27 @@ export async function POST(request) {
     console.log("Attempting to get session...");
     // Check authentication
     const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (sessionError) {
-      console.error("Error getting session:", sessionError.message);
+    if (authError) {
+      console.error("Error getting user:", authError.message);
       return NextResponse.json(
-        { error: "Failed to authenticate session" },
+        { error: "Failed to authenticate user" },
         { status: 500 }
       );
     }
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       );
     }
 
-    const userId = session.user.id;
-    console.log(
-      `Session retrieved for UserID: ${userId}. Parsing request body...`
-    );
+    const userId = user.id;
+    console.log(`User authenticated: ${userId}. Parsing request body...`);
 
     // Parse request body
     const requestData = await request.json().catch((err) => {

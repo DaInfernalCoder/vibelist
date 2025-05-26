@@ -8,17 +8,25 @@ export async function GET(request, { params }) {
 
     // Verify user is authenticated
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (authError) {
+      return NextResponse.json(
+        { error: "Failed to authenticate user" },
+        { status: 500 }
+      );
+    }
+
+    if (!user) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       );
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
     const { id } = params;
 
     if (!id) {

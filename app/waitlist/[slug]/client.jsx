@@ -106,12 +106,12 @@ export function PublicWaitlistClient() {
       
       .waitlist-page {
         background-color: var(--waitlist-background-color);
-        color: var(--waitlist-text-color); /* Main page text color */
+        color: white; /* Main page text color */
         font-family: var(--waitlist-font-family);
       }
       
       .waitlist-card {
-        background-color: var(--waitlist-card-background-color);
+        background-color: var(--waitlist-card-background-color) !important;
         border-color: var(--waitlist-card-border-color);
         border-radius: var(--waitlist-card-border-radius);
         border-width: 1px; 

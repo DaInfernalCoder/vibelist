@@ -83,6 +83,8 @@ export const themeOptions = [
       buttonTextColor: "#ffffff",
       signupTextColor: "#d1d5db",
       pingDotColor: "#10b981",
+      cardBackgroundColor: "#2a2a2a",
+      cardBorderColor: "#4a5568",
     },
   },
   {
@@ -99,6 +101,8 @@ export const themeOptions = [
       buttonTextColor: "#ffffff",
       signupTextColor: "#4b5563",
       pingDotColor: "#10b981",
+      cardBackgroundColor: "#ffffff",
+      cardBorderColor: "#e2e8f0",
     },
   },
   {
@@ -116,6 +120,8 @@ export const themeOptions = [
       buttonTextWeight: "Bold",
       signupTextColor: "#6b7280",
       pingDotColor: "#ec4899",
+      cardBackgroundColor: "#ffffff",
+      cardBorderColor: "#e2e8f0",
     },
   },
   {
@@ -133,6 +139,8 @@ export const themeOptions = [
       buttonTextWeight: "Medium",
       signupTextColor: "#334155",
       pingDotColor: "#0ea5e9",
+      cardBackgroundColor: "#ffffff",
+      cardBorderColor: "#e2e8f0",
     },
   },
   {
@@ -149,6 +157,8 @@ export const themeOptions = [
       buttonTextColor: "#ffffff",
       signupTextColor: "#374151",
       pingDotColor: "#84cc16",
+      cardBackgroundColor: "#ffffff",
+      cardBorderColor: "#e2e8f0",
     },
   },
 ];

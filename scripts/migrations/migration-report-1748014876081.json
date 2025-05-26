@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "dryRun": true,
+  "totalRecords": 40,
+  "recordsNeedingMigration": 38,
+  "recordsProcessed": 38,
+  "totalBatches": 1,
+  "conversionMap": {
+    "text_color": "textColor",
+    "secondary_color": "secondaryColor",
+    "background_color": "backgroundColor",
+    "hero_text": "heroText",
+    "button_text": "buttonText",
+    "consent_text": "consentText",
+    "show_company": "showCompany",
+    "company_label": "companyLabel",
+    "show_job_title": "showJobTitle",
+    "job_title_label": "jobTitleLabel",
+    "success_message": "successMessage",
+    "company_required": "companyRequired",
+    "consent_checkbox": "consentCheckbox",
+    "consent_required": "consentRequired",
+    "description_text": "descriptionText",
+    "job_title_required": "jobTitleRequired",
+    "company_placeholder": "companyPlaceholder",
+    "job_title_placeholder": "jobTitlePlaceholder",
+    "button_text_color": "buttonTextColor"
+  },
+  "conflicts": 4,
+  "executionTimeMs": 101,
+  "migrationResults": [
+    {
+      "success": true,
+      "batchNumber": 1,
+      "recordsProcessed": 38,
+      "dryRun": true
+    }
+  ]
+}
