@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/libs/supabase/server";
 import config from "@/config";
 import { SessionNavBar } from "@/components/ui/sidebar";
+import WaitlistProvider from "@/contexts/WaitlistContext";
 
 // This is a server-side component to ensure the user is logged in.
 // If not, it will redirect to the login page.
@@ -26,11 +27,13 @@ export default async function LayoutPrivate({ children }) {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <SessionNavBar />
-      <div className="flex-1 pl-[3.05rem] transition-all duration-200">
-        <div className="container mx-auto p-6">{children}</div>
+    <WaitlistProvider>
+      <div className="flex min-h-screen">
+        <SessionNavBar />
+        <div className="flex-1 pl-[3.05rem] transition-all duration-200">
+          <div className="container mx-auto p-6">{children}</div>
+        </div>
       </div>
-    </div>
+    </WaitlistProvider>
   );
 }
