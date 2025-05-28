@@ -34,15 +34,58 @@ const Hero = () => {
 
         <TestimonialsAvatars priority={true} />
       </div>
-      <div className="lg:w-full">
-        <Image
-          src="https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3540&q=80"
-          alt="Product Demo"
-          className="w-full"
-          priority={true}
-          width={500}
-          height={500}
-        />
+
+      {/* Creative Multi-Image Hero Design */}
+      <div className="lg:w-full relative">
+        <div className="relative w-full h-[500px] lg:h-[600px]">
+          {/* Background Image - Main Screenshot */}
+          <div className="absolute inset-0 transform rotate-2 hover:rotate-1 transition-transform duration-500 ease-out">
+            <div className="relative w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl shadow-2xl overflow-hidden">
+              <Image
+                src="/demos/Screenshot May 28 2025.png"
+                alt="Main Product Dashboard"
+                fill
+                className="object-cover"
+                priority={true}
+              />
+            </div>
+          </div>
+
+          {/* Floating Card 1 - Interactive Demo */}
+          <div className="absolute top-8 -left-4 lg:-left-8 w-64 lg:w-80 transform -rotate-6 hover:-rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
+            <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+              <Image
+                src="/demos/Interactive Product Demo Screenshot.png"
+                alt="Interactive Product Demo"
+                width={320}
+                height={200}
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </div>
+
+          {/* Floating Card 2 - Second Screenshot */}
+          <div className="absolute bottom-8 -right-4 lg:-right-8 w-56 lg:w-72 transform rotate-6 hover:rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
+            <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+              <Image
+                src="/demos/Screenshot May 28 2025 (1).png"
+                alt="Product Features"
+                width={288}
+                height={180}
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 to-transparent"></div>
+            </div>
+          </div>
+
+          {/* Decorative Elements */}
+          <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-primary rounded-full animate-pulse opacity-60"></div>
+          <div className="absolute bottom-1/3 left-1/4 w-3 h-3 bg-secondary rounded-full animate-pulse opacity-40 animation-delay-1000"></div>
+          <div className="absolute top-1/2 right-1/3 w-2 h-2 bg-accent rounded-full animate-pulse opacity-50 animation-delay-2000"></div>
+
+          {/* Gradient Overlay for Depth */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-base-100/10 pointer-events-none"></div>
+        </div>
       </div>
     </section>
   );
