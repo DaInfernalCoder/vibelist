@@ -47,6 +47,26 @@ export async function generateMetadata({ params }) {
         `[${requestId}] Error fetching waitlist for metadata:`,
         error
       );
+
+      // Try to fetch without the published filter to see if waitlist exists but isn't published
+      const { data: unpublishedWaitlist } = await supabase
+        .from("waitlists")
+        .select("id, name, description")
+        .eq("url_slug", slug)
+        .single();
+
+      if (unpublishedWaitlist) {
+        console.log(
+          `[${requestId}] Found unpublished waitlist: ${unpublishedWaitlist.name}`
+        );
+        return {
+          title: `Signup for ${unpublishedWaitlist.name} | Vibelist`,
+          description:
+            unpublishedWaitlist.description ||
+            "Join our waitlist to get early access",
+        };
+      }
+
       return {
         title: "Waitlist Not Found | Vibelist",
         description:
@@ -80,12 +100,13 @@ export async function generateMetadata({ params }) {
       logoUrl: customizationSettings.logo_url ? "Set" : "Not set",
     });
 
-    // Construct metadata
-    const title = waitlist.name || "Join Our Waitlist";
+    // Construct metadata with "Signup for" prefix
+    const waitlistName = waitlist.name || "Our Waitlist";
+    const title = `Signup for ${waitlistName}`;
     const description =
       waitlist.description ||
       customFields.description_text ||
-      "Sign up to get early access";
+      `Sign up for ${waitlistName} to get early access`;
     const logoUrl =
       customizationSettings.logo_url || `${getBaseUrl()}/logo.png`;
     const url = getWaitlistUrl(slug);

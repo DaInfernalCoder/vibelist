@@ -171,7 +171,7 @@ export function SessionNavBar() {
   const handleWaitlistSelect = useCallback(
     (waitlist) => {
       selectWaitlist(waitlist);
-      router.push(`/dashboard/waitlist/${waitlist.id}`);
+      router.push(`/dashboard/analytics?waitlist=${waitlist.id}`);
     },
     [selectWaitlist, router]
   );
@@ -284,9 +284,6 @@ export function SessionNavBar() {
                                 <div className="flex flex-col">
                                   <span className="font-medium">
                                     {waitlist.name}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {getSignupCount(waitlist.id)} signups
                                   </span>
                                 </div>
                                 {selectedWaitlist?.id === waitlist.id && (
