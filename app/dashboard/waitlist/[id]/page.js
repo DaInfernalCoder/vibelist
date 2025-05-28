@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useWaitlist } from "@/contexts/WaitlistContext";
 import { createClient } from "@/libs/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,9 +12,8 @@ import WaitlistEditorWithData from "./components/WaitlistEditorWithData";
 
 export default function EditWaitlistPage() {
   const { id } = useParams();
-  const router = useRouter();
   const { toast } = useToast();
-  const { waitlists, selectedWaitlist, selectWaitlist } = useWaitlist();
+  const { waitlists, selectWaitlist } = useWaitlist();
 
   const [waitlistData, setWaitlistData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,8 +118,8 @@ export default function EditWaitlistPage() {
           <div>
             <h1 className="text-3xl font-bold">Waitlist Not Found</h1>
             <p className="text-muted-foreground mt-2">
-              The waitlist you're looking for doesn't exist or you don't have
-              permission to access it.
+              The waitlist you&apos;re looking for doesn&apos;t exist or you
+              don&apos;t have permission to access it.
             </p>
           </div>
         </div>

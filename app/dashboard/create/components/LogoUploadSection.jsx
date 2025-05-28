@@ -92,7 +92,7 @@ export default function LogoUploadSection() {
       const filePath = `${user.id}/logos/${fileName}`;
 
       // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from("waitlist-assets")
         .upload(filePath, file, {
           cacheControl: "3600",

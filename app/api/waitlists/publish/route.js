@@ -1,6 +1,5 @@
 // app/api/waitlists/publish/route.js
 import { createClient } from "@/libs/supabase/server";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import slugify from "slugify";
 import { nanoid } from "nanoid";

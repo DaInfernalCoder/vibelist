@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { TemplateProvider } from "./context/TemplateProvider";
 import WaitlistEditor from "./waitlist-editor";
 
 export default function CreateWaitlist() {

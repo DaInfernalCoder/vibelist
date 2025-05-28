@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
     }
 
     // Get analytics data
-    const { data: analytics, error: analyticsError } = await supabase
+    const { data: analytics } = await supabase
       .from("waitlist_analytics")
       .select("*")
       .eq("waitlist_id", id)

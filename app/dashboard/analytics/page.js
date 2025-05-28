@@ -16,8 +16,7 @@ import EmptyState from "./components/EmptyState";
 
 export default function AnalyticsPage() {
   const { selectedWaitlist, waitlists, selectWaitlist } = useWaitlist();
-  const { analyticsData, isLoading, isRefreshing, error, hasData } =
-    useAnalytics();
+  const { analyticsData, isLoading, isRefreshing, error } = useAnalytics();
   const searchParams = useSearchParams();
 
   // Handle direct navigation with waitlist ID

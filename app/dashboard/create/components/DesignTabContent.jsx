@@ -2,20 +2,13 @@
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useTemplate } from "../context/TemplateContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Bookmark } from "lucide-react";
 import LogoUploadSection from "./LogoUploadSection";
 
 export default function DesignTabContent() {
-  const {
-    template,
-    updateTemplate,
-    saveTemplate,
-    isSaving,
-    hasUnsavedChanges,
-  } = useTemplate();
+  const { template, updateTemplate } = useTemplate();
 
   return (
     <div className="space-y-6">

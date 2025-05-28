@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/libs/supabase/server";
 import config from "@/config";
 import { SessionNavBar } from "@/components/ui/sidebar";
-import WaitlistProvider from "@/contexts/WaitlistContext";
+import { WaitlistProvider } from "@/contexts/WaitlistContext";
+import Sidebar from "@/components/ui/sidebar";
 
 // This is a server-side component to ensure the user is logged in.
 // If not, it will redirect to the login page.
