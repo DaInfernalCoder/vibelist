@@ -20,7 +20,7 @@ const faqList = [
     ),
   },
   {
-    question: "What's included in my VibeList purchase?",
+    question: "What&apos;s included in my VibeList purchase?",
     answer: (
       <div className="space-y-2 leading-relaxed">
         <p>With your one-time purchase, you get:</p>
@@ -91,21 +91,22 @@ const faqList = [
     answer: (
       <div className="space-y-2 leading-relaxed">
         <p>
-          Not at all! VibeList is designed to be "braindead simple" - no coding,
-          no complex setup, no technical knowledge required. If you can use
-          basic web forms, you can create professional waitlists with VibeList.
+          Not at all! VibeList is designed to be &quot;braindead simple&quot; -
+          no coding, no complex setup, no technical knowledge required. If you
+          can use basic web forms, you can create professional waitlists with
+          VibeList.
         </p>
       </div>
     ),
   },
   {
-    question: "Can I get a refund if I'm not satisfied?",
+    question: "Can I get a refund if I&apos;m not satisfied?",
     answer: (
       <div className="space-y-2 leading-relaxed">
         <p>
-          Yes! We offer a 7-day money-back guarantee. If VibeList doesn't meet
-          your expectations, simply reach out to our support team within 7 days
-          of purchase for a full refund.
+          Yes! We offer a 7-day money-back guarantee. If VibeList doesn&apos;t
+          meet your expectations, simply reach out to our support team within 7
+          days of purchase for a full refund.
         </p>
       </div>
     ),
@@ -161,8 +162,8 @@ const faqList = [
           >
             dattasumit2019@gmail.com
           </a>{" "}
-          and we'll get back to you quickly. We're here to help you validate
-          your ideas and build successful waitlists.
+          and we&apos;ll get back to you quickly. We&apos;re here to help you
+          validate your ideas and build successful waitlists.
         </p>
       </div>
     ),
@@ -231,7 +232,7 @@ const Item = ({ item }) => {
 
 const FAQ = () => {
   return (
-    <section className="bg-base-200" id="faq">
+    <section className="bg-base-100" id="faq">
       <div className="py-24 px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-12">
         <div className="flex flex-col text-left basis-1/2">
           <p className="inline-block font-semibold text-primary mb-4">FAQ</p>

@@ -2011,6 +2011,16 @@
           "parentTaskId": 30
         }
       ]
+    },
+    {
+      "id": 31,
+      "title": "Implement White Theme with Shadow Separation Across Landing Page Components",
+      "description": "Update the landing page with a cohesive white background theme and add proper shadow effects to create visual separation between white components and their surroundings.",
+      "details": "This task involves creating a consistent white theme across the landing page while ensuring proper visual separation through shadows. Specific changes include:\n\n1. **Pricing Component**:\n   - Add subtle shadows around the white pricing cards to prevent them from blending with the background\n   - Change the background to DaisyUI white (bg-base-100)\n   - Reference the demo section's shadow implementation as a model\n\n2. **FAQ Section**:\n   - Change the background to DaisyUI white (bg-base-100)\n   - No shadow modifications needed for this section\n\n3. **Testimonials Section**:\n   - Add shadows to all white components to create visual separation\n   - Change the background to DaisyUI white (bg-base-100)\n   - Ensure consistent shadow styling with other components\n\n4. **Header Section**:\n   - Change the background to DaisyUI white (bg-base-100)\n\n**Shadow Implementation Guidelines**:\n- Use a consistent shadow style across components (suggest: `shadow-md` or `shadow-sm` from Tailwind)\n- Shadows should be subtle but effective in creating visual boundaries\n- For custom shadows, consider using: `box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);`\n\n**Color Implementation**:\n- Use DaisyUI's white theme color (`bg-base-100`) consistently across all sections\n- Ensure text colors maintain proper contrast against the white background",
+      "testStrategy": "**Visual Testing**:\n1. Compare each section before and after implementation to verify the white background is applied consistently\n2. Verify shadows are visible and effective in creating separation between white components and backgrounds\n3. Test the page at different screen sizes to ensure shadows remain effective across breakpoints\n\n**Specific Test Cases**:\n1. **Pricing Cards**: Verify each card has a visible shadow and doesn't blend into the background\n2. **FAQ Section**: Confirm the background is white with no unintended visual artifacts\n3. **Testimonials**: Verify all white components have shadows and proper separation\n4. **Header**: Confirm the background is properly set to DaisyUI white\n\n**Cross-Browser Testing**:\n- Test in Chrome, Firefox, Safari, and Edge to ensure shadow effects render consistently\n- Verify on both desktop and mobile devices\n\n**Accessibility Testing**:\n- Verify that the contrast between text and the white background meets WCAG AA standards\n- Ensure the shadow effects don't interfere with any interactive elements",
+      "status": "done",
+      "dependencies": [],
+      "priority": "medium"
     }
   ],
   "metadata": {

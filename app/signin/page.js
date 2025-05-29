@@ -128,7 +128,7 @@ export default function Login() {
           />
 
           <button
-            className="btn btn-primary btn-block"
+            className="btn btn-block bg-[#9334E9] hover:bg-[#7C2D9E] text-white border-0"
             disabled={isLoading || isDisabled}
             type="submit"
           >

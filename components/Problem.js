@@ -21,6 +21,7 @@ const Arrow = ({ extraStyle }) => {
     </svg>
   );
 };
+
 const Step = ({ emoji, text }) => {
   return (
     <div className="w-full md:w-48 flex flex-col gap-2 items-center justify-center">
