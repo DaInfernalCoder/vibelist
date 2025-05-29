@@ -1,6 +1,6 @@
 const DemoSection = () => {
   return (
-    <section className="bg-base-200">
+    <section className="bg-base-100">
       <div className="max-w-7xl mx-auto px-8 py-16 lg:py-24">
         {/* Header */}
         <div className="text-center mb-12 lg:mb-16">
@@ -8,8 +8,8 @@ const DemoSection = () => {
             See It In Action
           </h2>
           <p className="text-lg opacity-80 leading-relaxed max-w-3xl mx-auto">
-            Watch how easy it is to create and manage your waitlists with our
-            intuitive platform. From setup to launch in just a few clicks.
+            No BS, we&apos;re going to show you how easy this is to use. From
+            setup to validating your product in just a few clicks.
           </p>
         </div>
 
@@ -33,7 +33,6 @@ const DemoSection = () => {
                 loading="lazy"
                 title="VibeList Product Demo"
                 allow="clipboard-write"
-                frameBorder="0"
                 webkitallowfullscreen="true"
                 mozallowfullscreen="true"
                 allowFullScreen

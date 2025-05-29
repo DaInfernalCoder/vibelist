@@ -2,15 +2,15 @@ import themes from "daisyui/src/theming/themes";
 
 const config = {
   // REQUIRED
-  appName: "ShipFast",
+  appName: "VibeList",
   // REQUIRED: a short description of your app for SEO tags (can be overwritten)
   appDescription:
-    "The NextJS boilerplate with all you need to build your SaaS, AI tool, or any other web app.",
+    "The no-code platform to create beautiful waitlists to validate vibe coded products, without wasting another second. From idea to production in 2 minutes.",
   // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
-  domainName: "shipfa.st",
+  domainName: "vibe-list.com",
   crisp: {
     // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (resend.supportEmail) otherwise customer support won't work.
-    id: "",
+    id: "47f957d6-16b9-4d63-b871-f426704a8cbb",
     // Hide Crisp by default, except on route "/". Crisp is toggled with <ButtonSupport/>. If you want to show Crisp on every routes, just remove this below
     onlyShowOnRoutes: ["/"],
   },
@@ -21,23 +21,25 @@ const config = {
         // REQUIRED — we use this to find the plan in the webhook (for instance if you want to update the user's credits based on the plan)
         priceId:
           process.env.NODE_ENV === "development"
-            ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
-            : "price_456",
+            ? "price_1RTt7BAGcHrscZ23J1TgJQyi"
+            : "price_1RTt7BAGcHrscZ23J1TgJQyi",
         //  REQUIRED - Name of the plan, displayed on the pricing page
-        name: "Starter",
+        name: "Pro",
         // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
-        description: "Perfect for small projects",
+        description:
+          "Perfect for those that want to try out solopreneurship for one year and earn their first $1k Monthly Recurring Revenue",
         // The price you want to display, the one user will be charged on Stripe.
-        price: 79,
+        price: 25,
         // If you have an anchor price (i.e. $29) that you want to display crossed out, put it here. Otherwise, leave it empty
-        priceAnchor: 99,
+        priceAnchor: 50,
         features: [
           {
-            name: "NextJS boilerplate",
+            name: "Unlimited waitlists",
           },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
+          { name: "Unlimited user sign ups" },
+          { name: "One click database setup" },
+          { name: "24/7 support chat" },
+          { name: "One year of access" },
         ],
       },
       {
@@ -45,21 +47,21 @@ const config = {
         isFeatured: true,
         priceId:
           process.env.NODE_ENV === "development"
-            ? "price_1O5KtcAxyNprDp7iftKnrrpw"
-            : "price_456",
-        name: "Advanced",
-        description: "You need more power",
-        price: 99,
-        priceAnchor: 149,
+            ? "price_1RTtDMAGcHrscZ238DmjdRGv"
+            : "price_1RTtDMAGcHrscZ238DmjdRGv",
+        name: "Hacker",
+        description:
+          "For solopreners that are ALL IN and want to hit $10k Monthly Recurring Revenue",
+        price: 50,
+        priceAnchor: 100,
         features: [
           {
-            name: "NextJS boilerplate",
+            name: "Unlimited waitlists",
           },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
-          { name: "1 year of updates" },
-          { name: "24/7 support" },
+          { name: "Unlimited user sign ups" },
+          { name: "One click database setup" },
+          { name: "24/7 support chat" },
+          { name: "Lifetime access" },
         ],
       },
     ],
@@ -72,11 +74,11 @@ const config = {
   },
   resend: {
     // REQUIRED — Email 'From' field to be used when sending magic login links
-    fromNoReply: `ShipFast <noreply@resend.shipfa.st>`,
+    fromNoReply: `VibeList <team@support.vibe-list.com>`,
     // REQUIRED — Email 'From' field to be used when sending other emails, like abandoned carts, updates etc..
-    fromAdmin: `Marc at ShipFast <marc@resend.shipfa.st>`,
+    fromAdmin: `Sumit at VibeList <team@support.vibe-list.com>`,
     // Email shown to customer if need support. Leave empty if not needed => if empty, set up Crisp above, otherwise you won't be able to offer customer support."
-    supportEmail: "marc.louvion@gmail.com",
+    supportEmail: "dattasumit2019@gmail.com",
   },
   colors: {
     // REQUIRED — The DaisyUI theme to use (added to the main layout.js). Leave blank for default (light & dark mode). If you any other theme than light/dark, you need to add it in config.tailwind.js in daisyui.themes.
