@@ -3,251 +3,297 @@ import React from "react";
 
 const features = [
   {
-    title: "Collect user feedback",
+    title: "Powerful Analytics Dashboard",
     description:
-      "Use your Insighto's board to let users submit features they want.",
+      "Track signups, monitor growth, and analyze referral sources with real-time analytics.",
     styles: "bg-primary text-primary-content",
     demo: (
       <div className="overflow-hidden h-full flex items-stretch">
-        <div className="w-full translate-x-12 bg-base-200 rounded-t-box h-full p-6">
-          <p className="font-medium uppercase tracking-wide text-base-content/60 text-sm mb-3">
-            Suggest a feature
-          </p>
-          <div
-            className="relative textarea py-4 h-full mr-12 bg-base-200 group-hover:bg-base-100 group-hover:border-base-content/10 text-base-content"
-            placeholder="Feature on/off option for different pages"
-          >
-            <div className="absolute left-4 top-4 group-hover:hidden flex items-center ">
-              <span>Notifica</span>
-              <span className="w-[2px] h-6 bg-primary animate-pulse"></span>
+        <div className="w-full translate-x-6 bg-base-200 rounded-t-box h-full p-4">
+          <div className="space-y-3">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg text-base-content">Analytics</h3>
+              <div className="flex items-center gap-2 text-sm text-base-content/60">
+                <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <span>Live</span>
+              </div>
             </div>
-            <div className="opacity-0 group-hover:opacity-100 duration-500">
-              Notifications should be visible only on certain pages.
+
+            {/* Metrics Cards */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className="bg-base-100 rounded-lg p-3 border">
+                <div className="text-2xl font-bold text-primary group-hover:text-3xl transition-all duration-500">
+                  1,247
+                </div>
+                <div className="text-xs text-base-content/60">
+                  Total Signups
+                </div>
+              </div>
+              <div className="bg-base-100 rounded-lg p-3 border">
+                <div className="text-2xl font-bold text-green-600 group-hover:text-3xl transition-all duration-500">
+                  +89
+                </div>
+                <div className="text-xs text-base-content/60">This Week</div>
+              </div>
             </div>
-            <div className="opacity-0 group-hover:opacity-100 duration-1000 flex items-center gap-0.5">
-              <span>Terms & privacy pages don&apos;t need them</span>
-              <span className="w-[2px] h-6 bg-primary animate-pulse"></span>
+
+            {/* Chart */}
+            <div className="bg-base-100 rounded-lg p-3 border h-20">
+              <div className="flex items-end justify-between h-full gap-1">
+                {[12, 19, 15, 27, 23, 31, 28].map((height, i) => (
+                  <div
+                    key={i}
+                    className="bg-primary rounded-t transition-all duration-500 group-hover:bg-primary-focus"
+                    style={{
+                      height: `${height}%`,
+                      animationDelay: `${i * 100}ms`,
+                    }}
+                  ></div>
+                ))}
+              </div>
             </div>
-            <button className="btn shadow-lg btn-primary absolute right-4 bottom-6 opacity-0 group-hover:opacity-100 duration-1000">
-              Submit
-            </button>
           </div>
         </div>
       </div>
     ),
   },
   {
-    title: "Prioritize features",
-    description: "Users upvote features they want. You know what to ship next.",
+    title: "Visual Waitlist Editor",
+    description:
+      "Design beautiful waitlist pages with our intuitive drag-and-drop editor and live preview.",
     styles: "md:col-span-2 bg-base-300 text-base-content",
     demo: (
-      <div className="px-6 max-w-[600px] flex flex-col gap-4 overflow-hidden">
-        {[
-          {
-            text: "Add LemonSqueezy integration to the boilerplate",
-            secondaryText: "Yes, ship this! ✅",
-            votes: 48,
-            transition: "group-hover:-mt-36 group-hover:md:-mt-28 duration-500",
-          },
-          {
-            text: "A new pricing table for metered billing",
-            secondaryText: "Maybe ship this 🤔",
-            votes: 12,
-          },
-          {
-            text: "A new UI library for the dashboard",
-            secondaryText: "But don't ship that ❌",
-            votes: 1,
-          },
-        ].map((feature, i) => (
-          <div
-            className={`p-4 bg-base-100 text-base-content rounded-box flex justify-between mb-2 gap-4 ${feature?.transition}`}
-            key={i}
-          >
-            <div>
-              <p className="font-semibold mb-1">{feature.text}</p>
-              <p className="text-base-content-secondary">
-                {feature.secondaryText}
-              </p>
+      <div className="px-6 flex gap-6 overflow-hidden">
+        {/* Editor Panel */}
+        <div className="w-1/2 space-y-3">
+          <div className="bg-base-100 rounded-lg p-4 border">
+            <h4 className="font-semibold mb-3 text-sm">Setup</h4>
+            <div className="space-y-2">
+              <div>
+                <label className="text-xs text-base-content/60">
+                  Waitlist Name
+                </label>
+                <div className="bg-base-200 rounded px-2 py-1 text-sm relative overflow-hidden">
+                  <div className="group-hover:transform group-hover:-translate-y-full transition-transform duration-500">
+                    My Awesome Product
+                  </div>
+                  <div className="absolute top-1 left-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                    Product Launch 2024
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-base-content/60">
+                  Description
+                </label>
+                <div className="bg-base-200 rounded px-2 py-1 text-sm h-8 relative overflow-hidden">
+                  <div className="absolute top-1 left-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-700">
+                    Get early access to our platform
+                  </div>
+                </div>
+              </div>
             </div>
-            <button
-              className={`px-4 py-2 rounded-box group text-center text-lg duration-150 border border-transparent bg-primary text-primary-content`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className={`w-5 h-5 ease-in-out duration-150 -translate-y-0.5 group-hover:translate-y-0`}
-              >
-                <path d="m18 15-6-6-6 6" />
-              </svg>
-              {feature.votes}
-            </button>
           </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    title: "Your brand, your board",
-    description: "Customize your Insighto board with 7 themes.",
-    styles: "md:col-span-2 bg-base-100 text-base-content",
-    demo: (
-      <div className="flex left-0 w-full h-full pt-0 lg:pt-8 overflow-hidden -mt-4">
-        <div className="-rotate-[8deg] flex min-w-max overflow-x-visible h-full lg:pt-4">
-          {[
-            {
-              buttonStyles: "bg-primary text-primary-content",
-              css: "-ml-1 rotate-[6deg] w-72 h-72 z-30 bg-base-200 text-base-content rounded-2xl group-hover:-ml-64 group-hover:opacity-0 group-hover:scale-75 transition-all duration-500 p-4",
-            },
-            {
-              buttonStyles: "bg-secondary text-secondary-content",
-              css: "rotate-[6deg] bg-base-200 text-base-content w-72 h-72 -mr-20 -ml-20 z-20 rounded-xl p-4",
-            },
-            {
-              buttonStyles: "bg-accent text-accent-content",
-              css: "rotate-[6deg] bg-base-200 text-base-content z-10 w-72 h-72 rounded-xl p-4",
-            },
-            {
-              buttonStyles: "bg-neutral text-neutral-content",
-              css: "rotate-[6deg] bg-base-200 text-base-content w-72 h-72 -ml-20 rounded-xl p-4",
-            },
-            {
-              buttonStyles: "bg-base-100 text-base-content",
-              css: "rotate-[6deg] bg-base-200 text-base-content w-72 h-72 -ml-10 -z-10 rounded-xl p-4 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300",
-            },
-          ].map((theme, i) => (
-            <div className={theme.css} key={i}>
-              <div className="font-medium uppercase tracking-wide text-base-content/60 text-sm mb-3">
-                Trending feedback
+
+          <div className="bg-base-100 rounded-lg p-4 border">
+            <h4 className="font-semibold mb-3 text-sm">Design</h4>
+            <div className="flex gap-2">
+              <div className="w-6 h-6 bg-primary rounded border-2 border-primary"></div>
+              <div className="w-6 h-6 bg-secondary rounded border-2 border-transparent group-hover:border-secondary transition-colors duration-300"></div>
+              <div className="w-6 h-6 bg-accent rounded border-2 border-transparent"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Preview Panel */}
+        <div className="w-1/2">
+          <div className="bg-base-100 rounded-lg p-4 border h-full">
+            <div className="text-center space-y-3">
+              <div className="relative h-7 overflow-hidden">
+                <h3 className="font-bold text-lg absolute w-full group-hover:transform group-hover:-translate-y-full transition-transform duration-500">
+                  My Awesome Product
+                </h3>
+                <h3 className="font-bold text-lg text-primary absolute w-full transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                  Product Launch 2024
+                </h3>
               </div>
-              <div className="space-y-2">
-                <div className="p-4 bg-base-100 rounded-box flex justify-between">
-                  <div>
-                    <p className="font-semibold mb-1">Clickable cards</p>
-                    <p className="opacity-80">Make cards more accessible</p>
-                  </div>
-                  <button
-                    className={`px-4 py-2 rounded-box group text-center text-lg duration-150 border border-transparent ${theme.buttonStyles}`}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className={`w-5 h-5 ease-in-out duration-150 -translate-y-0.5 group-hover:translate-y-0`}
-                    >
-                      <path d="m18 15-6-6-6 6" />
-                    </svg>
-                    8
-                  </button>
-                </div>
-                <div className="p-4 bg-base-100 rounded-box flex justify-between ">
-                  <div>
-                    <p className="font-semibold mb-1">Bigger images</p>
-                    <p className="opacity-80">Make cards more accessible</p>
-                  </div>
-                  <button
-                    className={`px-4 py-2 rounded-box group text-center text-lg duration-150 border border-transparent ${theme.buttonStyles}`}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className={`w-5 h-5 ease-in-out duration-150 -translate-y-0.5 group-hover:translate-y-0`}
-                    >
-                      <path d="m18 15-6-6-6 6" />
-                    </svg>
-                    5
-                  </button>
-                </div>
+              <div className="relative h-5 overflow-hidden">
+                <p className="text-sm text-base-content/60 absolute w-full transform translate-y-full group-hover:translate-y-0 transition-transform duration-700">
+                  Get early access to our platform
+                </p>
+              </div>
+              <div className="space-y-2 pt-2">
+                <input
+                  className="input input-sm w-full"
+                  placeholder="your@email.com"
+                  readOnly
+                />
+                <button className="btn btn-primary btn-sm w-full group-hover:btn-secondary transition-colors duration-500">
+                  Join Waitlist
+                </button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     ),
   },
   {
-    title: "Discover new ideas",
-    description: "Users can chat and discuss features.",
+    title: "Beautiful Public Pages",
+    description:
+      "Your users see stunning, mobile-optimized waitlist pages that convert.",
+    styles: "md:col-span-2 bg-base-100 text-base-content",
+    demo: (
+      <div className="flex justify-center items-center h-full overflow-hidden">
+        <div className="relative">
+          {/* Mobile Frame */}
+          <div className="w-64 h-80 bg-gray-800 rounded-3xl p-2 group-hover:scale-105 transition-transform duration-500">
+            <div className="w-full h-full bg-white rounded-2xl overflow-hidden relative">
+              {/* Status Bar */}
+              <div className="h-6 bg-gray-900 flex items-center justify-center">
+                <div className="w-16 h-1 bg-gray-600 rounded-full"></div>
+              </div>
+
+              {/* Waitlist Content */}
+              <div className="p-6 text-center space-y-4">
+                <div className="w-12 h-12 bg-primary rounded-full mx-auto flex items-center justify-center">
+                  <span className="text-white font-bold">🚀</span>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-lg text-gray-900">
+                    Product Launch
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Be the first to know when we launch
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <input
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    placeholder="your@email.com"
+                    readOnly
+                  />
+                  <button className="w-full bg-primary text-white py-2 rounded-lg text-sm font-medium group-hover:bg-primary-focus transition-colors duration-300">
+                    Join Waitlist
+                  </button>
+                </div>
+
+                {/* Social Proof */}
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                  <div className="flex -space-x-1">
+                    {[...Array(3)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-5 h-5 rounded-full bg-gray-300 border border-white"
+                      ></div>
+                    ))}
+                  </div>
+                  <span>Join 1,247 others</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Success State Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-1000 delay-500">
+            <div className="w-64 h-80 bg-gray-800 rounded-3xl p-2">
+              <div className="w-full h-full bg-white rounded-2xl overflow-hidden flex items-center justify-center">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-green-500 rounded-full mx-auto flex items-center justify-center">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-gray-900">
+                      You&apos;re on the list!
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      We&apos;ll notify you when we launch
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    title: "Smart Referral System",
+    description:
+      "Track referral sources and boost growth with built-in sharing features.",
     styles: "bg-neutral text-neutral-content",
     demo: (
       <div className="text-neutral-content px-6 space-y-4">
-        {[
-          {
-            id: 1,
-            text: "Can we have a feature to add a custom domain to IndiePage?",
-            userImg:
-              "https://pbs.twimg.com/profile_images/1514863683574599681/9k7PqDTA_400x400.jpg",
-            userName: "Marc Lou",
-            createdAt: "2024-09-01T00:00:00Z",
-          },
-          {
-            id: 2,
-            text: "I'd definitelly pay for that 🤩",
-            userImg:
-              "https://pbs.twimg.com/profile_images/1778434561556320256/knBJT1OR_400x400.jpg",
-            userName: "Dan K.",
-            createdAt: "2024-09-02T00:00:00Z",
-            transition:
-              "opacity-0 group-hover:opacity-100 duration-500 translate-x-1/4 group-hover:translate-x-0",
-          },
-        ]?.map((reply) => (
-          <div
-            key={reply.id}
-            className={`px-6 py-4 bg-neutral-content text-neutral rounded-box ${reply?.transition}`}
-          >
-            <div className="mb-2 whitespace-pre-wrap">{reply.text}</div>
-            <div className="text-neutral/80 flex items-center gap-2 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="avatar">
-                  <div className="w-7 rounded-full">
-                    <img src={reply.userImg} alt={reply.userName} />
-                  </div>
-                </div>
-                <div className=""> {reply.userName} </div>
+        <div className="bg-neutral-content text-neutral rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold text-sm">Referral Sources</h4>
+            <span className="text-xs bg-primary text-primary-content px-2 py-1 rounded">
+              Live
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {[
+              { source: "Twitter", count: 89, color: "bg-blue-500" },
+              { source: "Direct", count: 156, color: "bg-gray-500" },
+              { source: "LinkedIn", count: 43, color: "bg-blue-600" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
+                <span className="text-sm flex-1">{item.source}</span>
+                <span className="text-sm font-medium group-hover:text-primary transition-colors duration-300">
+                  {item.count}
+                </span>
               </div>
-              •
-              <div>
-                {new Date(reply.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-neutral-content text-neutral rounded-lg p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <div className="text-center space-y-2">
+            <p className="text-sm font-medium">Share your waitlist</p>
+            <div className="flex gap-2 justify-center">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">T</span>
+              </div>
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">L</span>
+              </div>
+              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">W</span>
               </div>
             </div>
           </div>
-        ))}
+        </div>
       </div>
     ),
   },
 ];
+
 const FeaturesGrid = () => {
   return (
     <section className="flex justify-center items-center w-full bg-base-100 text-base-content py-20 lg:py-32">
       <div className="flex flex-col max-w-[82rem] gap-16 md:gap-20 px-4">
         <h2 className="max-w-3xl font-black text-4xl md:text-6xl tracking-[-0.01em]">
-          Ship features <br /> users{" "}
+          Build products that{" "}
           <span className="underline decoration-dashed underline-offset-8 decoration-base-300">
-            really want
+            people actually want
           </span>
         </h2>
         <div className="flex flex-col w-full h-fit gap-4 lg:gap-10 text-text-default max-w-[82rem]">

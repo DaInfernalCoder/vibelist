@@ -2021,6 +2021,28 @@
       "status": "done",
       "dependencies": [],
       "priority": "medium"
+    },
+    {
+      "id": 32,
+      "title": "Fix Unescaped HTML Entities in JSX Causing Vercel Build Failures",
+      "description": "Identify and replace all unescaped quotes and apostrophes in JSX content with proper HTML entities to resolve ESLint errors preventing Vercel deployment.",
+      "details": "The codebase contains multiple instances of unescaped quotes and apostrophes in JSX text content that are causing ESLint errors and blocking Vercel deployment. The developer needs to:\n\n1. Scan the entire codebase for JSX files containing unescaped entities, with known issues in components/FeaturesGrid.js (lines 94, 106, 164)\n2. Replace all instances of unescaped quotes with appropriate HTML entities:\n   - Double quotes (`\"`) should be replaced with `&quot;`, `&ldquo;`, `&#34;`, or `&rdquo;`\n   - Single quotes/apostrophes (`'`) should be replaced with `&apos;`, `&lsquo;`, `&#39;`, or `&rsquo;`\n3. Use a consistent approach for replacements (recommended: `&quot;` for double quotes and `&apos;` for apostrophes)\n4. Pay special attention to text within JSX elements, not attributes or JavaScript strings\n5. Consider using a linting tool or regex search to find all instances systematically\n6. Ensure replacements maintain proper spacing and don't introduce additional formatting issues\n7. Document any patterns found to help prevent similar issues in future development\n\nThis is a critical fix as it's currently blocking deployment. The changes should be minimal and focused only on replacing the unescaped entities without altering any functionality or visual appearance.",
+      "testStrategy": "To verify the fix has been properly implemented:\n\n1. Run ESLint across the entire codebase to confirm no unescaped entity errors remain: `npx eslint . --ext .js,.jsx,.ts,.tsx`\n2. Attempt a local build to ensure it completes without errors: `npm run build`\n3. Manually inspect the fixed files to ensure the replacements were made correctly and didn't introduce any syntax errors\n4. Visually compare the rendered components in development environment before and after changes to confirm no visual regressions\n5. Test the specific components mentioned (FeaturesGrid.js) to verify text displays correctly with the HTML entities\n6. Create a test deployment to Vercel to confirm the build succeeds in the production environment\n7. Perform cross-browser testing to ensure HTML entities render correctly across different browsers\n8. Document all files that were modified and the specific changes made for code review purposes\n\nSuccess criteria: Vercel build passes without ESLint errors related to unescaped entities, and all text content displays correctly in the browser with no visual differences from before.",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high"
+    },
+    {
+      "id": 33,
+      "title": "Fix Analytics Page Data Loading After Waitlist Creation",
+      "description": "Implement automatic data fetching when navigating to the analytics page immediately after waitlist creation, eliminating the need for manual page refresh.",
+      "details": "Currently, when a user creates a new waitlist and immediately navigates to the analytics page by clicking the 'analytics' button/tab, the data doesn't load properly and the page appears empty or shows stale data. The user has to manually refresh the browser tab to see the analytics data.\n\nImplementation should:\n1. Modify the navigation logic to the analytics page to detect when a user is coming directly from waitlist creation\n2. Implement a data refresh mechanism that triggers when this navigation pattern is detected\n3. Consider using React's useEffect hook with appropriate dependencies to detect navigation changes\n4. Ensure the analytics data fetching API is called when the component mounts and when relevant state/route changes occur\n5. Add a loading state indicator while data is being fetched to improve user experience\n6. Implement proper error handling in case the data fetch fails\n7. Consider using React Query or similar state management tools for better cache invalidation\n8. Ensure the solution works consistently across different browsers and devices",
+      "testStrategy": "Testing should verify that the analytics data loads correctly without manual refresh:\n\n1. Manual testing:\n   - Create a new waitlist and immediately navigate to its analytics page\n   - Verify data appears without manual refresh\n   - Test on multiple browsers (Chrome, Firefox, Safari)\n   - Test on mobile and desktop views\n\n2. Automated testing:\n   - Write integration tests that simulate waitlist creation and immediate navigation to analytics\n   - Verify API calls are made at the appropriate times\n   - Test that loading states are displayed correctly\n   - Verify error handling works as expected\n\n3. Edge cases to test:\n   - Test with slow network connections to ensure loading states work properly\n   - Test with network failures to verify error handling\n   - Test rapid navigation (creating waitlist and quickly clicking analytics multiple times)\n   - Test when navigating away and then back to analytics page\n\n4. Acceptance criteria:\n   - Analytics data should load within 3 seconds of navigation without manual refresh\n   - User should see appropriate loading indicator while data is being fetched\n   - Error messages should be displayed if data cannot be loaded",
+      "status": "pending",
+      "dependencies": [
+        29
+      ],
+      "priority": "high"
     }
   ],
   "metadata": {

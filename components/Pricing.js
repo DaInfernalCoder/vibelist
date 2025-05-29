@@ -12,7 +12,8 @@ const Pricing = () => {
         <div className="flex flex-col text-center w-full mb-20">
           <p className="font-medium text-primary mb-8">Pricing</p>
           <h2 className="font-bold text-3xl lg:text-5xl tracking-tight">
-            Save hours of repetitive code and ship faster!
+            Save hours of building the world&apos;s most revolutionary &quot;ai
+            chatbot&quot; and build products people actually want
           </h2>
         </div>
 

@@ -20,7 +20,7 @@ const faqList = [
     ),
   },
   {
-    question: "What&apos;s included in my VibeList purchase?",
+    question: "What's included in my VibeList purchase?",
     answer: (
       <div className="space-y-2 leading-relaxed">
         <p>With your one-time purchase, you get:</p>
@@ -100,7 +100,7 @@ const faqList = [
     ),
   },
   {
-    question: "Can I get a refund if I&apos;m not satisfied?",
+    question: "Can I get a refund if I'm not satisfied?",
     answer: (
       <div className="space-y-2 leading-relaxed">
         <p>

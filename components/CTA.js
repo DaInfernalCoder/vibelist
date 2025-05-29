@@ -18,7 +18,8 @@ const CTA = () => {
           </h2>
           <p className="text-lg opacity-80 mb-12 md:mb-16">
             Don&apos;t waste time building a product that no one wants. Create a
-            waitlist in minutes and validate your idea in minutes.
+            waitlist in minutes and validate your idea in minutes. <br /> <br />
+            Or you&apos;ll make kitty sad.
           </p>
 
           <a
