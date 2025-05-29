@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircleIcon, SparklesIcon } from "@heroicons/react/24/solid";
 import { createClient } from "@/libs/supabase/client";
 
-const PaymentSuccessPage = () => {
+const PaymentSuccessContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -201,35 +201,58 @@ const PaymentSuccessPage = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-success" />
-                  <span>Export & Integration Tools</span>
+                  <span>Export Data & Analytics</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/dashboard" className="btn btn-primary btn-lg">
-              Continue to Dashboard
-            </Link>
-            <Link
-              href="/dashboard/analytics"
-              className="btn btn-outline btn-lg"
-            >
-              View Analytics
-            </Link>
+          {/* Next Steps */}
+          <div className="text-center space-y-4">
+            <h3 className="text-2xl font-bold text-base-content mb-4">
+              What&apos;s Next?
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/dashboard" className="btn btn-primary btn-lg">
+                Go to Dashboard
+              </Link>
+              <Link href="/dashboard/market" className="btn btn-outline btn-lg">
+                Explore Marketplace
+              </Link>
+            </div>
           </div>
 
-          {/* Additional Info */}
-          <div className="text-center mt-8 p-4 bg-base-200 rounded-lg">
-            <p className="text-sm text-base-content/70">
-              A confirmation email has been sent to {user?.email}. If you have
-              any questions, please contact our support team.
+          {/* Receipt */}
+          <div className="mt-8 p-4 bg-base-200 rounded-lg text-center">
+            <p className="text-sm text-base-content/60 mb-2">
+              A receipt has been sent to your email address.
             </p>
+            {sessionId && (
+              <p className="text-xs text-base-content/50">
+                Session ID: {sessionId}
+              </p>
+            )}
           </div>
         </div>
       </div>
     </div>
+  );
+};
+
+const PaymentSuccessPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-base-100 flex items-center justify-center">
+          <div className="text-center">
+            <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+            <p className="text-base-content/70">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
   );
 };
 

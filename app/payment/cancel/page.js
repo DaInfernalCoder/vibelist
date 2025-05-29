@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { createClient } from "@/libs/supabase/client";
 
-const PaymentCancelPage = () => {
+const PaymentCancelContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -163,6 +163,20 @@ const PaymentCancelPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const PaymentCancelPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-base-100 flex items-center justify-center">
+          <div className="loading loading-spinner loading-lg text-primary"></div>
+        </div>
+      }
+    >
+      <PaymentCancelContent />
+    </Suspense>
   );
 };
 
