@@ -2151,6 +2151,169 @@
       "testStrategy": "1. **Environment Variable Verification**:\n   - Run a script to verify all required environment variables are present and properly formatted\n   - Check that the application can access these variables correctly\n\n2. **Stripe Product Testing**:\n   - Verify that the correct product IDs and price IDs are being used in the application\n   - Use Stripe's test mode to simulate purchases of both plans:\n     - Test the Pro Plan purchase flow and verify the correct amount is charged\n     - Test the Hacker Plan purchase flow and verify the correct amount is charged\n\n3. **Integration Testing**:\n   - Test the complete payment flow using Stripe test cards (e.g., 4242 4242 4242 4242)\n   - Verify successful payments update the user's subscription status in the database\n   - Verify webhook handling correctly processes payment events\n   - Test the success and cancel URL redirects\n\n4. **Edge Case Testing**:\n   - Test with missing environment variables to ensure proper error handling\n   - Test with invalid Stripe keys to ensure appropriate error messages\n   - Test payment failures and verify proper error handling\n\n5. **Documentation Review**:\n   - Have another team member review the documentation for clarity and completeness\n   - Verify that the setup instructions work when followed by someone else",
       "status": "pending",
       "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up Stripe Dashboard Account and Access Keys",
+          "description": "Configure the Stripe dashboard account and retrieve the necessary API keys for the VibeList application.",
+          "dependencies": [],
+          "details": "1. Log into the Stripe dashboard (or create account if needed)\n2. Navigate to Developers > API keys section\n3. Copy the Publishable key and Secret key from the appropriate environment (test/live)\n4. Ensure the account has the necessary permissions for product creation and webhook management\n5. Document the key locations and access procedures\n6. Test API key validity by making a simple API call using Stripe CLI or curl\n7. Verify account is in the correct mode (test vs live) for the current development phase",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 2,
+          "title": "Create VibeList Pro Plan Product in Stripe",
+          "description": "Create the Pro Plan product with one-year billing period and $25 USD pricing in the Stripe dashboard.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Navigate to Products section in Stripe dashboard\n2. Click 'Add product' button\n3. Set product name: 'VibeList Pro Plan'\n4. Set description: 'One year of premium access to VibeList'\n5. Create pricing with: $25 USD, one-time payment\n6. Set billing period metadata to indicate 1 year duration\n7. Configure product as active and available\n8. Copy and securely store the Product ID and Price ID\n9. Verify product appears correctly in the dashboard\n10. Test product retrieval via Stripe API to ensure proper configuration",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 3,
+          "title": "Create VibeList Hacker Plan Product in Stripe",
+          "description": "Create the Hacker Plan product with lifetime access and $50 USD one-time pricing in the Stripe dashboard.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Navigate to Products section in Stripe dashboard\n2. Click 'Add product' button\n3. Set product name: 'VibeList Hacker Plan'\n4. Set description: 'Lifetime premium access to VibeList'\n5. Create pricing with: $50 USD, one-time payment\n6. Add metadata to indicate lifetime access\n7. Configure product as active and available\n8. Copy and securely store the Product ID and Price ID\n9. Verify product appears correctly in the dashboard\n10. Test product retrieval via Stripe API to ensure proper configuration",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 4,
+          "title": "Configure Stripe Webhook Endpoint and Secret",
+          "description": "Set up webhook endpoint in Stripe dashboard and generate webhook secret for payment event handling.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Navigate to Developers > Webhooks in Stripe dashboard\n2. Click 'Add endpoint' button\n3. Set endpoint URL (e.g., https://vibelist.app/api/webhooks/stripe)\n4. Select relevant events: checkout.session.completed, payment_intent.succeeded, payment_intent.payment_failed\n5. Add any additional events needed for subscription management\n6. Save the webhook configuration\n7. Copy the webhook signing secret from the webhook details page\n8. Test webhook endpoint connectivity using Stripe CLI or webhook testing tools\n9. Verify webhook receives and processes test events correctly",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 5,
+          "title": "Create and Configure Environment Variables File",
+          "description": "Set up the .env file with all required Stripe configuration variables for the VibeList application.",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "1. Create or update .env file in the project root directory\n2. Add STRIPE_SECRET_KEY with the secret key from subtask 1\n3. Add STRIPE_PUBLISHABLE_KEY with the publishable key from subtask 1\n4. Add STRIPE_WEBHOOK_SECRET with the webhook secret from subtask 4\n5. Add STRIPE_PRO_PRICE_ID with the Pro Plan price ID from subtask 2\n6. Add STRIPE_HACKER_PRICE_ID with the Hacker Plan price ID from subtask 3\n7. Add STRIPE_SUCCESS_URL: https://vibelist.app/payment/success\n8. Add STRIPE_CANCEL_URL: https://vibelist.app/pricing\n9. Ensure .env file is added to .gitignore\n10. Create .env.example file with placeholder values for other developers",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 6,
+          "title": "Update Application Configuration Files",
+          "description": "Modify application configuration files to use environment variables instead of hardcoded Stripe values.",
+          "dependencies": [
+            5
+          ],
+          "details": "1. Locate all configuration files that reference Stripe settings (config.js, constants.js, etc.)\n2. Replace any hardcoded Stripe product IDs with environment variable references\n3. Update Stripe client initialization to use environment variables\n4. Modify any pricing display components to reference the new environment variables\n5. Update API route configurations to use the new webhook secret\n6. Ensure all Stripe-related imports and initializations use the environment variables\n7. Add proper error handling for missing environment variables\n8. Test configuration loading in development environment",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 7,
+          "title": "Update Checkout Flow and Webhook Handler",
+          "description": "Modify the payment checkout flow and webhook processing to work with the new Stripe products and environment configuration.",
+          "dependencies": [
+            6
+          ],
+          "details": "1. Update checkout session creation to use environment variables for price IDs\n2. Modify success and cancel URL redirects to use environment variables\n3. Update webhook handler to process events for both Pro and Hacker plans\n4. Implement proper event validation using the webhook secret\n5. Add logic to handle different subscription types based on price ID\n6. Update user account upgrade logic for both plan types\n7. Ensure proper error handling and logging for payment events\n8. Test checkout flow with both products using Stripe test mode\n9. Verify webhook processing handles all relevant payment events correctly",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 8,
+          "title": "Create Documentation and Validation Testing",
+          "description": "Document the Stripe configuration setup and perform comprehensive testing of the entire paywall system.",
+          "dependencies": [
+            7
+          ],
+          "details": "1. Create documentation file (STRIPE_SETUP.md) with complete setup instructions\n2. Document all environment variables and their purposes\n3. Include step-by-step Stripe dashboard configuration guide\n4. Add troubleshooting section for common setup issues\n5. Create local development setup instructions for other developers\n6. Perform end-to-end testing of both Pro and Hacker plan purchases\n7. Test webhook event processing with various payment scenarios\n8. Verify environment variable loading and error handling\n9. Test payment success and cancellation flows\n10. Document any additional configuration needed for production deployment",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 9,
+          "title": "Implement Soft Paywall with Feature Restrictions",
+          "description": "Replace hard paywall redirect with soft paywall that allows users to create waitlists but restricts premium features like live preview, publishing, and analytics access",
+          "details": "Remove the pricing page redirect and instead:\n1. Allow unpaid users to access dashboard and create waitlists\n2. Disable publishing functionality for unpaid users\n3. Hide/disable live preview for unpaid users  \n4. Blur analytics with upgrade overlay\n5. Show upgrade prompts on restricted features\n6. Keep users engaged while encouraging upgrade",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 35
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "title": "Fix Paywall Modal Bug: Consolidate Duplicate Modals and Repair 'Go Back' Functionality",
+      "description": "Resolve the issue where non-paying users clicking 'Publish Waitlist' encounter two overlapping modals, with only one being functional, and fix the non-working 'Go Back' button.",
+      "details": "The current implementation has a critical UI bug in the paywall flow. When a non-paying user clicks the 'Publish Waitlist' button, two modals are simultaneously displayed - one non-functional and another with a broken 'Go Back' button. \n\nImplementation tasks:\n1. Identify the source of the duplicate modal - likely two event listeners or overlapping component renders triggering the same action.\n2. Consolidate the modal logic to ensure only one paywall modal appears at a time.\n3. Debug and fix the 'Go Back' button functionality - it should dismiss the modal and return the user to their previous state.\n4. Ensure proper z-index management to prevent any modal stacking issues.\n5. Verify that the modal appears correctly on all supported browsers and device sizes.\n6. Add proper error handling to prevent similar issues in the future.\n7. Update any relevant documentation about the paywall flow.\n\nThe fix should maintain all existing functionality of the paywall modal while eliminating the duplicate display and ensuring all buttons work as expected.",
+      "testStrategy": "Testing should cover the following scenarios:\n\n1. **Basic Functionality Test**:\n   - Log in as a non-paying user\n   - Navigate to the publish section and click 'Publish Waitlist'\n   - Verify only one modal appears\n   - Verify the 'Go Back' button properly dismisses the modal\n\n2. **Edge Cases**:\n   - Test rapid clicking of the publish button to ensure no duplicate modals appear\n   - Test with network latency to ensure modals don't stack during slow connections\n   - Verify behavior after browser refresh while modal is open\n\n3. **Cross-browser Testing**:\n   - Test on Chrome, Firefox, Safari, and Edge\n   - Test on mobile browsers (iOS Safari, Android Chrome)\n\n4. **Regression Testing**:\n   - Verify other modal dialogs in the application still function correctly\n   - Ensure the paywall conversion flow still works properly\n   - Check that users can still upgrade their account through the modal\n\n5. **Accessibility Testing**:\n   - Verify modal can be navigated with keyboard\n   - Ensure screen readers can properly interpret the modal content\n\nDocument all test results with screenshots before and after the fix.",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Analyze and Document Current Modal Architecture",
+          "description": "Investigate the PublishWaitlistModal.jsx component to understand the dual modal system causing the overlap issue. Map out the current implementation including the Dialog component and createPortal overlay, identify all event listeners and render triggers, and document the current state management flow.",
+          "dependencies": [],
+          "details": "1. Examine PublishWaitlistModal.jsx source code to identify both modal systems (Dialog component and createPortal overlay). 2. Trace all event handlers that trigger modal display, particularly the 'Publish Waitlist' button click. 3. Map the component state management and props flow that controls modal visibility. 4. Document the current onClose() function behavior and why it fails to close both modals. 5. Identify z-index values and CSS classes affecting modal stacking. 6. Create a technical diagram showing the current problematic architecture. 7. Write unit tests to reproduce the duplicate modal bug consistently. Testing: Verify the bug can be reproduced reliably and document exact steps to trigger the issue across different browsers.",
+          "status": "pending",
+          "parentTaskId": 36
+        },
+        {
+          "id": 2,
+          "title": "Consolidate Modal Architecture to Single System",
+          "description": "Refactor the PublishWaitlistModal.jsx to use only one modal system, eliminating the duplicate modal issue. Choose either the Dialog component or createPortal approach and remove the redundant implementation while preserving all paywall functionality.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Based on analysis from subtask 1, choose the most appropriate modal system (likely Dialog component for better accessibility). 2. Remove the redundant modal implementation (either Dialog or createPortal). 3. Consolidate all modal content into the chosen system, ensuring paywall content renders correctly. 4. Update state management to control only the single modal system. 5. Refactor event handlers to trigger only one modal display. 6. Ensure proper modal backdrop and overlay behavior. 7. Update CSS classes and z-index management for the consolidated modal. Testing: Verify only one modal appears when clicking 'Publish Waitlist' and that all paywall content displays correctly.",
+          "status": "pending",
+          "parentTaskId": 36
+        },
+        {
+          "id": 3,
+          "title": "Fix 'Go Back' Button Functionality and Modal State Management",
+          "description": "Repair the 'Go Back' button in the paywall modal to properly close the modal and return users to their previous state. Implement proper state cleanup and ensure the onClose() function works correctly with the consolidated modal system.",
+          "dependencies": [
+            2
+          ],
+          "details": "1. Update the onClose() function to properly handle the consolidated modal system from subtask 2. 2. Ensure 'Go Back' button correctly triggers modal dismissal and clears any related state. 3. Implement proper state reset to return users to their pre-modal state. 4. Add event handler cleanup to prevent memory leaks or duplicate listeners. 5. Ensure modal backdrop clicks also properly close the modal. 6. Handle edge cases like rapid button clicks or keyboard navigation (ESC key). 7. Add proper focus management to return focus to the triggering element. Testing: Verify 'Go Back' button closes modal completely, test keyboard navigation, and ensure no state persistence issues.",
+          "status": "pending",
+          "parentTaskId": 36
+        },
+        {
+          "id": 4,
+          "title": "Cross-Browser Testing and Error Prevention",
+          "description": "Conduct comprehensive testing across all supported browsers and device sizes, implement error handling to prevent future modal issues, and update documentation. Ensure the fix maintains all existing paywall functionality while preventing regression.",
+          "dependencies": [
+            3
+          ],
+          "details": "1. Test the fixed modal on all supported browsers (Chrome, Firefox, Safari, Edge) and device sizes (mobile, tablet, desktop). 2. Verify modal positioning, z-index behavior, and responsive design work correctly. 3. Implement error boundaries or try-catch blocks around modal rendering to prevent crashes. 4. Add logging for modal state changes to help debug future issues. 5. Create comprehensive unit and integration tests covering the modal flow. 6. Update component documentation with the new architecture and usage patterns. 7. Add PropTypes or TypeScript definitions for better type safety. 8. Perform accessibility testing with screen readers and keyboard navigation. Testing: Run full regression test suite, verify paywall conversion flow works end-to-end, and confirm no new bugs are introduced.",
+          "status": "pending",
+          "parentTaskId": 36
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "title": "Implement Environment-Aware Auth Redirect Configuration for Supabase",
+      "description": "Modify the Supabase authentication configuration to dynamically handle redirect URLs based on the current environment (development or production).",
+      "details": "The current Supabase auth configuration uses hardcoded redirect URLs which causes issues when switching between development and production environments. Implement a solution that:\n\n1. Creates an environment variable system to detect whether the application is running in development (localhost:3000) or production (vibe-list.com)\n2. Updates the authentication initialization process to dynamically set the redirect URL based on the detected environment\n3. Configures Supabase project settings to accept both redirect URLs (add both localhost:3000 and vibe-list.com to the allowed redirect URLs in the Supabase dashboard)\n4. Modifies the auth callback handling to work with both URLs\n5. Updates any sign-in, sign-up, password reset, and other auth-related functions to use the dynamic redirect URL\n6. Ensures that deep linking and return-to-original-page functionality works correctly in both environments\n\nThe implementation should use environment variables (like NEXT_PUBLIC_SITE_URL) that can be set differently in development and production. Consider using a .env.local file for development and environment variables in your hosting platform for production.",
+      "testStrategy": "Testing should verify the authentication flow works correctly in both environments:\n\n1. Local Development Testing:\n   - Run the application locally and attempt sign-in, sign-up, and password reset flows\n   - Verify redirects correctly return to localhost:3000\n   - Test deep linking by starting auth flows from different pages and confirm return to the original page\n\n2. Production Testing:\n   - Deploy changes to a staging environment that mimics production\n   - Verify all auth flows redirect correctly to vibe-list.com\n   - Test on multiple browsers (Chrome, Firefox, Safari) to ensure consistent behavior\n\n3. Edge Case Testing:\n   - Test behavior when cookies are disabled\n   - Test with various URL parameters to ensure they're preserved through the auth flow\n   - Verify behavior when a user cancels the auth process\n\n4. Configuration Verification:\n   - Confirm both URLs are properly configured in the Supabase dashboard\n   - Verify environment variables are being correctly loaded and used\n\nDocument the testing process and results for future reference.",
+      "status": "pending",
+      "dependencies": [],
       "priority": "high"
     }
   ],

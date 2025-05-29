@@ -47,6 +47,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.13",
     "pg": "^8.16.0",
+    "playwright": "^1.52.0",
     "posthog-js": "^1.240.6",
     "posthog-node": "^4.17.1",
     "qrcode": "^1.5.4",
