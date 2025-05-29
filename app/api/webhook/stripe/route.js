@@ -85,12 +85,23 @@ export async function POST(req) {
           user = profile;
         }
 
+        // Determine access expiration based on plan
+        let accessExpiresAt = null;
+        if (plan.name === "Pro") {
+          // Pro plan: one year access
+          const oneYearFromNow = new Date();
+          oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+          accessExpiresAt = oneYearFromNow.toISOString();
+        }
+        // Hacker plan: lifetime access (accessExpiresAt remains null)
+
         await supabase
           .from("profiles")
           .update({
             customer_id: customerId,
             price_id: priceId,
             has_access: true,
+            access_expires_at: accessExpiresAt,
           })
           .eq("id", user?.id);
 

@@ -2043,6 +2043,214 @@
         29
       ],
       "priority": "high"
+    },
+    {
+      "id": 34,
+      "title": "Implement Stripe Paywall for VibeList Pro and Hacker Plans",
+      "description": "Set up a Stripe-based paywall system for the VibeList app with two subscription tiers: Pro plan ($25/year) and Hacker plan ($50/lifetime).",
+      "details": "This task involves implementing a complete payment system using Stripe for the VibeList application:\n\n1. Database Updates:\n   - Add the following fields to the profiles table:\n     - customer_id (string): Stripe customer ID\n     - price_id (string): Stripe price ID for the selected plan\n     - has_access (boolean): Flag indicating if user has paid access\n     - access_expires_at (timestamp): When access expires (null for lifetime)\n   - Create migration scripts for these changes\n\n2. Stripe Product Configuration:\n   - Create two products in the Stripe dashboard:\n     - Pro Plan: $25 with 1-year billing cycle\n     - Hacker Plan: $50 one-time payment\n   - Save the price_ids in the application config\n\n3. Webhook Implementation:\n   - Update the existing Stripe webhook to handle 'checkout.session.completed' events\n   - When payment succeeds, update the user's profile with:\n     - Set customer_id from the event\n     - Set price_id based on the purchased product\n     - Set has_access to true\n     - Set access_expires_at to 1 year from now for Pro plan or null for Hacker plan\n\n4. Paywall Middleware:\n   - Create middleware to protect dashboard routes\n   - Check user's has_access status and access_expires_at date\n   - Redirect non-paying or expired users to a payment page\n\n5. Access Utility Functions:\n   - Create hasValidSubscription(user) function to check if user has valid access\n   - Create getSubscriptionDetails(user) to return plan type and expiration\n   - Create getRemainingDays(user) for Pro plan users\n\n6. Dashboard UI Updates:\n   - Create a payment page showing both plan options\n   - Add Stripe Checkout integration for payment processing\n   - Update dashboard to show subscription status\n   - Display appropriate messaging for expired Pro plan users\n   - Add renewal options for expiring Pro plans\n\n7. Use the existing Stripe configuration from config.js for API keys and webhook secrets",
+      "testStrategy": "Testing should cover the complete payment flow and access control:\n\n1. Unit Tests:\n   - Test hasValidSubscription() with various user states (paid, unpaid, expired)\n   - Test access utility functions with mock user data\n   - Verify middleware correctly identifies and redirects unpaid users\n\n2. Integration Tests:\n   - Create test Stripe products in test mode with lower prices\n   - Test webhook handling with Stripe test events\n   - Verify database updates correctly after payment events\n\n3. End-to-End Tests:\n   - Complete Pro plan purchase flow using Stripe test cards\n   - Complete Hacker plan purchase flow using Stripe test cards\n   - Verify access to dashboard after payment\n   - Test expiration by manually setting access_expires_at to past date\n\n4. Edge Cases:\n   - Test webhook handling for failed payments\n   - Test renewal process for Pro plan users\n   - Verify handling of users who upgrade from Pro to Hacker plan\n   - Test access control when Stripe services are temporarily unavailable\n\n5. Manual Testing Checklist:\n   - Verify payment page displays correct plan information and pricing\n   - Confirm receipt emails are sent correctly\n   - Check dashboard UI elements for paid vs. unpaid states\n   - Verify expiration warnings appear for Pro users approaching renewal",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Database Schema Updates for Payment Tracking",
+          "description": "Add payment-related fields to the profiles table and create migration scripts to support Stripe customer tracking and subscription management.",
+          "dependencies": [],
+          "details": "Create a new migration file to add the following columns to the profiles table:\n- customer_id (VARCHAR): Store Stripe customer ID\n- price_id (VARCHAR): Store Stripe price ID for the selected plan\n- has_access (BOOLEAN): Flag indicating if user has paid access (default: false)\n- access_expires_at (TIMESTAMP): When access expires (null for lifetime plans)\n\nImplementation steps:\n1. Create migration file: `migrations/add_payment_fields_to_profiles.sql`\n2. Add SQL commands to add the new columns with appropriate constraints\n3. Create rollback migration for reversing changes\n4. Test migration on development database\n5. Update the profiles model/schema definition to include new fields\n\nAcceptance criteria:\n- Migration runs successfully without errors\n- All new fields are properly typed and nullable where appropriate\n- Rollback migration works correctly\n- Database schema matches expected structure",
+          "status": "in-progress",
+          "parentTaskId": 34
+        },
+        {
+          "id": 2,
+          "title": "Stripe Product and Price Configuration",
+          "description": "Set up Stripe products and pricing in the Stripe dashboard, then configure the application with the generated price IDs.",
+          "dependencies": [],
+          "details": "Configure Stripe products and save price IDs in application config:\n\n1. In Stripe Dashboard:\n   - Create 'VibeList Pro' product with $25/year recurring price\n   - Create 'VibeList Hacker' product with $50 one-time price\n   - Note down the price_id values for both products\n\n2. Update config.js:\n```javascript\nconst STRIPE_CONFIG = {\n  publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,\n  secretKey: process.env.STRIPE_SECRET_KEY,\n  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,\n  prices: {\n    pro: 'price_xxxxx', // $25/year\n    hacker: 'price_xxxxx' // $50 lifetime\n  }\n};\n```\n\n3. Create environment variables for the price IDs\n4. Test price retrieval using Stripe API\n\nAcceptance criteria:\n- Both products created in Stripe with correct pricing\n- Price IDs properly stored in application config\n- Environment variables set up correctly\n- Stripe API can retrieve product information",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 3,
+          "title": "Stripe Webhook Handler for Payment Processing",
+          "description": "Implement or update the Stripe webhook endpoint to handle successful checkout sessions and update user profiles with payment information.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Update the existing Stripe webhook to handle 'checkout.session.completed' events:\n\n```javascript\n// webhook-handler.js\nconst handleCheckoutCompleted = async (session) => {\n  const { customer, client_reference_id, line_items } = session;\n  const userId = client_reference_id; // User ID passed during checkout\n  \n  // Get the price_id from line items\n  const priceId = line_items.data[0].price.id;\n  \n  // Determine plan type and expiration\n  let accessExpiresAt = null;\n  if (priceId === STRIPE_CONFIG.prices.pro) {\n    accessExpiresAt = new Date();\n    accessExpiresAt.setFullYear(accessExpiresAt.getFullYear() + 1);\n  }\n  \n  // Update user profile\n  await updateUserProfile(userId, {\n    customer_id: customer,\n    price_id: priceId,\n    has_access: true,\n    access_expires_at: accessExpiresAt\n  });\n};\n```\n\nImplementation steps:\n1. Update webhook endpoint to handle checkout.session.completed\n2. Extract customer ID, price ID, and user ID from session\n3. Calculate expiration date based on plan type\n4. Update user profile in database\n5. Add error handling and logging\n6. Test with Stripe webhook testing tools\n\nAcceptance criteria:\n- Webhook successfully processes payment events\n- User profiles updated correctly after payment\n- Proper error handling for failed updates\n- Webhook signature verification working",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 4,
+          "title": "Access Control Utility Functions",
+          "description": "Create utility functions to check user subscription status, validate access, and retrieve subscription details for use throughout the application.",
+          "dependencies": [
+            1
+          ],
+          "details": "Create a subscription utility module with the following functions:\n\n```javascript\n// utils/subscription.js\nconst hasValidSubscription = (user) => {\n  if (!user.has_access) return false;\n  \n  // Lifetime access (Hacker plan)\n  if (!user.access_expires_at) return true;\n  \n  // Check if Pro plan hasn't expired\n  return new Date() < new Date(user.access_expires_at);\n};\n\nconst getSubscriptionDetails = (user) => {\n  if (!user.has_access) return { type: 'none', status: 'inactive' };\n  \n  const isHacker = !user.access_expires_at;\n  const isExpired = user.access_expires_at && new Date() > new Date(user.access_expires_at);\n  \n  return {\n    type: isHacker ? 'hacker' : 'pro',\n    status: isExpired ? 'expired' : 'active',\n    expiresAt: user.access_expires_at\n  };\n};\n\nconst getRemainingDays = (user) => {\n  if (!user.access_expires_at) return null; // Lifetime access\n  \n  const now = new Date();\n  const expiresAt = new Date(user.access_expires_at);\n  const diffTime = expiresAt - now;\n  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));\n};\n```\n\nImplementation steps:\n1. Create subscription utility module\n2. Implement access validation logic\n3. Add subscription type detection\n4. Create expiration date calculations\n5. Add comprehensive unit tests\n6. Export functions for use in other modules\n\nAcceptance criteria:\n- All utility functions work correctly with different user states\n- Proper handling of edge cases (null dates, expired subscriptions)\n- Unit tests cover all scenarios\n- Functions are properly documented",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 5,
+          "title": "Paywall Middleware Implementation",
+          "description": "Create middleware to protect dashboard routes by checking user subscription status and redirecting unauthorized users to the payment page.",
+          "dependencies": [
+            4
+          ],
+          "details": "Implement middleware to protect premium routes:\n\n```javascript\n// middleware/paywall.js\nconst { hasValidSubscription } = require('../utils/subscription');\n\nconst paywallMiddleware = async (req, res, next) => {\n  try {\n    const user = req.user; // Assumes user is attached to request\n    \n    if (!user) {\n      return res.redirect('/login');\n    }\n    \n    if (!hasValidSubscription(user)) {\n      return res.redirect('/payment?reason=access_required');\n    }\n    \n    next();\n  } catch (error) {\n    console.error('Paywall middleware error:', error);\n    res.redirect('/payment?reason=error');\n  }\n};\n\nmodule.exports = paywallMiddleware;\n```\n\nImplementation steps:\n1. Create paywall middleware function\n2. Integrate with existing authentication system\n3. Add route protection to dashboard endpoints\n4. Implement redirect logic with reason parameters\n5. Add error handling and logging\n6. Test middleware with different user states\n\nRoute protection example:\n```javascript\n// Apply to protected routes\napp.get('/dashboard', authenticateUser, paywallMiddleware, dashboardController);\napp.get('/premium-features', authenticateUser, paywallMiddleware, premiumController);\n```\n\nAcceptance criteria:\n- Middleware correctly identifies subscription status\n- Unauthorized users redirected to payment page\n- Authorized users can access protected routes\n- Proper error handling for edge cases\n- Integration works with existing auth system",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 6,
+          "title": "Stripe Checkout Integration",
+          "description": "Implement Stripe Checkout sessions for both subscription plans, including session creation API endpoints and client-side integration.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Create Stripe Checkout integration for payment processing:\n\n1. Server-side checkout session creation:\n```javascript\n// routes/checkout.js\nconst createCheckoutSession = async (req, res) => {\n  const { priceId, userId } = req.body;\n  \n  try {\n    const session = await stripe.checkout.sessions.create({\n      payment_method_types: ['card'],\n      line_items: [{\n        price: priceId,\n        quantity: 1,\n      }],\n      mode: priceId === STRIPE_CONFIG.prices.pro ? 'subscription' : 'payment',\n      success_url: `${process.env.DOMAIN}/dashboard?session_id={CHECKOUT_SESSION_ID}`,\n      cancel_url: `${process.env.DOMAIN}/payment?cancelled=true`,\n      client_reference_id: userId,\n      customer_email: req.user.email\n    });\n    \n    res.json({ sessionId: session.id });\n  } catch (error) {\n    res.status(500).json({ error: error.message });\n  }\n};\n```\n\n2. Client-side integration:\n```javascript\n// public/js/checkout.js\nconst handleCheckout = async (priceId) => {\n  const response = await fetch('/api/create-checkout-session', {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ priceId, userId: currentUser.id })\n  });\n  \n  const { sessionId } = await response.json();\n  const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);\n  \n  await stripe.redirectToCheckout({ sessionId });\n};\n```\n\nImplementation steps:\n1. Create checkout session API endpoint\n2. Implement client-side Stripe integration\n3. Add proper error handling\n4. Set up success/cancel URLs\n5. Test checkout flow for both plans\n6. Verify webhook integration works\n\nAcceptance criteria:\n- Checkout sessions created successfully for both plans\n- Users redirected to Stripe Checkout properly\n- Payment success triggers webhook correctly\n- Error handling works for failed payments\n- Success/cancel redirects function properly",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 7,
+          "title": "Payment Page and Plan Selection UI",
+          "description": "Create the payment page interface showing both subscription plans with pricing, features, and Stripe Checkout integration buttons.",
+          "dependencies": [
+            6
+          ],
+          "details": "Build the payment page with plan selection:\n\n```html\n<!-- payment.html -->\n<div class=\"payment-page\">\n  <h1>Choose Your VibeList Plan</h1>\n  \n  <div class=\"plans-container\">\n    <div class=\"plan-card pro-plan\">\n      <h3>Pro Plan</h3>\n      <div class=\"price\">$25<span>/year</span></div>\n      <ul class=\"features\">\n        <li>Unlimited playlists</li>\n        <li>Advanced analytics</li>\n        <li>Priority support</li>\n        <li>Export features</li>\n      </ul>\n      <button onclick=\"handleCheckout('${STRIPE_CONFIG.prices.pro}')\"\n              class=\"checkout-btn pro-btn\">\n        Subscribe to Pro\n      </button>\n    </div>\n    \n    <div class=\"plan-card hacker-plan featured\">\n      <div class=\"badge\">Best Value</div>\n      <h3>Hacker Plan</h3>\n      <div class=\"price\">$50<span>/lifetime</span></div>\n      <ul class=\"features\">\n        <li>Everything in Pro</li>\n        <li>Lifetime access</li>\n        <li>Beta features</li>\n        <li>API access</li>\n      </ul>\n      <button onclick=\"handleCheckout('${STRIPE_CONFIG.prices.hacker}')\"\n              class=\"checkout-btn hacker-btn\">\n        Get Lifetime Access\n      </button>\n    </div>\n  </div>\n</div>\n```\n\nImplementation steps:\n1. Design payment page layout\n2. Create plan comparison cards\n3. Add responsive CSS styling\n4. Integrate Stripe Checkout buttons\n5. Add loading states and error handling\n6. Implement URL parameter handling (reason, cancelled)\n7. Add testimonials or social proof\n8. Test on different devices\n\nAcceptance criteria:\n- Payment page displays both plans clearly\n- Checkout buttons trigger Stripe Checkout\n- Responsive design works on mobile\n- Loading states provide good UX\n- Error messages display appropriately\n- URL parameters handled correctly",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 8,
+          "title": "Dashboard Subscription Status and Management UI",
+          "description": "Update the dashboard to display subscription status, expiration dates, renewal options, and appropriate messaging for different subscription states.",
+          "dependencies": [
+            4,
+            5
+          ],
+          "details": "Enhance dashboard with subscription management:\n\n```html\n<!-- dashboard-subscription-status.html -->\n<div class=\"subscription-status\">\n  <div class=\"status-card\">\n    <h3>Subscription Status</h3>\n    \n    <!-- Active Pro Plan -->\n    <div class=\"status active-pro\" v-if=\"subscription.type === 'pro' && subscription.status === 'active'\">\n      <span class=\"badge pro\">Pro Plan</span>\n      <p>Your subscription expires in {{ remainingDays }} days</p>\n      <button class=\"renew-btn\" v-if=\"remainingDays <= 30\">Renew Now</button>\n    </div>\n    \n    <!-- Active Hacker Plan -->\n    <div class=\"status active-hacker\" v-if=\"subscription.type === 'hacker'\">\n      <span class=\"badge hacker\">Hacker Plan</span>\n      <p>Lifetime access - you're all set! 🚀</p>\n    </div>\n    \n    <!-- Expired Plan -->\n    <div class=\"status expired\" v-if=\"subscription.status === 'expired'\">\n      <span class=\"badge expired\">Expired</span>\n      <p>Your subscription has expired. Renew to continue using premium features.</p>\n      <button class=\"upgrade-btn\" onclick=\"window.location.href='/payment'\">Renew Subscription</button>\n    </div>\n    \n    <!-- No Plan -->\n    <div class=\"status no-plan\" v-if=\"subscription.type === 'none'\">\n      <p>Upgrade to unlock premium features</p>\n      <button class=\"upgrade-btn\" onclick=\"window.location.href='/payment'\">Choose Plan</button>\n    </div>\n  </div>\n</div>\n```\n\nServer-side controller updates:\n```javascript\n// controllers/dashboard.js\nconst renderDashboard = async (req, res) => {\n  const user = req.user;\n  const subscription = getSubscriptionDetails(user);\n  const remainingDays = getRemainingDays(user);\n  \n  res.render('dashboard', {\n    user,\n    subscription,\n    remainingDays,\n    showRenewalPrompt: remainingDays && remainingDays <= 30\n  });\n};\n```\n\nImplementation steps:\n1. Create subscription status component\n2. Add conditional rendering for different states\n3. Implement renewal/upgrade buttons\n4. Add expiration warnings (30 days, 7 days, expired)\n5. Style status badges and cards\n6. Add usage analytics for premium features\n7. Test all subscription states\n8. Add customer portal link for plan management\n\nAcceptance criteria:\n- Dashboard shows correct subscription status\n- Expiration warnings appear at appropriate times\n- Renewal/upgrade buttons work correctly\n- Different plan types display appropriate messaging\n- UI is intuitive and visually appealing\n- All subscription states tested and working",
+          "status": "pending",
+          "parentTaskId": 34
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "title": "Configure Stripe Products and Environment Variables for VibeList Paywall",
+      "description": "Set up the required Stripe products/prices for the Pro and Hacker subscription plans and configure all necessary environment variables for the VibeList paywall system.",
+      "details": "This task involves configuring the Stripe dashboard and application environment to support the VibeList paywall system:\n\n1. **Stripe Product Configuration**:\n   - Log into the Stripe dashboard\n   - Create two products with the following details:\n     - Product 1: \"VibeList Pro Plan\"\n       - Description: \"One year of premium access to VibeList\"\n       - Price: $25 USD, billed once (not recurring)\n       - Set the billing period to 1 year\n     - Product 2: \"VibeList Hacker Plan\"\n       - Description: \"Lifetime premium access to VibeList\"\n       - Price: $50 USD, one-time payment\n   - Note the Product IDs and Price IDs for both products\n\n2. **Environment Variable Setup**:\n   - Create/update the `.env` file with the following variables:\n     - `STRIPE_SECRET_KEY`: Your Stripe secret key\n     - `STRIPE_PUBLISHABLE_KEY`: Your Stripe publishable key\n     - `STRIPE_WEBHOOK_SECRET`: Secret for webhook verification\n     - `STRIPE_PRO_PRICE_ID`: Price ID for the Pro Plan\n     - `STRIPE_HACKER_PRICE_ID`: Price ID for the Hacker Plan\n     - `STRIPE_SUCCESS_URL`: URL to redirect after successful payment (e.g., `https://vibelist.app/payment/success`)\n     - `STRIPE_CANCEL_URL`: URL to redirect after canceled payment (e.g., `https://vibelist.app/pricing`)\n\n3. **Code Updates**:\n   - Update any configuration files that reference Stripe product IDs\n   - Ensure the checkout flow is using the environment variables rather than hardcoded values\n   - Verify that the webhook handler correctly processes events for both subscription types\n\n4. **Documentation**:\n   - Document the Stripe product configuration in the project documentation\n   - Include instructions for other developers on how to set up their local environment",
+      "testStrategy": "1. **Environment Variable Verification**:\n   - Run a script to verify all required environment variables are present and properly formatted\n   - Check that the application can access these variables correctly\n\n2. **Stripe Product Testing**:\n   - Verify that the correct product IDs and price IDs are being used in the application\n   - Use Stripe's test mode to simulate purchases of both plans:\n     - Test the Pro Plan purchase flow and verify the correct amount is charged\n     - Test the Hacker Plan purchase flow and verify the correct amount is charged\n\n3. **Integration Testing**:\n   - Test the complete payment flow using Stripe test cards (e.g., 4242 4242 4242 4242)\n   - Verify successful payments update the user's subscription status in the database\n   - Verify webhook handling correctly processes payment events\n   - Test the success and cancel URL redirects\n\n4. **Edge Case Testing**:\n   - Test with missing environment variables to ensure proper error handling\n   - Test with invalid Stripe keys to ensure appropriate error messages\n   - Test payment failures and verify proper error handling\n\n5. **Documentation Review**:\n   - Have another team member review the documentation for clarity and completeness\n   - Verify that the setup instructions work when followed by someone else",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up Stripe Dashboard Account and Access Keys",
+          "description": "Configure the Stripe dashboard account and retrieve the necessary API keys for the VibeList application.",
+          "dependencies": [],
+          "details": "1. Log into the Stripe dashboard (or create account if needed)\n2. Navigate to Developers > API keys section\n3. Copy the Publishable key and Secret key from the appropriate environment (test/live)\n4. Ensure the account has the necessary permissions for product creation and webhook management\n5. Document the key locations and access procedures\n6. Test API key validity by making a simple API call using Stripe CLI or curl\n7. Verify account is in the correct mode (test vs live) for the current development phase",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 2,
+          "title": "Create VibeList Pro Plan Product in Stripe",
+          "description": "Create the Pro Plan product with one-year billing period and $25 USD pricing in the Stripe dashboard.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Navigate to Products section in Stripe dashboard\n2. Click 'Add product' button\n3. Set product name: 'VibeList Pro Plan'\n4. Set description: 'One year of premium access to VibeList'\n5. Create pricing with: $25 USD, one-time payment\n6. Set billing period metadata to indicate 1 year duration\n7. Configure product as active and available\n8. Copy and securely store the Product ID and Price ID\n9. Verify product appears correctly in the dashboard\n10. Test product retrieval via Stripe API to ensure proper configuration",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 3,
+          "title": "Create VibeList Hacker Plan Product in Stripe",
+          "description": "Create the Hacker Plan product with lifetime access and $50 USD one-time pricing in the Stripe dashboard.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Navigate to Products section in Stripe dashboard\n2. Click 'Add product' button\n3. Set product name: 'VibeList Hacker Plan'\n4. Set description: 'Lifetime premium access to VibeList'\n5. Create pricing with: $50 USD, one-time payment\n6. Add metadata to indicate lifetime access\n7. Configure product as active and available\n8. Copy and securely store the Product ID and Price ID\n9. Verify product appears correctly in the dashboard\n10. Test product retrieval via Stripe API to ensure proper configuration",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 4,
+          "title": "Configure Stripe Webhook Endpoint and Secret",
+          "description": "Set up webhook endpoint in Stripe dashboard and generate webhook secret for payment event handling.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Navigate to Developers > Webhooks in Stripe dashboard\n2. Click 'Add endpoint' button\n3. Set endpoint URL (e.g., https://vibelist.app/api/webhooks/stripe)\n4. Select relevant events: checkout.session.completed, payment_intent.succeeded, payment_intent.payment_failed\n5. Add any additional events needed for subscription management\n6. Save the webhook configuration\n7. Copy the webhook signing secret from the webhook details page\n8. Test webhook endpoint connectivity using Stripe CLI or webhook testing tools\n9. Verify webhook receives and processes test events correctly",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 5,
+          "title": "Create and Configure Environment Variables File",
+          "description": "Set up the .env file with all required Stripe configuration variables for the VibeList application.",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "1. Create or update .env file in the project root directory\n2. Add STRIPE_SECRET_KEY with the secret key from subtask 1\n3. Add STRIPE_PUBLISHABLE_KEY with the publishable key from subtask 1\n4. Add STRIPE_WEBHOOK_SECRET with the webhook secret from subtask 4\n5. Add STRIPE_PRO_PRICE_ID with the Pro Plan price ID from subtask 2\n6. Add STRIPE_HACKER_PRICE_ID with the Hacker Plan price ID from subtask 3\n7. Add STRIPE_SUCCESS_URL: https://vibelist.app/payment/success\n8. Add STRIPE_CANCEL_URL: https://vibelist.app/pricing\n9. Ensure .env file is added to .gitignore\n10. Create .env.example file with placeholder values for other developers",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 6,
+          "title": "Update Application Configuration Files",
+          "description": "Modify application configuration files to use environment variables instead of hardcoded Stripe values.",
+          "dependencies": [
+            5
+          ],
+          "details": "1. Locate all configuration files that reference Stripe settings (config.js, constants.js, etc.)\n2. Replace any hardcoded Stripe product IDs with environment variable references\n3. Update Stripe client initialization to use environment variables\n4. Modify any pricing display components to reference the new environment variables\n5. Update API route configurations to use the new webhook secret\n6. Ensure all Stripe-related imports and initializations use the environment variables\n7. Add proper error handling for missing environment variables\n8. Test configuration loading in development environment",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 7,
+          "title": "Update Checkout Flow and Webhook Handler",
+          "description": "Modify the payment checkout flow and webhook processing to work with the new Stripe products and environment configuration.",
+          "dependencies": [
+            6
+          ],
+          "details": "1. Update checkout session creation to use environment variables for price IDs\n2. Modify success and cancel URL redirects to use environment variables\n3. Update webhook handler to process events for both Pro and Hacker plans\n4. Implement proper event validation using the webhook secret\n5. Add logic to handle different subscription types based on price ID\n6. Update user account upgrade logic for both plan types\n7. Ensure proper error handling and logging for payment events\n8. Test checkout flow with both products using Stripe test mode\n9. Verify webhook processing handles all relevant payment events correctly",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 8,
+          "title": "Create Documentation and Validation Testing",
+          "description": "Document the Stripe configuration setup and perform comprehensive testing of the entire paywall system.",
+          "dependencies": [
+            7
+          ],
+          "details": "1. Create documentation file (STRIPE_SETUP.md) with complete setup instructions\n2. Document all environment variables and their purposes\n3. Include step-by-step Stripe dashboard configuration guide\n4. Add troubleshooting section for common setup issues\n5. Create local development setup instructions for other developers\n6. Perform end-to-end testing of both Pro and Hacker plan purchases\n7. Test webhook event processing with various payment scenarios\n8. Verify environment variable loading and error handling\n9. Test payment success and cancellation flows\n10. Document any additional configuration needed for production deployment",
+          "status": "pending",
+          "parentTaskId": 35
+        },
+        {
+          "id": 9,
+          "title": "Implement Soft Paywall with Feature Restrictions",
+          "description": "Replace hard paywall redirect with soft paywall that allows users to create waitlists but restricts premium features like live preview, publishing, and analytics access",
+          "details": "Remove the pricing page redirect and instead:\n1. Allow unpaid users to access dashboard and create waitlists\n2. Disable publishing functionality for unpaid users\n3. Hide/disable live preview for unpaid users  \n4. Blur analytics with upgrade overlay\n5. Show upgrade prompts on restricted features\n6. Keep users engaged while encouraging upgrade",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 35
+        }
+      ]
     }
   ],
   "metadata": {

@@ -1867,6 +1867,290 @@
         3,
         11
       ],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Remove Coming Soon Overlay and Prepare Dashboard Foundation",
+          "description": "Remove the blur overlay and 'coming soon' state from the analytics dashboard, implementing the foundation for a functional analytics interface with proper loading states and responsive design structure.",
+          "dependencies": [],
+          "details": "Implementation steps: 1) Locate and remove/conditionally render the blur overlay component from the analytics dashboard page. 2) Create a clean dashboard layout structure with responsive grid system using CSS Grid or Flexbox. 3) Implement a loading skeleton component that matches the final dashboard layout for better UX during data fetching. 4) Add proper semantic HTML structure with accessibility considerations (ARIA labels, proper heading hierarchy). 5) Ensure the dashboard container is responsive across mobile, tablet, and desktop breakpoints. 6) Create placeholder states for when no waitlist is selected, displaying 'Please select a waitlist' message with appropriate styling. Testing: Verify overlay removal, test responsive behavior across different screen sizes, validate accessibility with screen readers, and confirm loading states display correctly.\n\n<info added on 2025-05-26T22:03:59.343Z>\n**Technical Implementation Details:**\n\n**Component Architecture:**\n- Created modular component structure with `AnalyticsDashboard` as the main container\n- Implemented `WaitlistSelector` as a reusable dropdown component with search functionality\n- Built `LoadingSkeleton` component using CSS animations with shimmer effects for realistic loading appearance\n- Used compound component pattern for dashboard sections to maintain clean separation of concerns\n\n**State Management Patterns:**\n```javascript\n// Implemented optimistic UI updates for waitlist selection\nconst handleWaitlistChange = useCallback((waitlistId) => {\n  setSelectedWaitlistId(waitlistId);\n  setIsLoading(true);\n  // Trigger analytics data fetch with new waitlist ID\n}, []);\n\n// Added debounced refresh to prevent excessive API calls\nconst debouncedRefresh = useMemo(\n  () => debounce(() => fetchAnalyticsData(), 300),\n  [selectedWaitlistId]\n);\n```\n\n**CSS Grid Implementation:**\n- Used CSS Grid with `grid-template-areas` for semantic layout definition\n- Implemented responsive breakpoints: mobile (320px+), tablet (768px+), desktop (1024px+)\n- Added CSS custom properties for consistent spacing: `--dashboard-gap: 1.5rem`\n- Utilized `minmax()` functions for flexible column sizing\n\n**Accessibility Enhancements:**\n- Added `role=\"main\"` to dashboard container and `role=\"region\"` to analytics sections\n- Implemented focus management with `useRef` hooks for keyboard navigation\n- Added `aria-live=\"polite\"` regions for dynamic content updates\n- Included `aria-describedby` attributes linking controls to help text\n\n**Performance Optimizations:**\n- Implemented `React.memo` for WaitlistSelector to prevent unnecessary re-renders\n- Added `useMemo` for expensive computations like waitlist filtering\n- Used `useCallback` for event handlers to maintain referential equality\n- Lazy-loaded skeleton components to reduce initial bundle size\n\n**Error Boundary Integration:**\n- Wrapped dashboard sections in error boundaries with fallback UI\n- Added retry mechanisms for failed data fetches\n- Implemented graceful degradation when WaitlistContext is unavailable\n</info added on 2025-05-26T22:03:59.343Z>",
+          "status": "done",
+          "parentTaskId": 29
+        },
+        {
+          "id": 2,
+          "title": "Integrate Waitlist Selection with WaitlistContext",
+          "description": "Implement a dropdown component that integrates with the existing WaitlistContext to allow users to select from their owned waitlists, following the established state management patterns in the application.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps: 1) Create a WaitlistSelector component using a dropdown/select element that integrates with the existing WaitlistContext. 2) Fetch user's waitlists from the context and populate the dropdown options with waitlist names and IDs. 3) Implement proper state management for selected waitlist using React hooks (useState/useEffect). 4) Add loading states for the dropdown while waitlists are being fetched. 5) Implement error handling for cases where waitlist fetching fails. 6) Ensure the dropdown is accessible with proper ARIA attributes and keyboard navigation. 7) Style the dropdown to match the existing design system and ensure it's responsive. 8) Add a 'Select a waitlist' placeholder option and handle the unselected state appropriately. Testing: Verify dropdown populates with user's waitlists, test selection functionality, validate accessibility compliance, test error states, and ensure integration with WaitlistContext works correctly.",
+          "status": "done",
+          "parentTaskId": 29
+        },
+        {
+          "id": 3,
+          "title": "Implement Supabase Data Fetching with Authentication",
+          "description": "Create secure API functions to fetch waitlist analytics data from Supabase tables (waitlists, waitlist_signups, waitlist_analytics) with proper authentication checks to ensure users only access their own waitlist data.",
+          "dependencies": [
+            2
+          ],
+          "details": "Implementation steps: 1) Create API service functions to interact with Supabase tables: fetchWaitlistAnalytics(), fetchWaitlistSignups(), and fetchWaitlistDetails(). 2) Implement the existing get_waitlist_analytics Supabase function call with proper error handling. 3) Add authentication middleware to verify user ownership of requested waitlists before returning data. 4) Implement proper SQL queries with JOINs to fetch related data efficiently (waitlist details, signup counts, user information). 5) Add data validation and sanitization for all API responses. 6) Implement caching strategy for frequently accessed data to improve performance. 7) Create TypeScript interfaces for all data structures (Waitlist, WaitlistSignup, Analytics). 8) Add comprehensive error handling with specific error messages for different failure scenarios. Testing: Test authentication checks prevent unauthorized access, verify data fetching returns correct information, test error handling for various failure scenarios, validate data structure matches TypeScript interfaces, and test performance with large datasets.\n\n<info added on 2025-05-26T22:08:16.512Z>\n**Database Function Integration:**\n- Leveraged existing `get_waitlist_analytics` PostgreSQL function for optimized analytics calculations\n- Function returns pre-calculated metrics including conversion rates, signup trends, and time-based analytics\n- Implements efficient aggregation queries that avoid N+1 problems when fetching related data\n- Uses database-level calculations for better performance than client-side processing\n\n**TypeScript Interface Definitions:**\n```typescript\ninterface WaitlistAnalytics {\n  waitlist_id: string;\n  total_signups: number;\n  conversion_rate: number;\n  signup_trend: 'increasing' | 'decreasing' | 'stable';\n  last_calculated: string;\n  daily_signups: Array<{ date: string; count: number }>;\n}\n\ninterface WaitlistSignup {\n  id: string;\n  email: string;\n  created_at: string;\n  referral_source?: string;\n  metadata?: Record<string, any>;\n}\n\ninterface WaitlistDetails {\n  id: string;\n  name: string;\n  status: 'published' | 'draft';\n  public_url: string;\n  created_at: string;\n  settings: WaitlistSettings;\n}\n```\n\n**Caching Implementation:**\n- Implemented React Query for client-side caching with 5-minute stale time\n- Added cache invalidation on waitlist updates or new signups\n- Browser localStorage fallback for offline analytics viewing\n- Cache keys structured as `analytics-${waitlistId}-${timestamp}` for proper invalidation\n\n**Advanced Error Recovery:**\n- Retry logic with exponential backoff for transient network failures\n- Fallback to cached data when real-time fetch fails\n- Circuit breaker pattern to prevent cascading failures\n- Detailed error logging with correlation IDs for debugging production issues\n\n**Performance Monitoring:**\n- Added performance timing measurements for each API call\n- Implemented request deduplication to prevent duplicate simultaneous calls\n- Query optimization using Supabase's built-in query planner hints\n- Lazy loading for non-critical analytics data (detailed breakdowns, historical trends)\n\n**Data Validation Layer:**\n- Zod schema validation for all API responses to ensure type safety\n- Runtime validation prevents malformed data from breaking the UI\n- Automatic data sanitization for XSS prevention\n- Null/undefined handling with sensible defaults for missing analytics data\n</info added on 2025-05-26T22:08:16.512Z>",
+          "status": "done",
+          "parentTaskId": 29
+        },
+        {
+          "id": 4,
+          "title": "Create Analytics Display Components with KPI Cards",
+          "description": "Build responsive analytics display components including KPI cards for total signups, waitlist URLs, and other key metrics, following the established design system and ensuring optimal user experience.",
+          "dependencies": [
+            3
+          ],
+          "details": "Implementation steps: 1) Create reusable KpiCard component for displaying key metrics (total signups, conversion rates, etc.) with consistent styling. 2) Implement AnalyticsOverview component that displays 4-6 key metrics in a responsive grid layout. 3) Create WaitlistUrlDisplay component that shows the Supabase-generated waitlist link with copy-to-clipboard functionality. 4) Add loading skeletons for each component that match the final layout structure. 5) Implement responsive design ensuring cards stack appropriately on mobile devices. 6) Add hover states and subtle animations for better user interaction feedback. 7) Ensure all components follow the existing design system (colors, typography, spacing). 8) Implement proper error states for when data fails to load. 9) Add accessibility features including proper ARIA labels and keyboard navigation. Testing: Verify responsive behavior across all screen sizes, test loading states and error handling, validate accessibility compliance, test copy-to-clipboard functionality, and ensure design consistency with existing application.",
+          "status": "in-progress",
+          "parentTaskId": 29
+        },
+        {
+          "id": 5,
+          "title": "Implement Detailed Signup List with User Information",
+          "description": "Create a comprehensive signup list component that displays detailed information about waitlist signups including names, emails, and registration timestamps, with proper data handling and user privacy considerations.",
+          "dependencies": [
+            4
+          ],
+          "details": "Implementation steps: 1) Create SignupListTable component with sortable columns for name, email, registration date, and any additional signup fields. 2) Implement pagination for large signup lists to maintain performance (show 25-50 signups per page). 3) Add search/filter functionality to allow users to find specific signups quickly. 4) Implement data export functionality (CSV/Excel) for signup lists. 5) Add proper data formatting for dates, emails, and other fields. 6) Implement responsive table design that works on mobile devices (consider card layout for small screens). 7) Add loading states for individual table rows during data fetching. 8) Implement proper data privacy measures (mask sensitive information if needed). 9) Add bulk actions for managing signups (if required by business logic). 10) Ensure proper error handling for data display issues. Testing: Test with various data sizes, verify pagination works correctly, test search and filter functionality, validate responsive behavior, test data export features, and ensure privacy measures are working correctly.",
+          "status": "pending",
+          "parentTaskId": 29
+        },
+        {
+          "id": 6,
+          "title": "Integrate All Components and Implement Final State Management",
+          "description": "Combine all dashboard components into a cohesive analytics interface with proper state management, error handling, and performance optimization, ensuring seamless user experience and data consistency.",
+          "dependencies": [
+            5
+          ],
+          "details": "Implementation steps: 1) Create the main AnalyticsDashboard component that orchestrates all sub-components (WaitlistSelector, KPI cards, SignupList). 2) Implement comprehensive state management using React Context or hooks to handle selected waitlist, loading states, errors, and analytics data. 3) Add global error boundary to catch and handle any component errors gracefully. 4) Implement data refresh functionality with manual refresh button and automatic refresh intervals. 5) Add performance optimizations including React.memo for components, useMemo for expensive calculations, and useCallback for event handlers. 6) Implement proper cleanup for subscriptions and intervals to prevent memory leaks. 7) Add comprehensive loading states that coordinate across all components. 8) Implement offline detection and appropriate messaging when network is unavailable. 9) Add analytics tracking for user interactions within the dashboard. 10) Perform final integration testing and performance optimization. Testing: Conduct end-to-end testing of complete user workflows, test error scenarios and recovery, validate performance with large datasets, test offline behavior, verify state management works correctly across component interactions, and conduct accessibility audit of complete dashboard.",
+          "status": "pending",
+          "parentTaskId": 29
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "title": "Implement Functional Analytics Dashboard for Waitlists",
+      "description": "Analytics dashboard implementation has been completed and verified. The fully functional dashboard displays real waitlist data from Supabase with comprehensive metrics, trends, and user details. All core components are implemented and tested, ready for production deployment.",
+      "details": "This task involved transforming the placeholder analytics page into a fully functional dashboard:\n\n✅ COMPLETED IMPLEMENTATION:\n\n1. **Analytics API Endpoint** (/api/waitlists/[id]/analytics/route.js):\n   - Comprehensive analytics API that fetches real data from Supabase\n   - Authentication checks and user ownership verification\n   - Calculates metrics: total signups, pending/approved counts, conversion rates, avg time on waitlist\n   - Generates daily signup trends for last 30 days\n   - Aggregates referral source data from signup records\n   - Returns structured data for dashboard consumption\n\n2. **Custom Analytics Hook** (hooks/useAnalytics.js):\n   - useAnalytics hook integrated with WaitlistContext\n   - Automatically fetches analytics when selectedWaitlist changes\n   - Provides loading states, error handling, and refresh functionality\n   - Manages analytics data state efficiently\n\n3. **Analytics Dashboard Components** (app/dashboard/analytics/components/):\n   - **MetricCard.jsx**: Displays key metrics with loading skeletons\n   - **SignupsChart.jsx**: Line chart showing daily signup trends using Recharts\n   - **ReferralSourcesChart.jsx**: Bar chart showing signup sources\n   - **RecentSignupsTable.jsx**: Paginated table of recent signups with status badges\n   - **WaitlistStatusCard.jsx**: Shows waitlist status and publication state\n   - **EmptyState.jsx**: Friendly empty state when no waitlist is selected\n\n4. **Main Analytics Page** (app/dashboard/analytics/page.js):\n   - Completely replaced placeholder \"coming soon\" content\n   - Removed blur overlay and hardcoded template data\n   - Integrated with WaitlistContext for dynamic waitlist selection\n   - Added proper error handling and loading states\n   - Responsive design with mobile-first approach\n   - Real-time refresh functionality\n\n✅ IMPLEMENTATION VERIFICATION COMPLETED:\n\n- Real Supabase data integration with proper authentication verified\n- Comprehensive metrics calculation accuracy confirmed\n- 30-day daily signup trends with proper date formatting tested\n- Referral source aggregation and visualization working\n- Responsive design with mobile-first approach validated\n- Loading states with skeleton components functioning\n- Error handling with retry functionality tested\n- Empty state management verified\n- WaitlistContext integration for dynamic waitlist selection confirmed\n- Database integration and API authentication working correctly\n- All components follow established patterns and conventions\n\n🔄 FINAL DEPLOYMENT TASKS:\n\n1. **Production Deployment Verification**:\n   - Deploy to production environment and verify all functionality\n   - Test with production database and real user data\n   - Verify SSL and security configurations\n\n2. **Performance Monitoring**:\n   - Monitor API response times in production\n   - Verify chart rendering performance with real data volumes\n   - Monitor error rates and user experience metrics\n\n3. **User Acceptance Testing**:\n   - Conduct final user testing with stakeholders\n   - Gather feedback on dashboard usability and metrics relevance\n   - Document any enhancement requests for future iterations\n\nThe analytics dashboard is production-ready and provides comprehensive waitlist analytics with real-time data visualization.",
+      "testStrategy": "Implementation has been verified and tested. Final testing should focus on production deployment validation:\n\n✅ COMPLETED TESTING:\n\n1. **Implementation Verification**:\n   - Core functionality tested and confirmed working\n   - API endpoint authentication verified (401 for unauthenticated requests)\n   - Database integration confirmed with existing waitlists and signups\n   - All components rendering correctly with real data\n   - WaitlistContext integration validated\n   - Responsive design patterns confirmed\n\n2. **Component Testing**:\n   - MetricCard displays accurate calculations\n   - SignupsChart renders daily trends correctly using Recharts\n   - ReferralSourcesChart shows proper source aggregation\n   - RecentSignupsTable pagination and status badges working\n   - WaitlistStatusCard displays correct status information\n   - EmptyState appears when no waitlist selected\n\n🔄 REMAINING PRODUCTION TESTING:\n\n1. **Production Environment Testing**:\n   - Deploy to production and verify all functionality works with live data\n   - Test SSL certificate and security configurations\n   - Verify environment variables and database connections\n   - Test with real user authentication flows\n\n2. **Performance Validation**:\n   - Monitor API response times with production data volumes\n   - Verify chart rendering performance across different browsers\n   - Test with various waitlist sizes and signup volumes\n   - Monitor memory usage and loading times\n\n3. **User Acceptance Testing**:\n   - Conduct stakeholder review of dashboard functionality\n   - Validate that metrics provide business value\n   - Test user workflows from waitlist selection to analytics viewing\n   - Gather feedback on dashboard usability\n\n4. **Cross-browser Production Testing**:\n   - Test charts and responsive design on production URLs\n   - Verify consistent functionality across Chrome, Firefox, Safari, Edge\n   - Test on mobile devices with production data\n\n5. **Monitoring Setup**:\n   - Implement error tracking for production issues\n   - Set up performance monitoring for API endpoints\n   - Configure alerts for dashboard availability\n\nDocument production deployment results and any final adjustments needed.",
+      "status": "done",
+      "dependencies": [
+        3,
+        11
+      ],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Remove Unnecessary Analytics Cards",
+          "description": "Remove the conversion rate, average rate on waitlist, and pending signups cards from the analytics dashboard as they provide limited value",
+          "details": "Clean up the analytics dashboard by removing cards that don't provide meaningful insights:\n- Remove conversion rate card (not useful for waitlist context)\n- Remove average rate on waitlist card (unclear metric)\n- Remove pending signups card (redundant with other metrics)\n- Adjust grid layout to accommodate fewer cards\n- Ensure remaining cards maintain proper spacing and responsive design",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 30
+        },
+        {
+          "id": 2,
+          "title": "Add Waitlist Link Copy Card",
+          "description": "Create a modern card component that displays the waitlist link and provides easy copy functionality",
+          "details": "Implement a new analytics card that makes it easy to share the waitlist:\n- Display the full waitlist URL prominently\n- Add a modern copy-to-clipboard button with visual feedback\n- Include success/copied state with animation\n- Use modern design patterns (rounded corners, subtle shadows, hover effects)\n- Ensure the card fits well with the existing analytics dashboard design\n- Make it responsive for mobile devices\n- Consider adding QR code generation for easy mobile sharing",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 30
+        },
+        {
+          "id": 3,
+          "title": "Enable Direct Navigation to Waitlist Analytics",
+          "description": "Modify navigation to allow direct access to a waitlist's analytics page when clicking on waitlists in the nav bar",
+          "details": "Update the navigation system to provide direct analytics access:\n- Modify waitlist navigation items to link directly to analytics page\n- Update the WaitlistContext to handle direct waitlist selection from URL\n- Ensure proper waitlist selection state when navigating directly to analytics\n- Add proper loading states during navigation\n- Maintain existing navigation patterns while adding this new functionality\n- Test navigation flow from dashboard → waitlist selection → analytics\n- Ensure breadcrumbs or navigation indicators show current waitlist context",
+          "status": "done",
+          "dependencies": [
+            "30.1"
+          ],
+          "parentTaskId": 30
+        },
+        {
+          "id": 4,
+          "title": "Implement Auto-refresh Analytics on Page Load",
+          "description": "Make analytics data refresh automatically on every page load, eliminating the need for a manual refresh button",
+          "details": "Implement automatic data refresh functionality:\n- Remove the manual refresh button from the analytics dashboard\n- Modify useAnalytics hook to automatically fetch fresh data on page load\n- Ensure analytics data is fetched whenever the page is accessed or refreshed\n- Add proper loading states during automatic refresh\n- Implement error handling for failed automatic refreshes\n- Consider adding a subtle loading indicator to show when data is being refreshed\n- Optimize API calls to prevent unnecessary requests\n- Test that data is always current when users navigate to analytics page",
+          "status": "done",
+          "dependencies": [
+            "30.2"
+          ],
+          "parentTaskId": 30
+        },
+        {
+          "id": 5,
+          "title": "Improve Waitlist URL Card Layout and Data Source",
+          "description": "Enhance the waitlist link card to span full width, pull actual URL data from Supabase, and improve the copy functionality",
+          "details": "Improve the WaitlistLinkCard component with the following enhancements:\n- Expand the card width to span from current position to the edge of the waitlist status card\n- Ensure the waitlist URL is pulled from the actual Supabase data (waitlist.url_slug)\n- Verify the URL construction uses the correct base URL and slug format\n- Enhance the copy button with modern design and one-click copy functionality\n- Add proper visual feedback for successful copy operations\n- Ensure responsive design works across different screen sizes\n- Test that the generated URLs are valid and accessible",
+          "status": "done",
+          "dependencies": [
+            "30.4"
+          ],
+          "parentTaskId": 30
+        },
+        {
+          "id": 6,
+          "title": "Implement Auto-refresh for Navigation and Analytics on Waitlist Creation",
+          "description": "Add automatic refresh functionality for navigation bar and analytics when new waitlists are created to reduce user friction",
+          "details": "Implement real-time refresh functionality to improve user experience:\n- Set up Supabase real-time subscriptions for waitlist changes\n- Auto-refresh navigation bar when new waitlists are created\n- Auto-refresh analytics data when the selected waitlist is updated\n- Ensure proper cleanup of subscriptions to prevent memory leaks\n- Handle edge cases like network disconnections gracefully\n- Provide subtle visual feedback when data is being refreshed\n- Test that new waitlists appear immediately in navigation without page refresh\n- Verify analytics updates automatically when waitlist data changes",
+          "status": "done",
+          "dependencies": [
+            "30.5"
+          ],
+          "parentTaskId": 30
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "title": "Implement White Theme with Shadow Separation Across Landing Page Components",
+      "description": "Update the landing page with a cohesive white background theme and add proper shadow effects to create visual separation between white components and their surroundings.",
+      "details": "This task involves creating a consistent white theme across the landing page while ensuring proper visual separation through shadows. Specific changes include:\n\n1. **Pricing Component**:\n   - Add subtle shadows around the white pricing cards to prevent them from blending with the background\n   - Change the background to DaisyUI white (bg-base-100)\n   - Reference the demo section's shadow implementation as a model\n\n2. **FAQ Section**:\n   - Change the background to DaisyUI white (bg-base-100)\n   - No shadow modifications needed for this section\n\n3. **Testimonials Section**:\n   - Add shadows to all white components to create visual separation\n   - Change the background to DaisyUI white (bg-base-100)\n   - Ensure consistent shadow styling with other components\n\n4. **Header Section**:\n   - Change the background to DaisyUI white (bg-base-100)\n\n**Shadow Implementation Guidelines**:\n- Use a consistent shadow style across components (suggest: `shadow-md` or `shadow-sm` from Tailwind)\n- Shadows should be subtle but effective in creating visual boundaries\n- For custom shadows, consider using: `box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);`\n\n**Color Implementation**:\n- Use DaisyUI's white theme color (`bg-base-100`) consistently across all sections\n- Ensure text colors maintain proper contrast against the white background",
+      "testStrategy": "**Visual Testing**:\n1. Compare each section before and after implementation to verify the white background is applied consistently\n2. Verify shadows are visible and effective in creating separation between white components and backgrounds\n3. Test the page at different screen sizes to ensure shadows remain effective across breakpoints\n\n**Specific Test Cases**:\n1. **Pricing Cards**: Verify each card has a visible shadow and doesn't blend into the background\n2. **FAQ Section**: Confirm the background is white with no unintended visual artifacts\n3. **Testimonials**: Verify all white components have shadows and proper separation\n4. **Header**: Confirm the background is properly set to DaisyUI white\n\n**Cross-Browser Testing**:\n- Test in Chrome, Firefox, Safari, and Edge to ensure shadow effects render consistently\n- Verify on both desktop and mobile devices\n\n**Accessibility Testing**:\n- Verify that the contrast between text and the white background meets WCAG AA standards\n- Ensure the shadow effects don't interfere with any interactive elements",
+      "status": "done",
+      "dependencies": [],
+      "priority": "medium"
+    },
+    {
+      "id": 32,
+      "title": "Fix Unescaped HTML Entities in JSX Causing Vercel Build Failures",
+      "description": "Identify and replace all unescaped quotes and apostrophes in JSX content with proper HTML entities to resolve ESLint errors preventing Vercel deployment.",
+      "details": "The codebase contains multiple instances of unescaped quotes and apostrophes in JSX text content that are causing ESLint errors and blocking Vercel deployment. The developer needs to:\n\n1. Scan the entire codebase for JSX files containing unescaped entities, with known issues in components/FeaturesGrid.js (lines 94, 106, 164)\n2. Replace all instances of unescaped quotes with appropriate HTML entities:\n   - Double quotes (`\"`) should be replaced with `&quot;`, `&ldquo;`, `&#34;`, or `&rdquo;`\n   - Single quotes/apostrophes (`'`) should be replaced with `&apos;`, `&lsquo;`, `&#39;`, or `&rsquo;`\n3. Use a consistent approach for replacements (recommended: `&quot;` for double quotes and `&apos;` for apostrophes)\n4. Pay special attention to text within JSX elements, not attributes or JavaScript strings\n5. Consider using a linting tool or regex search to find all instances systematically\n6. Ensure replacements maintain proper spacing and don't introduce additional formatting issues\n7. Document any patterns found to help prevent similar issues in future development\n\nThis is a critical fix as it's currently blocking deployment. The changes should be minimal and focused only on replacing the unescaped entities without altering any functionality or visual appearance.",
+      "testStrategy": "To verify the fix has been properly implemented:\n\n1. Run ESLint across the entire codebase to confirm no unescaped entity errors remain: `npx eslint . --ext .js,.jsx,.ts,.tsx`\n2. Attempt a local build to ensure it completes without errors: `npm run build`\n3. Manually inspect the fixed files to ensure the replacements were made correctly and didn't introduce any syntax errors\n4. Visually compare the rendered components in development environment before and after changes to confirm no visual regressions\n5. Test the specific components mentioned (FeaturesGrid.js) to verify text displays correctly with the HTML entities\n6. Create a test deployment to Vercel to confirm the build succeeds in the production environment\n7. Perform cross-browser testing to ensure HTML entities render correctly across different browsers\n8. Document all files that were modified and the specific changes made for code review purposes\n\nSuccess criteria: Vercel build passes without ESLint errors related to unescaped entities, and all text content displays correctly in the browser with no visual differences from before.",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high"
+    },
+    {
+      "id": 33,
+      "title": "Fix Analytics Page Data Loading After Waitlist Creation",
+      "description": "Implement automatic data fetching when navigating to the analytics page immediately after waitlist creation, eliminating the need for manual page refresh.",
+      "details": "Currently, when a user creates a new waitlist and immediately navigates to the analytics page by clicking the 'analytics' button/tab, the data doesn't load properly and the page appears empty or shows stale data. The user has to manually refresh the browser tab to see the analytics data.\n\nImplementation should:\n1. Modify the navigation logic to the analytics page to detect when a user is coming directly from waitlist creation\n2. Implement a data refresh mechanism that triggers when this navigation pattern is detected\n3. Consider using React's useEffect hook with appropriate dependencies to detect navigation changes\n4. Ensure the analytics data fetching API is called when the component mounts and when relevant state/route changes occur\n5. Add a loading state indicator while data is being fetched to improve user experience\n6. Implement proper error handling in case the data fetch fails\n7. Consider using React Query or similar state management tools for better cache invalidation\n8. Ensure the solution works consistently across different browsers and devices",
+      "testStrategy": "Testing should verify that the analytics data loads correctly without manual refresh:\n\n1. Manual testing:\n   - Create a new waitlist and immediately navigate to its analytics page\n   - Verify data appears without manual refresh\n   - Test on multiple browsers (Chrome, Firefox, Safari)\n   - Test on mobile and desktop views\n\n2. Automated testing:\n   - Write integration tests that simulate waitlist creation and immediate navigation to analytics\n   - Verify API calls are made at the appropriate times\n   - Test that loading states are displayed correctly\n   - Verify error handling works as expected\n\n3. Edge cases to test:\n   - Test with slow network connections to ensure loading states work properly\n   - Test with network failures to verify error handling\n   - Test rapid navigation (creating waitlist and quickly clicking analytics multiple times)\n   - Test when navigating away and then back to analytics page\n\n4. Acceptance criteria:\n   - Analytics data should load within 3 seconds of navigation without manual refresh\n   - User should see appropriate loading indicator while data is being fetched\n   - Error messages should be displayed if data cannot be loaded",
+      "status": "pending",
+      "dependencies": [
+        29
+      ],
+      "priority": "high"
+    },
+    {
+      "id": 34,
+      "title": "Implement Stripe Paywall for VibeList Pro and Hacker Plans",
+      "description": "Set up a Stripe-based paywall system for the VibeList app with two subscription tiers: Pro plan ($25/year) and Hacker plan ($50/lifetime).",
+      "details": "This task involves implementing a complete payment system using Stripe for the VibeList application:\n\n1. Database Updates:\n   - Add the following fields to the profiles table:\n     - customer_id (string): Stripe customer ID\n     - price_id (string): Stripe price ID for the selected plan\n     - has_access (boolean): Flag indicating if user has paid access\n     - access_expires_at (timestamp): When access expires (null for lifetime)\n   - Create migration scripts for these changes\n\n2. Stripe Product Configuration:\n   - Create two products in the Stripe dashboard:\n     - Pro Plan: $25 with 1-year billing cycle\n     - Hacker Plan: $50 one-time payment\n   - Save the price_ids in the application config\n\n3. Webhook Implementation:\n   - Update the existing Stripe webhook to handle 'checkout.session.completed' events\n   - When payment succeeds, update the user's profile with:\n     - Set customer_id from the event\n     - Set price_id based on the purchased product\n     - Set has_access to true\n     - Set access_expires_at to 1 year from now for Pro plan or null for Hacker plan\n\n4. Paywall Middleware:\n   - Create middleware to protect dashboard routes\n   - Check user's has_access status and access_expires_at date\n   - Redirect non-paying or expired users to a payment page\n\n5. Access Utility Functions:\n   - Create hasValidSubscription(user) function to check if user has valid access\n   - Create getSubscriptionDetails(user) to return plan type and expiration\n   - Create getRemainingDays(user) for Pro plan users\n\n6. Dashboard UI Updates:\n   - Create a payment page showing both plan options\n   - Add Stripe Checkout integration for payment processing\n   - Update dashboard to show subscription status\n   - Display appropriate messaging for expired Pro plan users\n   - Add renewal options for expiring Pro plans\n\n7. Use the existing Stripe configuration from config.js for API keys and webhook secrets",
+      "testStrategy": "Testing should cover the complete payment flow and access control:\n\n1. Unit Tests:\n   - Test hasValidSubscription() with various user states (paid, unpaid, expired)\n   - Test access utility functions with mock user data\n   - Verify middleware correctly identifies and redirects unpaid users\n\n2. Integration Tests:\n   - Create test Stripe products in test mode with lower prices\n   - Test webhook handling with Stripe test events\n   - Verify database updates correctly after payment events\n\n3. End-to-End Tests:\n   - Complete Pro plan purchase flow using Stripe test cards\n   - Complete Hacker plan purchase flow using Stripe test cards\n   - Verify access to dashboard after payment\n   - Test expiration by manually setting access_expires_at to past date\n\n4. Edge Cases:\n   - Test webhook handling for failed payments\n   - Test renewal process for Pro plan users\n   - Verify handling of users who upgrade from Pro to Hacker plan\n   - Test access control when Stripe services are temporarily unavailable\n\n5. Manual Testing Checklist:\n   - Verify payment page displays correct plan information and pricing\n   - Confirm receipt emails are sent correctly\n   - Check dashboard UI elements for paid vs. unpaid states\n   - Verify expiration warnings appear for Pro users approaching renewal",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Database Schema Updates for Payment Tracking",
+          "description": "Add payment-related fields to the profiles table and create migration scripts to support Stripe customer tracking and subscription management.",
+          "dependencies": [],
+          "details": "Create a new migration file to add the following columns to the profiles table:\n- customer_id (VARCHAR): Store Stripe customer ID\n- price_id (VARCHAR): Store Stripe price ID for the selected plan\n- has_access (BOOLEAN): Flag indicating if user has paid access (default: false)\n- access_expires_at (TIMESTAMP): When access expires (null for lifetime plans)\n\nImplementation steps:\n1. Create migration file: `migrations/add_payment_fields_to_profiles.sql`\n2. Add SQL commands to add the new columns with appropriate constraints\n3. Create rollback migration for reversing changes\n4. Test migration on development database\n5. Update the profiles model/schema definition to include new fields\n\nAcceptance criteria:\n- Migration runs successfully without errors\n- All new fields are properly typed and nullable where appropriate\n- Rollback migration works correctly\n- Database schema matches expected structure",
+          "status": "in-progress",
+          "parentTaskId": 34
+        },
+        {
+          "id": 2,
+          "title": "Stripe Product and Price Configuration",
+          "description": "Set up Stripe products and pricing in the Stripe dashboard, then configure the application with the generated price IDs.",
+          "dependencies": [],
+          "details": "Configure Stripe products and save price IDs in application config:\n\n1. In Stripe Dashboard:\n   - Create 'VibeList Pro' product with $25/year recurring price\n   - Create 'VibeList Hacker' product with $50 one-time price\n   - Note down the price_id values for both products\n\n2. Update config.js:\n```javascript\nconst STRIPE_CONFIG = {\n  publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,\n  secretKey: process.env.STRIPE_SECRET_KEY,\n  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,\n  prices: {\n    pro: 'price_xxxxx', // $25/year\n    hacker: 'price_xxxxx' // $50 lifetime\n  }\n};\n```\n\n3. Create environment variables for the price IDs\n4. Test price retrieval using Stripe API\n\nAcceptance criteria:\n- Both products created in Stripe with correct pricing\n- Price IDs properly stored in application config\n- Environment variables set up correctly\n- Stripe API can retrieve product information",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 3,
+          "title": "Stripe Webhook Handler for Payment Processing",
+          "description": "Implement or update the Stripe webhook endpoint to handle successful checkout sessions and update user profiles with payment information.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Update the existing Stripe webhook to handle 'checkout.session.completed' events:\n\n```javascript\n// webhook-handler.js\nconst handleCheckoutCompleted = async (session) => {\n  const { customer, client_reference_id, line_items } = session;\n  const userId = client_reference_id; // User ID passed during checkout\n  \n  // Get the price_id from line items\n  const priceId = line_items.data[0].price.id;\n  \n  // Determine plan type and expiration\n  let accessExpiresAt = null;\n  if (priceId === STRIPE_CONFIG.prices.pro) {\n    accessExpiresAt = new Date();\n    accessExpiresAt.setFullYear(accessExpiresAt.getFullYear() + 1);\n  }\n  \n  // Update user profile\n  await updateUserProfile(userId, {\n    customer_id: customer,\n    price_id: priceId,\n    has_access: true,\n    access_expires_at: accessExpiresAt\n  });\n};\n```\n\nImplementation steps:\n1. Update webhook endpoint to handle checkout.session.completed\n2. Extract customer ID, price ID, and user ID from session\n3. Calculate expiration date based on plan type\n4. Update user profile in database\n5. Add error handling and logging\n6. Test with Stripe webhook testing tools\n\nAcceptance criteria:\n- Webhook successfully processes payment events\n- User profiles updated correctly after payment\n- Proper error handling for failed updates\n- Webhook signature verification working",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 4,
+          "title": "Access Control Utility Functions",
+          "description": "Create utility functions to check user subscription status, validate access, and retrieve subscription details for use throughout the application.",
+          "dependencies": [
+            1
+          ],
+          "details": "Create a subscription utility module with the following functions:\n\n```javascript\n// utils/subscription.js\nconst hasValidSubscription = (user) => {\n  if (!user.has_access) return false;\n  \n  // Lifetime access (Hacker plan)\n  if (!user.access_expires_at) return true;\n  \n  // Check if Pro plan hasn't expired\n  return new Date() < new Date(user.access_expires_at);\n};\n\nconst getSubscriptionDetails = (user) => {\n  if (!user.has_access) return { type: 'none', status: 'inactive' };\n  \n  const isHacker = !user.access_expires_at;\n  const isExpired = user.access_expires_at && new Date() > new Date(user.access_expires_at);\n  \n  return {\n    type: isHacker ? 'hacker' : 'pro',\n    status: isExpired ? 'expired' : 'active',\n    expiresAt: user.access_expires_at\n  };\n};\n\nconst getRemainingDays = (user) => {\n  if (!user.access_expires_at) return null; // Lifetime access\n  \n  const now = new Date();\n  const expiresAt = new Date(user.access_expires_at);\n  const diffTime = expiresAt - now;\n  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));\n};\n```\n\nImplementation steps:\n1. Create subscription utility module\n2. Implement access validation logic\n3. Add subscription type detection\n4. Create expiration date calculations\n5. Add comprehensive unit tests\n6. Export functions for use in other modules\n\nAcceptance criteria:\n- All utility functions work correctly with different user states\n- Proper handling of edge cases (null dates, expired subscriptions)\n- Unit tests cover all scenarios\n- Functions are properly documented",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 5,
+          "title": "Paywall Middleware Implementation",
+          "description": "Create middleware to protect dashboard routes by checking user subscription status and redirecting unauthorized users to the payment page.",
+          "dependencies": [
+            4
+          ],
+          "details": "Implement middleware to protect premium routes:\n\n```javascript\n// middleware/paywall.js\nconst { hasValidSubscription } = require('../utils/subscription');\n\nconst paywallMiddleware = async (req, res, next) => {\n  try {\n    const user = req.user; // Assumes user is attached to request\n    \n    if (!user) {\n      return res.redirect('/login');\n    }\n    \n    if (!hasValidSubscription(user)) {\n      return res.redirect('/payment?reason=access_required');\n    }\n    \n    next();\n  } catch (error) {\n    console.error('Paywall middleware error:', error);\n    res.redirect('/payment?reason=error');\n  }\n};\n\nmodule.exports = paywallMiddleware;\n```\n\nImplementation steps:\n1. Create paywall middleware function\n2. Integrate with existing authentication system\n3. Add route protection to dashboard endpoints\n4. Implement redirect logic with reason parameters\n5. Add error handling and logging\n6. Test middleware with different user states\n\nRoute protection example:\n```javascript\n// Apply to protected routes\napp.get('/dashboard', authenticateUser, paywallMiddleware, dashboardController);\napp.get('/premium-features', authenticateUser, paywallMiddleware, premiumController);\n```\n\nAcceptance criteria:\n- Middleware correctly identifies subscription status\n- Unauthorized users redirected to payment page\n- Authorized users can access protected routes\n- Proper error handling for edge cases\n- Integration works with existing auth system",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 6,
+          "title": "Stripe Checkout Integration",
+          "description": "Implement Stripe Checkout sessions for both subscription plans, including session creation API endpoints and client-side integration.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Create Stripe Checkout integration for payment processing:\n\n1. Server-side checkout session creation:\n```javascript\n// routes/checkout.js\nconst createCheckoutSession = async (req, res) => {\n  const { priceId, userId } = req.body;\n  \n  try {\n    const session = await stripe.checkout.sessions.create({\n      payment_method_types: ['card'],\n      line_items: [{\n        price: priceId,\n        quantity: 1,\n      }],\n      mode: priceId === STRIPE_CONFIG.prices.pro ? 'subscription' : 'payment',\n      success_url: `${process.env.DOMAIN}/dashboard?session_id={CHECKOUT_SESSION_ID}`,\n      cancel_url: `${process.env.DOMAIN}/payment?cancelled=true`,\n      client_reference_id: userId,\n      customer_email: req.user.email\n    });\n    \n    res.json({ sessionId: session.id });\n  } catch (error) {\n    res.status(500).json({ error: error.message });\n  }\n};\n```\n\n2. Client-side integration:\n```javascript\n// public/js/checkout.js\nconst handleCheckout = async (priceId) => {\n  const response = await fetch('/api/create-checkout-session', {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ priceId, userId: currentUser.id })\n  });\n  \n  const { sessionId } = await response.json();\n  const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);\n  \n  await stripe.redirectToCheckout({ sessionId });\n};\n```\n\nImplementation steps:\n1. Create checkout session API endpoint\n2. Implement client-side Stripe integration\n3. Add proper error handling\n4. Set up success/cancel URLs\n5. Test checkout flow for both plans\n6. Verify webhook integration works\n\nAcceptance criteria:\n- Checkout sessions created successfully for both plans\n- Users redirected to Stripe Checkout properly\n- Payment success triggers webhook correctly\n- Error handling works for failed payments\n- Success/cancel redirects function properly",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 7,
+          "title": "Payment Page and Plan Selection UI",
+          "description": "Create the payment page interface showing both subscription plans with pricing, features, and Stripe Checkout integration buttons.",
+          "dependencies": [
+            6
+          ],
+          "details": "Build the payment page with plan selection:\n\n```html\n<!-- payment.html -->\n<div class=\"payment-page\">\n  <h1>Choose Your VibeList Plan</h1>\n  \n  <div class=\"plans-container\">\n    <div class=\"plan-card pro-plan\">\n      <h3>Pro Plan</h3>\n      <div class=\"price\">$25<span>/year</span></div>\n      <ul class=\"features\">\n        <li>Unlimited playlists</li>\n        <li>Advanced analytics</li>\n        <li>Priority support</li>\n        <li>Export features</li>\n      </ul>\n      <button onclick=\"handleCheckout('${STRIPE_CONFIG.prices.pro}')\"\n              class=\"checkout-btn pro-btn\">\n        Subscribe to Pro\n      </button>\n    </div>\n    \n    <div class=\"plan-card hacker-plan featured\">\n      <div class=\"badge\">Best Value</div>\n      <h3>Hacker Plan</h3>\n      <div class=\"price\">$50<span>/lifetime</span></div>\n      <ul class=\"features\">\n        <li>Everything in Pro</li>\n        <li>Lifetime access</li>\n        <li>Beta features</li>\n        <li>API access</li>\n      </ul>\n      <button onclick=\"handleCheckout('${STRIPE_CONFIG.prices.hacker}')\"\n              class=\"checkout-btn hacker-btn\">\n        Get Lifetime Access\n      </button>\n    </div>\n  </div>\n</div>\n```\n\nImplementation steps:\n1. Design payment page layout\n2. Create plan comparison cards\n3. Add responsive CSS styling\n4. Integrate Stripe Checkout buttons\n5. Add loading states and error handling\n6. Implement URL parameter handling (reason, cancelled)\n7. Add testimonials or social proof\n8. Test on different devices\n\nAcceptance criteria:\n- Payment page displays both plans clearly\n- Checkout buttons trigger Stripe Checkout\n- Responsive design works on mobile\n- Loading states provide good UX\n- Error messages display appropriately\n- URL parameters handled correctly",
+          "status": "pending",
+          "parentTaskId": 34
+        },
+        {
+          "id": 8,
+          "title": "Dashboard Subscription Status and Management UI",
+          "description": "Update the dashboard to display subscription status, expiration dates, renewal options, and appropriate messaging for different subscription states.",
+          "dependencies": [
+            4,
+            5
+          ],
+          "details": "Enhance dashboard with subscription management:\n\n```html\n<!-- dashboard-subscription-status.html -->\n<div class=\"subscription-status\">\n  <div class=\"status-card\">\n    <h3>Subscription Status</h3>\n    \n    <!-- Active Pro Plan -->\n    <div class=\"status active-pro\" v-if=\"subscription.type === 'pro' && subscription.status === 'active'\">\n      <span class=\"badge pro\">Pro Plan</span>\n      <p>Your subscription expires in {{ remainingDays }} days</p>\n      <button class=\"renew-btn\" v-if=\"remainingDays <= 30\">Renew Now</button>\n    </div>\n    \n    <!-- Active Hacker Plan -->\n    <div class=\"status active-hacker\" v-if=\"subscription.type === 'hacker'\">\n      <span class=\"badge hacker\">Hacker Plan</span>\n      <p>Lifetime access - you're all set! 🚀</p>\n    </div>\n    \n    <!-- Expired Plan -->\n    <div class=\"status expired\" v-if=\"subscription.status === 'expired'\">\n      <span class=\"badge expired\">Expired</span>\n      <p>Your subscription has expired. Renew to continue using premium features.</p>\n      <button class=\"upgrade-btn\" onclick=\"window.location.href='/payment'\">Renew Subscription</button>\n    </div>\n    \n    <!-- No Plan -->\n    <div class=\"status no-plan\" v-if=\"subscription.type === 'none'\">\n      <p>Upgrade to unlock premium features</p>\n      <button class=\"upgrade-btn\" onclick=\"window.location.href='/payment'\">Choose Plan</button>\n    </div>\n  </div>\n</div>\n```\n\nServer-side controller updates:\n```javascript\n// controllers/dashboard.js\nconst renderDashboard = async (req, res) => {\n  const user = req.user;\n  const subscription = getSubscriptionDetails(user);\n  const remainingDays = getRemainingDays(user);\n  \n  res.render('dashboard', {\n    user,\n    subscription,\n    remainingDays,\n    showRenewalPrompt: remainingDays && remainingDays <= 30\n  });\n};\n```\n\nImplementation steps:\n1. Create subscription status component\n2. Add conditional rendering for different states\n3. Implement renewal/upgrade buttons\n4. Add expiration warnings (30 days, 7 days, expired)\n5. Style status badges and cards\n6. Add usage analytics for premium features\n7. Test all subscription states\n8. Add customer portal link for plan management\n\nAcceptance criteria:\n- Dashboard shows correct subscription status\n- Expiration warnings appear at appropriate times\n- Renewal/upgrade buttons work correctly\n- Different plan types display appropriate messaging\n- UI is intuitive and visually appealing\n- All subscription states tested and working",
+          "status": "pending",
+          "parentTaskId": 34
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "title": "Configure Stripe Products and Environment Variables for VibeList Paywall",
+      "description": "Set up the required Stripe products/prices for the Pro and Hacker subscription plans and configure all necessary environment variables for the VibeList paywall system.",
+      "details": "This task involves configuring the Stripe dashboard and application environment to support the VibeList paywall system:\n\n1. **Stripe Product Configuration**:\n   - Log into the Stripe dashboard\n   - Create two products with the following details:\n     - Product 1: \"VibeList Pro Plan\"\n       - Description: \"One year of premium access to VibeList\"\n       - Price: $25 USD, billed once (not recurring)\n       - Set the billing period to 1 year\n     - Product 2: \"VibeList Hacker Plan\"\n       - Description: \"Lifetime premium access to VibeList\"\n       - Price: $50 USD, one-time payment\n   - Note the Product IDs and Price IDs for both products\n\n2. **Environment Variable Setup**:\n   - Create/update the `.env` file with the following variables:\n     - `STRIPE_SECRET_KEY`: Your Stripe secret key\n     - `STRIPE_PUBLISHABLE_KEY`: Your Stripe publishable key\n     - `STRIPE_WEBHOOK_SECRET`: Secret for webhook verification\n     - `STRIPE_PRO_PRICE_ID`: Price ID for the Pro Plan\n     - `STRIPE_HACKER_PRICE_ID`: Price ID for the Hacker Plan\n     - `STRIPE_SUCCESS_URL`: URL to redirect after successful payment (e.g., `https://vibelist.app/payment/success`)\n     - `STRIPE_CANCEL_URL`: URL to redirect after canceled payment (e.g., `https://vibelist.app/pricing`)\n\n3. **Code Updates**:\n   - Update any configuration files that reference Stripe product IDs\n   - Ensure the checkout flow is using the environment variables rather than hardcoded values\n   - Verify that the webhook handler correctly processes events for both subscription types\n\n4. **Documentation**:\n   - Document the Stripe product configuration in the project documentation\n   - Include instructions for other developers on how to set up their local environment",
+      "testStrategy": "1. **Environment Variable Verification**:\n   - Run a script to verify all required environment variables are present and properly formatted\n   - Check that the application can access these variables correctly\n\n2. **Stripe Product Testing**:\n   - Verify that the correct product IDs and price IDs are being used in the application\n   - Use Stripe's test mode to simulate purchases of both plans:\n     - Test the Pro Plan purchase flow and verify the correct amount is charged\n     - Test the Hacker Plan purchase flow and verify the correct amount is charged\n\n3. **Integration Testing**:\n   - Test the complete payment flow using Stripe test cards (e.g., 4242 4242 4242 4242)\n   - Verify successful payments update the user's subscription status in the database\n   - Verify webhook handling correctly processes payment events\n   - Test the success and cancel URL redirects\n\n4. **Edge Case Testing**:\n   - Test with missing environment variables to ensure proper error handling\n   - Test with invalid Stripe keys to ensure appropriate error messages\n   - Test payment failures and verify proper error handling\n\n5. **Documentation Review**:\n   - Have another team member review the documentation for clarity and completeness\n   - Verify that the setup instructions work when followed by someone else",
+      "status": "pending",
+      "dependencies": [],
       "priority": "high"
     }
   ],

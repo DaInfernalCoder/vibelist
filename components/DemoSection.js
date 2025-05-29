@@ -9,7 +9,8 @@ const DemoSection = () => {
           </h2>
           <p className="text-lg opacity-80 leading-relaxed max-w-3xl mx-auto">
             No BS, we&apos;re going to show you how easy this is to use. From
-            setup to validating your product in just a few clicks.
+            setup to validating your product in just a few clicks. <br /> <br />{" "}
+            Just keep clicking the forward arrow to get a live demo
           </p>
         </div>
 
@@ -19,26 +20,33 @@ const DemoSection = () => {
           <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 rounded-3xl blur-xl opacity-30"></div>
 
           {/* Main demo container */}
-          <div className="relative bg-base-100 rounded-2xl shadow-2xl overflow-hidden border border-base-300">
-            {/* Demo iframe container */}
-            <div
-              className="relative w-full"
+          <div
+            style={{
+              position: "relative",
+              boxSizing: "content-box",
+              maxHeight: "80vh",
+              width: "100%",
+              aspectRatio: "1.6723549488054608",
+              padding: "40px 0 40px 0",
+            }}
+          >
+            <iframe
+              src="https://app.supademo.com/embed/cmb845e2a5jitppkp6kzlet8h?embed_v=2"
+              loading="lazy"
+              title="Supademo Demo"
+              allow="clipboard-write"
+              frameBorder="0"
+              webkitallowfullscreen="true"
+              mozallowfullscreen="true"
+              allowFullScreen
               style={{
-                aspectRatio: "1.6723549488054608",
-                maxHeight: "80svh",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
               }}
-            >
-              <iframe
-                src="https://app.supademo.com/embed/cmb845e2a5jitppkp6kzlet8h?embed_v=2"
-                loading="lazy"
-                title="VibeList Product Demo"
-                allow="clipboard-write"
-                webkitallowfullscreen="true"
-                mozallowfullscreen="true"
-                allowFullScreen
-                className="absolute top-0 left-0 w-full h-full"
-              />
-            </div>
+            ></iframe>
           </div>
 
           {/* Bottom accent */}

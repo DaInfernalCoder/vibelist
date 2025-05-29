@@ -38,14 +38,12 @@ export async function updateSession(request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // This is just an example of how to protect routes
-  // Add your own logic here if needed
-  // For instance, if you want to redirect unauthenticated users from a protected route:
-  // if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-  //   const url = request.nextUrl.clone();
-  //   url.pathname = '/signin'; // Or your login page
-  //   return NextResponse.redirect(url);
-  // }
+  // Redirect unauthenticated users from protected routes to signin
+  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/signin";
+    return NextResponse.redirect(url);
+  }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:

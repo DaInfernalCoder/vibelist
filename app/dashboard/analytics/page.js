@@ -3,7 +3,9 @@
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useWaitlist } from "@/contexts/WaitlistContext";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/libs/supabase/client";
+import PaywallAlert from "@/components/PaywallAlert";
 
 // Import our analytics components
 import MetricCard from "./components/MetricCard";
@@ -15,9 +17,53 @@ import WaitlistLinkCard from "./components/WaitlistLinkCard";
 import EmptyState from "./components/EmptyState";
 
 export default function AnalyticsPage() {
-  const { selectedWaitlist, waitlists, selectWaitlist } = useWaitlist();
+  const { selectedWaitlist, waitlists, selectWaitlist, user } = useWaitlist();
   const { analyticsData, isLoading, isRefreshing, error } = useAnalytics();
   const searchParams = useSearchParams();
+  const [hasValidSubscription, setHasValidSubscription] = useState(false);
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
+  const supabase = createClient();
+
+  // Check subscription status
+  useEffect(() => {
+    const checkSubscriptionStatus = async () => {
+      if (!user) {
+        setHasValidSubscription(false);
+        setIsCheckingSubscription(false);
+        return;
+      }
+
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("has_access, access_expires_at")
+          .eq("id", user.id)
+          .single();
+
+        if (!profile || !profile.has_access) {
+          setHasValidSubscription(false);
+          return;
+        }
+
+        // Check if subscription hasn't expired
+        if (
+          !profile.access_expires_at ||
+          new Date(profile.access_expires_at) > new Date()
+        ) {
+          setHasValidSubscription(true);
+        } else {
+          setHasValidSubscription(false);
+        }
+      } catch (error) {
+        console.error("Error checking subscription:", error);
+        setHasValidSubscription(false);
+      } finally {
+        setIsCheckingSubscription(false);
+      }
+    };
+
+    checkSubscriptionStatus();
+  }, [user, supabase]);
 
   // Handle direct navigation with waitlist ID
   useEffect(() => {
@@ -33,6 +79,50 @@ export default function AnalyticsPage() {
       }
     }
   }, [searchParams, waitlists, selectedWaitlist, selectWaitlist]);
+
+  // Show loading state while checking subscription
+  if (isCheckingSubscription) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Analytics</h1>
+            <p className="text-muted-foreground mt-2">
+              Track and analyze your waitlist performance
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <span className="loading loading-spinner loading-lg"></span>
+            <p className="mt-2 text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show paywall alert if user doesn't have valid subscription
+  if (!hasValidSubscription) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Analytics</h1>
+            <p className="text-muted-foreground mt-2">
+              Track and analyze your waitlist performance
+            </p>
+          </div>
+        </div>
+
+        <PaywallAlert
+          feature="Analytics & Insights"
+          description="Get detailed analytics about your waitlist performance, including signup trends, referral sources, and conversion metrics."
+          className="max-w-4xl"
+        />
+      </div>
+    );
+  }
 
   // Show empty state if no waitlist is selected
   if (!selectedWaitlist) {

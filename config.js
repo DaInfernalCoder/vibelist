@@ -26,8 +26,7 @@ const config = {
         //  REQUIRED - Name of the plan, displayed on the pricing page
         name: "Pro",
         // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
-        description:
-          "Perfect for those that want to try out solopreneurship for one year and earn their first $1k Monthly Recurring Revenue",
+        description: "Perfect for those that want to try out solopreneurship",
         // The price you want to display, the one user will be charged on Stripe.
         price: 25,
         // If you have an anchor price (i.e. $29) that you want to display crossed out, put it here. Otherwise, leave it empty
@@ -51,7 +50,7 @@ const config = {
             : "price_1RTtDMAGcHrscZ238DmjdRGv",
         name: "Hacker",
         description:
-          "For solopreners that are ALL IN and want to hit $10k Monthly Recurring Revenue",
+          "For solopreners that are ALL IN and want to hit $10k Monthly Recurring Revenue with their next product",
         price: 50,
         priceAnchor: 100,
         features: [
