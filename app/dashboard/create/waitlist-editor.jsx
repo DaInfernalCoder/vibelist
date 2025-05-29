@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Maximize2, Save, Send } from "lucide-react";
-import { createClient } from "@/libs/supabase/client";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 
 // Import context provider
 import TemplateProvider from "./context/TemplateProvider";
@@ -39,53 +39,26 @@ function EditorLayout() {
     template,
   } = useTemplate();
 
+  const { hasValidAccess, isAuthenticated } = useSubscription();
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
-  const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   // Handle publish button click with subscription check
-  const handlePublishClick = async () => {
-    setIsCheckingSubscription(true);
-
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        // Not logged in, redirect to pricing
-        router.push("/pricing");
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("has_access, access_expires_at")
-        .eq("id", user.id)
-        .single();
-
-      // Check if user has valid subscription
-      const hasValidSubscription =
-        profile?.has_access &&
-        (!profile.access_expires_at ||
-          new Date(profile.access_expires_at) > new Date());
-
-      if (!hasValidSubscription) {
-        // No subscription, redirect to pricing
-        router.push("/pricing");
-        return;
-      }
-
-      // User has subscription, show publish modal
-      setIsPublishModalOpen(true);
-    } catch (error) {
-      console.error("Error checking subscription:", error);
-      // On error, redirect to pricing as fallback
+  const handlePublishClick = () => {
+    if (!isAuthenticated) {
+      // Not logged in, redirect to pricing
       router.push("/pricing");
-    } finally {
-      setIsCheckingSubscription(false);
+      return;
     }
+
+    if (!hasValidAccess) {
+      // No subscription, redirect to pricing
+      router.push("/pricing");
+      return;
+    }
+
+    // User has subscription, show publish modal
+    setIsPublishModalOpen(true);
   };
 
   // Set up keyboard shortcuts
@@ -213,19 +186,9 @@ function EditorLayout() {
               variant="primary"
               className="px-6"
               onClick={handlePublishClick}
-              disabled={isCheckingSubscription}
             >
-              {isCheckingSubscription ? (
-                <>
-                  <span className="loading loading-spinner loading-xs mr-2"></span>
-                  Checking...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Publish
-                </>
-              )}
+              <Send className="h-4 w-4 mr-2" />
+              Publish
             </Button>
           </div>
         </div>

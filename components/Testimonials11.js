@@ -342,7 +342,7 @@ const Testimonials11 = () => {
             </h2>
           </div>
           <p className="lg:w-2/3 mx-auto leading-relaxed text-base text-base-content/80">
-            These are temporary template testimonials, you submit a real one
+            These are temporary template testimonials, to submit a real one
             reach out at{" "}
             <a
               href="https://x.com/iam_sumitd"
@@ -352,7 +352,7 @@ const Testimonials11 = () => {
             >
               @i_amsumitd
             </a>{" "}
-            on twitter to submit your own!
+            on twitter!
           </p>
         </div>
 

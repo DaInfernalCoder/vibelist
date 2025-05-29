@@ -1,0 +1,236 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { CheckCircleIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import { createClient } from "@/libs/supabase/client";
+
+const PaymentSuccessPage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [paymentData, setPaymentData] = useState(null);
+  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const verifyPaymentAndRefreshStatus = async () => {
+      if (!sessionId) {
+        setError("No payment session found");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const supabase = createClient();
+
+        // Get current user
+        const {
+          data: { user: currentUser },
+        } = await supabase.auth.getUser();
+        setUser(currentUser);
+
+        // Verify payment with our API
+        const response = await fetch(`/api/payment/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ sessionId }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to verify payment");
+        }
+
+        const data = await response.json();
+        setPaymentData(data);
+
+        // Refresh subscription status
+        const statusResponse = await fetch("/api/subscription/refresh", {
+          method: "POST",
+        });
+
+        if (!statusResponse.ok) {
+          console.warn("Failed to refresh subscription status");
+        }
+      } catch (err) {
+        console.error("Payment verification error:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifyPaymentAndRefreshStatus();
+  }, [sessionId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+          <p className="text-base-content/70">Verifying your payment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="text-error mb-4">
+            <svg
+              className="w-16 h-16 mx-auto"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-base-content mb-4">
+            Payment Verification Failed
+          </h1>
+          <p className="text-base-content/70 mb-6">{error}</p>
+          <Link href="/dashboard" className="btn btn-primary">
+            Go to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10">
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-2xl mx-auto">
+          {/* Success Animation */}
+          <div className="text-center mb-8">
+            <div className="relative inline-block">
+              <CheckCircleIcon className="w-24 h-24 text-success mx-auto animate-bounce" />
+              <SparklesIcon className="w-8 h-8 text-warning absolute -top-2 -right-2 animate-pulse" />
+            </div>
+          </div>
+
+          {/* Success Message */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-base-content mb-4">
+              Payment Successful! 🎉
+            </h1>
+            <p className="text-xl text-base-content/70">
+              Welcome to VibeList Pro! Your premium features are now unlocked.
+            </p>
+          </div>
+
+          {/* Payment Details Card */}
+          {paymentData && (
+            <div className="card bg-base-200 shadow-xl mb-8">
+              <div className="card-body">
+                <h2 className="card-title text-primary mb-4">
+                  Payment Details
+                </h2>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-base-content/70">Plan:</span>
+                    <span className="font-semibold">
+                      {paymentData.planName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-base-content/70">Amount:</span>
+                    <span className="font-semibold">${paymentData.amount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-base-content/70">
+                      Transaction ID:
+                    </span>
+                    <span className="font-mono text-sm">
+                      {paymentData.transactionId}
+                    </span>
+                  </div>
+                  {paymentData.expiresAt && (
+                    <div className="flex justify-between">
+                      <span className="text-base-content/70">
+                        Access Until:
+                      </span>
+                      <span className="font-semibold">
+                        {new Date(paymentData.expiresAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Premium Features Unlocked */}
+          <div className="card bg-base-100 shadow-xl mb-8">
+            <div className="card-body">
+              <h2 className="card-title text-secondary mb-4">
+                <SparklesIcon className="w-6 h-6" />
+                Premium Features Unlocked
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-success" />
+                  <span>Advanced Analytics Dashboard</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-success" />
+                  <span>Waitlist Marketplace Access</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-success" />
+                  <span>Unlimited Waitlist Publishing</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-success" />
+                  <span>Priority Customer Support</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-success" />
+                  <span>Custom Branding Options</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircleIcon className="w-5 h-5 text-success" />
+                  <span>Export & Integration Tools</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/dashboard" className="btn btn-primary btn-lg">
+              Continue to Dashboard
+            </Link>
+            <Link
+              href="/dashboard/analytics"
+              className="btn btn-outline btn-lg"
+            >
+              View Analytics
+            </Link>
+          </div>
+
+          {/* Additional Info */}
+          <div className="text-center mt-8 p-4 bg-base-200 rounded-lg">
+            <p className="text-sm text-base-content/70">
+              A confirmation email has been sent to {user?.email}. If you have
+              any questions, please contact our support team.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentSuccessPage;

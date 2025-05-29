@@ -2,6 +2,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
+// Define routes that require subscription access
+const PREMIUM_ROUTES = ["/dashboard/analytics", "/dashboard/market"];
+
+// Define routes that require authentication but not subscription
+const AUTH_REQUIRED_ROUTES = ["/dashboard"];
+
 export async function updateSession(request) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -38,11 +44,63 @@ export async function updateSession(request) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const pathname = request.nextUrl.pathname;
+
+  // Check if this is a premium route
+  const isPremiumRoute = PREMIUM_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  // Check if this is an auth-required route
+  const isAuthRoute =
+    AUTH_REQUIRED_ROUTES.some((route) => pathname.startsWith(route)) ||
+    isPremiumRoute;
+
   // Redirect unauthenticated users from protected routes to signin
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (!user && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/signin";
+    // Add return URL for better UX
+    url.searchParams.set("returnTo", pathname);
     return NextResponse.redirect(url);
+  }
+
+  // For premium routes, check subscription status
+  if (user && isPremiumRoute) {
+    try {
+      // Get user's subscription status from the database
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("has_access, access_expires_at")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error checking subscription in middleware:", error);
+        // On error, allow access but log the issue
+        // The client-side SubscriptionContext will handle the actual paywall
+        return supabaseResponse;
+      }
+
+      // Check if user has valid subscription
+      const hasValidSubscription =
+        profile?.has_access &&
+        (!profile.access_expires_at ||
+          new Date(profile.access_expires_at) > new Date());
+
+      if (!hasValidSubscription) {
+        // User doesn't have valid subscription, redirect to pricing
+        const url = request.nextUrl.clone();
+        url.pathname = "/pricing";
+        url.searchParams.set("feature", "premium");
+        url.searchParams.set("returnTo", pathname);
+        return NextResponse.redirect(url);
+      }
+    } catch (error) {
+      console.error("Subscription check error in middleware:", error);
+      // On error, allow access but log the issue
+      // The client-side SubscriptionContext will handle the actual paywall
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

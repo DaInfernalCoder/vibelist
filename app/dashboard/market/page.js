@@ -2,55 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useWaitlist } from "@/contexts/WaitlistContext";
-import { createClient } from "@/libs/supabase/client";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import PaywallAlert from "@/components/PaywallAlert";
 
 export default function MarketPage() {
   const { user } = useWaitlist();
-  const [hasValidSubscription, setHasValidSubscription] = useState(false);
-  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
-  const supabase = createClient();
-
-  // Check subscription status
-  useEffect(() => {
-    const checkSubscriptionStatus = async () => {
-      if (!user) {
-        setHasValidSubscription(false);
-        setIsCheckingSubscription(false);
-        return;
-      }
-
-      try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("has_access, access_expires_at")
-          .eq("id", user.id)
-          .single();
-
-        if (!profile || !profile.has_access) {
-          setHasValidSubscription(false);
-          return;
-        }
-
-        // Check if subscription hasn&apos;t expired
-        if (
-          !profile.access_expires_at ||
-          new Date(profile.access_expires_at) > new Date()
-        ) {
-          setHasValidSubscription(true);
-        } else {
-          setHasValidSubscription(false);
-        }
-      } catch (error) {
-        console.error("Error checking subscription:", error);
-        setHasValidSubscription(false);
-      } finally {
-        setIsCheckingSubscription(false);
-      }
-    };
-
-    checkSubscriptionStatus();
-  }, [user, supabase]);
+  const { hasValidAccess, isLoading: isCheckingSubscription } =
+    useSubscription();
 
   // Show loading state while checking subscription
   if (isCheckingSubscription) {
@@ -74,8 +32,8 @@ export default function MarketPage() {
     );
   }
 
-  // Show paywall alert if user doesn&apos;t have valid subscription
-  if (!hasValidSubscription) {
+  // Show paywall alert if user doesn't have valid subscription
+  if (!hasValidAccess) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">

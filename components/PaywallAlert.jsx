@@ -1,9 +1,8 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Crown, Sparkles } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import ButtonCheckout from "@/components/ButtonCheckout";
+import config from "@/config";
 
 /**
  * PaywallAlert component for showing upgrade prompts for premium features
@@ -12,53 +11,51 @@ import { useRouter } from "next/navigation";
  * @param {string} props.description - Description of what the feature does
  * @param {string} props.className - Additional CSS classes
  */
-export default function PaywallAlert({
-  feature = "This feature",
-  description = "This is a premium feature that requires a Pro subscription.",
+const PaywallAlert = ({
+  feature = "Premium Feature",
+  description = "This feature requires a premium subscription to access.",
   className = "",
-}) {
-  const router = useRouter();
+}) => {
+  const { isAuthenticated, hasValidAccess, isLoading } = useSubscription();
 
-  const handleUpgrade = () => {
-    router.push("/pricing");
-  };
+  // Don't show paywall if user has access or if still loading
+  if (hasValidAccess || isLoading) {
+    return null;
+  }
 
   return (
-    <Alert
-      className={`border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 ${className}`}
+    <div
+      className={`bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 ${className}`}
     >
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 mt-1">
-          <Crown className="h-5 w-5 text-amber-600" />
-        </div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex-1">
-          <AlertTitle className="text-amber-900 flex items-center gap-2">
-            {feature} - Pro Feature
-            <Sparkles className="h-4 w-4 text-yellow-500" />
-          </AlertTitle>
-          <AlertDescription className="text-amber-800 mb-4">
-            {description} Upgrade to Pro to unlock this feature and start
-            getting the most out of VibeList.
-          </AlertDescription>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={handleUpgrade}
-              className="bg-amber-600 hover:bg-amber-700 text-white"
-              size="sm"
-            >
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade to Pro
-            </Button>
-            <div className="text-sm text-amber-700 flex items-center">
-              <span className="font-medium">✓ Analytics & insights</span>
-              <span className="mx-2">•</span>
-              <span className="font-medium">✓ Marketing tools</span>
-              <span className="mx-2">•</span>
-              <span className="font-medium">✓ Advanced features</span>
-            </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            🚀 Unlock {feature}
+          </h3>
+          <p className="text-gray-600 mb-4">{description}</p>
+          <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+            <span className="flex items-center gap-1">
+              ✅ Unlimited waitlists
+            </span>
+            <span className="flex items-center gap-1">
+              ✅ Advanced analytics
+            </span>
+            <span className="flex items-center gap-1">✅ Custom branding</span>
+            <span className="flex items-center gap-1">✅ Priority support</span>
           </div>
         </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <ButtonCheckout
+            priceId={config.stripe.plans.starter.priceId}
+            mode="subscription"
+            className="btn btn-primary"
+          >
+            Upgrade to Pro
+          </ButtonCheckout>
+        </div>
       </div>
-    </Alert>
+    </div>
   );
-}
+};
+
+export default PaywallAlert;

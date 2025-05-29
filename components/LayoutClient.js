@@ -7,6 +7,9 @@ import { Crisp } from "crisp-sdk-web";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import { Tooltip } from "react-tooltip";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import SubscriptionStatusNotification from "@/components/SubscriptionStatusNotification";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import config from "@/config";
 
 // Crisp customer chat support:
@@ -61,35 +64,47 @@ const CrispChat = () => {
 };
 
 // All the client wrappers are here (they can't be in server components)
-// 1. NextTopLoader: Show a progress bar at the top when navigating between pages
-// 2. Toaster: Show Success/Error messages anywhere from the app with toast()
-// 3. Tooltip: Show tooltips if any JSX elements has these 2 attributes: data-tooltip-id="tooltip" data-tooltip-content=""
-// 4. CrispChat: Set Crisp customer chat support (see above)
+// 1. ErrorBoundary: Catch and handle React errors gracefully
+// 2. NextTopLoader: Show a progress bar at the top when navigating between pages
+// 3. Toaster: Show Success/Error messages anywhere from the app with toast()
+// 4. Tooltip: Show tooltips if any JSX elements has these 2 attributes: data-tooltip-id="tooltip" data-tooltip-content=""
+// 5. CrispChat: Set Crisp customer chat support (see above)
+// 6. SubscriptionProvider: Global subscription status management
+// 7. SubscriptionStatusNotification: Real-time subscription status notifications
 const ClientLayout = ({ children }) => {
   return (
-    <>
-      {/* Show a progress bar at the top when navigating between pages */}
-      <NextTopLoader color={config.colors.main} showSpinner={false} />
+    <ErrorBoundary
+      title="Application Error"
+      message="We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists."
+      context={{ layout: "main" }}
+    >
+      <SubscriptionProvider>
+        {/* Show a progress bar at the top when navigating between pages */}
+        <NextTopLoader color={config.colors.main} showSpinner={false} />
 
-      {/* Content inside app/page.js files  */}
-      {children}
+        {/* Content inside app/page.js files  */}
+        {children}
 
-      {/* Show Success/Error messages anywhere from the app with toast() */}
-      <Toaster
-        toastOptions={{
-          duration: 3000,
-        }}
-      />
+        {/* Show Success/Error messages anywhere from the app with toast() */}
+        <Toaster
+          toastOptions={{
+            duration: 3000,
+          }}
+        />
 
-      {/* Show tooltips if any JSX elements has these 2 attributes: data-tooltip-id="tooltip" data-tooltip-content="" */}
-      <Tooltip
-        id="tooltip"
-        className="z-[60] !opacity-100 max-w-sm shadow-lg"
-      />
+        {/* Show tooltips if any JSX elements has these 2 attributes: data-tooltip-id="tooltip" data-tooltip-content="" */}
+        <Tooltip
+          id="tooltip"
+          className="z-[60] !opacity-100 max-w-sm shadow-lg"
+        />
 
-      {/* Set Crisp customer chat support */}
-      <CrispChat />
-    </>
+        {/* Real-time subscription status notifications */}
+        <SubscriptionStatusNotification />
+
+        {/* Set Crisp customer chat support */}
+        <CrispChat />
+      </SubscriptionProvider>
+    </ErrorBoundary>
   );
 };
 

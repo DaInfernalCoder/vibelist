@@ -1,69 +1,139 @@
 "use client";
 
-import { useAnalytics } from "@/hooks/useAnalytics";
-import { useWaitlist } from "@/contexts/WaitlistContext";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useWaitlist } from "@/contexts/WaitlistContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import { createClient } from "@/libs/supabase/client";
 import PaywallAlert from "@/components/PaywallAlert";
 
 // Import our analytics components
+import WaitlistStatusCard from "./components/WaitlistStatusCard";
 import MetricCard from "./components/MetricCard";
 import SignupsChart from "./components/SignupsChart";
 import ReferralSourcesChart from "./components/ReferralSourcesChart";
 import RecentSignupsTable from "./components/RecentSignupsTable";
-import WaitlistStatusCard from "./components/WaitlistStatusCard";
 import WaitlistLinkCard from "./components/WaitlistLinkCard";
-import EmptyState from "./components/EmptyState";
 
 export default function AnalyticsPage() {
   const { selectedWaitlist, waitlists, selectWaitlist, user } = useWaitlist();
-  const { analyticsData, isLoading, isRefreshing, error } = useAnalytics();
+  const { hasValidAccess, isLoading: isCheckingSubscription } =
+    useSubscription();
   const searchParams = useSearchParams();
-  const [hasValidSubscription, setHasValidSubscription] = useState(false);
-  const [isCheckingSubscription, setIsCheckingSubscription] = useState(true);
+
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const supabase = createClient();
 
-  // Check subscription status
-  useEffect(() => {
-    const checkSubscriptionStatus = async () => {
-      if (!user) {
-        setHasValidSubscription(false);
-        setIsCheckingSubscription(false);
-        return;
+  // Fetch analytics data
+  const fetchAnalytics = useCallback(async (waitlistId, isRefresh = false) => {
+    if (!waitlistId) {
+      setAnalyticsData(null);
+      return;
+    }
+
+    if (isRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/waitlists/${waitlistId}/analytics`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch analytics: ${response.statusText}`);
       }
 
-      try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("has_access, access_expires_at")
-          .eq("id", user.id)
-          .single();
+      const data = await response.json();
+      setAnalyticsData(data);
+    } catch (err) {
+      console.error("Error fetching analytics:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
 
-        if (!profile || !profile.has_access) {
-          setHasValidSubscription(false);
-          return;
-        }
+  // Fetch analytics when selected waitlist changes
+  useEffect(() => {
+    if (selectedWaitlist?.id && hasValidAccess) {
+      fetchAnalytics(selectedWaitlist.id);
+    } else {
+      setAnalyticsData(null);
+    }
+  }, [selectedWaitlist?.id, hasValidAccess, fetchAnalytics]);
 
-        // Check if subscription hasn't expired
-        if (
-          !profile.access_expires_at ||
-          new Date(profile.access_expires_at) > new Date()
-        ) {
-          setHasValidSubscription(true);
-        } else {
-          setHasValidSubscription(false);
+  // Set up real-time subscriptions for analytics data
+  useEffect(() => {
+    if (!selectedWaitlist?.id || !hasValidAccess) return;
+
+    const waitlistId = selectedWaitlist.id;
+
+    // Create a channel for real-time updates
+    const channel = supabase
+      .channel(`analytics_${waitlistId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "waitlist_signups",
+          filter: `waitlist_id=eq.${waitlistId}`,
+        },
+        () => {
+          // Refresh analytics when signups change
+          fetchAnalytics(waitlistId, true);
         }
-      } catch (error) {
-        console.error("Error checking subscription:", error);
-        setHasValidSubscription(false);
-      } finally {
-        setIsCheckingSubscription(false);
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "waitlist_analytics",
+          filter: `waitlist_id=eq.${waitlistId}`,
+        },
+        () => {
+          // Refresh analytics when analytics data changes
+          fetchAnalytics(waitlistId, true);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "waitlists",
+          filter: `id=eq.${waitlistId}`,
+        },
+        () => {
+          // Refresh analytics when waitlist details change
+          fetchAnalytics(waitlistId, true);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [selectedWaitlist?.id, hasValidAccess, fetchAnalytics, supabase]);
+
+  // Auto-refresh analytics data on page focus (when user returns to tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (selectedWaitlist?.id && hasValidAccess) {
+        fetchAnalytics(selectedWaitlist.id);
       }
     };
 
-    checkSubscriptionStatus();
-  }, [user, supabase]);
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [selectedWaitlist?.id, hasValidAccess, fetchAnalytics]);
 
   // Handle direct navigation with waitlist ID
   useEffect(() => {
@@ -79,6 +149,29 @@ export default function AnalyticsPage() {
       }
     }
   }, [searchParams, waitlists, selectedWaitlist, selectWaitlist]);
+
+  // Empty state component
+  const EmptyState = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Analytics</h1>
+          <p className="text-muted-foreground mt-2">
+            Track and analyze your waitlist performance
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold mb-2">No Waitlist Selected</h3>
+          <p className="text-muted-foreground">
+            Select a waitlist from the sidebar to view its analytics
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 
   // Show loading state while checking subscription
   if (isCheckingSubscription) {
@@ -103,7 +196,7 @@ export default function AnalyticsPage() {
   }
 
   // Show paywall alert if user doesn't have valid subscription
-  if (!hasValidSubscription) {
+  if (!hasValidAccess) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
