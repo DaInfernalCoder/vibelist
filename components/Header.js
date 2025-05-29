@@ -23,7 +23,9 @@ const links = [
   },
 ];
 
-const cta = <ButtonSignin extraStyle="btn-primary" />;
+const cta = (
+  <ButtonSignin extraStyle="bg-[#9334E9] hover:bg-[#7C2D9E] text-white border-0" />
+);
 
 // A header with a logo on the left, links in the center (like Pricing, etc...), and a CTA (like Get Started or Login) on the right.
 // The header is responsive, and on mobile, the links are hidden behind a burger button.

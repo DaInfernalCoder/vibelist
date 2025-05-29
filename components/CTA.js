@@ -5,8 +5,8 @@ const CTA = () => {
   return (
     <section className="relative hero overflow-hidden min-h-screen">
       <Image
-        src="https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3540&q=80"
-        alt="Background"
+        src="/White Cat on MacBook Pro.jpg"
+        alt="White cat on MacBook Pro"
         className="object-cover w-full"
         fill
       />
@@ -17,13 +17,17 @@ const CTA = () => {
             Boost your app, launch, earn
           </h2>
           <p className="text-lg opacity-80 mb-12 md:mb-16">
-            Don&apos;t waste time integrating APIs or designing a pricing
-            section...
+            Don&apos;t waste time building a product that no one wants. Create a
+            waitlist in minutes and validate your idea in minutes.
           </p>
 
-          <button className="btn btn-primary btn-wide">
+          <a
+            href="/dashboard/create"
+            className="btn btn-wide bg-[#9334E9] hover:bg-[#7C2D9E] text-white border-0"
+            target="_blank"
+          >
             Get {config.appName}
-          </button>
+          </a>
         </div>
       </div>
     </section>

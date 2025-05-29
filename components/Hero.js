@@ -50,7 +50,10 @@ const Hero = () => {
           coded ideas, without wasting another second. Stop wasting time on
           building ideas that don&apos;t convert.
         </p>
-        <a href="/dashboard/create" className="btn btn-primary btn-wide">
+        <a
+          href="/dashboard/create"
+          className="btn btn-wide bg-[#9334E9] hover:bg-[#7C2D9E] text-white border-0"
+        >
           Create your first waitlist
         </a>
 

@@ -8,6 +8,7 @@ const nextConfig = {
       "images.unsplash.com",
       "logos-world.net",
       "wejhvwzgymkaerwupjqn.supabase.co",
+      "unsplash.com",
     ],
   },
   async rewrites() {
