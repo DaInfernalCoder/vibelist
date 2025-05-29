@@ -19,7 +19,11 @@ const PaymentSuccessContent = () => {
   useEffect(() => {
     const verifyPaymentAndRefreshStatus = async () => {
       if (!sessionId) {
-        setError("No payment session found");
+        // If no session ID, redirect to dashboard after a short delay
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 2000);
+        setError("Redirecting to dashboard...");
         setIsLoading(false);
         return;
       }
@@ -31,9 +35,25 @@ const PaymentSuccessContent = () => {
         const {
           data: { user: currentUser },
         } = await supabase.auth.getUser();
-        setUser(currentUser);
 
-        // Verify payment with our API
+        // If user is already authenticated and we have a session_id,
+        // check if this is a repeat visit (they might have already seen this page)
+        if (currentUser && sessionId) {
+          // Check if they already have access - if so, redirect to dashboard
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("has_access")
+            .eq("id", currentUser.id)
+            .single();
+
+          if (profile?.has_access) {
+            // User already has access and is authenticated, redirect to dashboard
+            router.push("/dashboard/create");
+            return;
+          }
+        }
+
+        // Verify payment with our API first
         const response = await fetch(`/api/payment/verify`, {
           method: "POST",
           headers: {
@@ -48,6 +68,37 @@ const PaymentSuccessContent = () => {
 
         const data = await response.json();
         setPaymentData(data);
+
+        // If user is not authenticated but payment is valid, try to sign them in
+        if (!currentUser && data.customerEmail) {
+          try {
+            // Send magic link to the customer's email
+            const { error: signInError } = await supabase.auth.signInWithOtp({
+              email: data.customerEmail,
+              options: {
+                shouldCreateUser: false, // User should already exist from webhook
+                emailRedirectTo: `${window.location.origin}/payment/success?session_id=${sessionId}`,
+              },
+            });
+
+            if (signInError) {
+              console.error("Auto sign-in failed:", signInError);
+              // Don't throw error, just show manual sign-in option
+            } else {
+              // Show message that magic link was sent
+              setError(
+                "Check your email for a sign-in link to complete setup!"
+              );
+              setIsLoading(false);
+              return;
+            }
+          } catch (autoSignInError) {
+            console.error("Auto sign-in error:", autoSignInError);
+            // Continue with manual flow
+          }
+        }
+
+        setUser(currentUser);
 
         // Refresh subscription status
         const statusResponse = await fetch("/api/subscription/refresh", {
@@ -66,7 +117,7 @@ const PaymentSuccessContent = () => {
     };
 
     verifyPaymentAndRefreshStatus();
-  }, [sessionId]);
+  }, [sessionId, router]);
 
   if (isLoading) {
     return (
@@ -97,12 +148,26 @@ const PaymentSuccessContent = () => {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-base-content mb-4">
-            Payment Verification Failed
+            {error.includes("Check your email")
+              ? "Sign In Required"
+              : "Payment Verification Failed"}
           </h1>
           <p className="text-base-content/70 mb-6">{error}</p>
-          <Link href="/dashboard" className="btn btn-primary">
-            Go to Dashboard
-          </Link>
+          {error.includes("Check your email") ? (
+            <div className="space-y-3">
+              <p className="text-sm text-base-content/60">
+                We&apos;ve sent a magic link to your email. Click it to complete
+                your account setup.
+              </p>
+              <Link href="/signin" className="btn btn-primary">
+                Or Sign In Manually
+              </Link>
+            </div>
+          ) : (
+            <Link href="/dashboard" className="btn btn-primary">
+              Go to Dashboard
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -213,8 +278,8 @@ const PaymentSuccessContent = () => {
               What&apos;s Next?
             </h3>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/dashboard" className="btn btn-primary btn-lg">
-                Go to Dashboard
+              <Link href="/dashboard/create" className="btn btn-primary btn-lg">
+                Create Your First Waitlist
               </Link>
               <Link href="/dashboard/market" className="btn btn-outline btn-lg">
                 Explore Marketplace

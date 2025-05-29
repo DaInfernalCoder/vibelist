@@ -27,7 +27,7 @@ const config = {
         priceId:
           process.env.NODE_ENV === "development"
             ? "price_1RTt7BAGcHrscZ23J1TgJQyi"
-            : "price_1RTt7BAGcHrscZ23J1TgJQyi",
+            : "price_PRODUCTION_PRO_PLAN_ID",
         //  REQUIRED - Name of the plan, displayed on the pricing page
         name: "Pro",
         // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
@@ -52,7 +52,7 @@ const config = {
         priceId:
           process.env.NODE_ENV === "development"
             ? "price_1RTtDMAGcHrscZ238DmjdRGv"
-            : "price_1RTtDMAGcHrscZ238DmjdRGv",
+            : "price_PRODUCTION_HACKER_PLAN_ID",
         name: "Hacker",
         description:
           "For solopreners that are ALL IN and want to hit $10k Monthly Recurring Revenue with their next product",
