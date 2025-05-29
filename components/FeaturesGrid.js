@@ -143,7 +143,7 @@ const features = [
     title: "Beautiful Public Pages",
     description:
       "Your users see stunning, mobile-optimized waitlist pages that convert.",
-    styles: "md:col-span-2 bg-base-100 text-base-content",
+    styles: "md:col-span-2 bg-accent text-accent-content",
     demo: (
       <div className="flex justify-center items-center h-full overflow-hidden">
         <div className="relative">

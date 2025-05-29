@@ -342,8 +342,17 @@ const Testimonials11 = () => {
             </h2>
           </div>
           <p className="lg:w-2/3 mx-auto leading-relaxed text-base text-base-content/80">
-            Don&apos;t take our word for it. Here&apos;s what they have to say
-            about {config.appName}.
+            These are temporary template testimonials, you submit a real one
+            reach out at{" "}
+            <a
+              href="https://x.com/iam_sumitd"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:text-primary-focus underline font-medium"
+            >
+              @i_amsumitd
+            </a>{" "}
+            on twitter to submit your own!
           </p>
         </div>
 

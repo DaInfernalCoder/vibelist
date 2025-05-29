@@ -14,6 +14,10 @@ const links = [
     label: "Pricing",
   },
   {
+    href: "/#demo",
+    label: "Demo",
+  },
+  {
     href: "/#testimonials",
     label: "Reviews",
   },

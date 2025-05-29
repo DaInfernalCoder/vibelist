@@ -1,6 +1,6 @@
 const DemoSection = () => {
   return (
-    <section className="bg-base-100">
+    <section className="bg-base-100" id="demo">
       <div className="max-w-7xl mx-auto px-8 py-16 lg:py-24">
         {/* Header */}
         <div className="text-center mb-12 lg:mb-16">
