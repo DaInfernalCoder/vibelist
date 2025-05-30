@@ -2475,6 +2475,84 @@
           "parentTaskId": 38
         }
       ]
+    },
+    {
+      "id": 39,
+      "title": "Fix Waitlist Creation Flow and Payment Process Issues",
+      "description": "Resolve critical bugs in the waitlist creation flow including payment success page duration, incorrect redirects, navigation issues, and paywall flow problems to improve user experience and conversion.",
+      "details": "This task involves fixing several interconnected issues in the waitlist creation flow:\n\n1. **Payment Success Page Modification**:\n   - Remove the automatic redirect from the payment success page\n   - Add clear navigation buttons (e.g., \"Go to Dashboard\", \"Continue to Sharing\")\n   - Ensure the page remains visible until the user takes action\n   - Update success messaging to be clear about next steps\n\n2. **Publish Flow Correction**:\n   - Fix the redirect after waitlist publication to go to the sharing page instead of the dashboard\n   - Ensure the entire publish flow maintains proper state and context\n   - Add proper error handling if publication fails\n   - Implement progress indicators during the publication process\n\n3. **Navigation Improvements**:\n   - Add a \"Dashboard\" or \"My Waitlists\" link to the main navigation bar\n   - Ensure it's visible across all relevant pages\n   - Style consistently with existing navigation elements\n   - Add appropriate hover states and active indicators\n\n4. **Paywall Flow Restructuring**:\n   - Modify the system to allow full waitlist creation and design without payment\n   - Move payment requirement to trigger only when users attempt to publish\n   - Update UI to clearly indicate which actions require payment\n   - Ensure saved drafts are accessible without payment\n\nTechnical considerations:\n- Review and update route handlers to prevent unwanted redirects\n- Ensure proper state management throughout the creation and payment flow\n- Update payment processing callbacks to maintain proper user context\n- Implement proper session handling to track user progress through the flow",
+      "testStrategy": "Testing should cover all identified issues and their fixes:\n\n1. **Payment Success Page Tests**:\n   - Verify the payment success page remains visible until user action\n   - Test all navigation buttons on the success page lead to correct destinations\n   - Confirm all success page elements render properly on different devices/browsers\n\n2. **Publish Flow Tests**:\n   - Create a new waitlist and verify the entire publish flow\n   - Confirm successful publication leads to the sharing page, not dashboard\n   - Test the flow with various edge cases (slow connections, page refreshes)\n   - Verify proper error handling if publication fails\n\n3. **Navigation Tests**:\n   - Confirm dashboard link appears in navigation on all relevant pages\n   - Test dashboard link functionality across different user states (logged in/out, with/without waitlists)\n   - Verify responsive behavior of navigation on mobile devices\n\n4. **Paywall Flow Tests**:\n   - Verify users can create and fully design waitlists without payment\n   - Confirm payment is only required at publication attempt\n   - Test saving drafts and returning to them without payment\n   - Verify clear messaging about which actions require payment\n\n5. **End-to-End Tests**:\n   - Complete user journey tests from signup through waitlist creation, payment, and publication\n   - Test with both new and returning users\n   - Verify all flows work with different payment methods\n\nManual testing should be performed on multiple browsers (Chrome, Firefox, Safari) and devices (desktop, tablet, mobile) to ensure consistent behavior.",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Remove Auto-Redirect from Payment Success Page and Add Navigation Buttons",
+          "description": "Modify the payment success page to remain visible until user explicitly navigates away, replacing automatic redirects with clear action buttons.",
+          "dependencies": [],
+          "details": "Implementation steps: 1) Locate payment success page component and remove any setTimeout or automatic redirect logic. 2) Add two prominent buttons: 'Go to Dashboard' and 'Continue to Sharing' with proper routing. 3) Update success messaging to clearly explain next steps and what the user has accomplished. 4) Ensure buttons have proper loading states and error handling. 5) Style buttons consistently with existing design system. Testing: Verify payment success page stays visible indefinitely, test both navigation buttons lead to correct destinations, confirm messaging is clear and actionable.",
+          "status": "pending",
+          "parentTaskId": 39
+        },
+        {
+          "id": 2,
+          "title": "Add Dashboard Navigation Link to Main Navigation Bar",
+          "description": "Implement a persistent dashboard/my waitlists link in the main navigation that's visible across all relevant pages for easy access.",
+          "dependencies": [],
+          "details": "Implementation steps: 1) Identify main navigation component and add new 'Dashboard' or 'My Waitlists' link. 2) Implement proper routing to dashboard page with user's waitlist overview. 3) Add conditional rendering to show link only for authenticated users. 4) Style link consistently with existing navigation elements including hover states and active indicators. 5) Ensure link is visible on all pages where users might need dashboard access (creation flow, sharing pages, etc.). Testing: Verify link appears for logged-in users, test navigation functionality, confirm styling matches existing elements, test across different user states and pages.",
+          "status": "pending",
+          "parentTaskId": 39
+        },
+        {
+          "id": 3,
+          "title": "Restructure Paywall to Allow Full Creation Without Payment",
+          "description": "Modify the paywall system to permit complete waitlist creation and design without payment, only blocking the publish action.",
+          "dependencies": [],
+          "details": "Implementation steps: 1) Review current paywall implementation and identify where payment checks occur. 2) Remove payment requirements from waitlist creation, editing, and design phases. 3) Add payment gate specifically at the publish action with clear messaging about upgrade requirement. 4) Ensure draft waitlists are saved and accessible without payment. 5) Update UI to show clear indicators of which actions require payment (e.g., disabled publish button with upgrade prompt). 6) Implement proper session handling to maintain creation progress. Testing: Create waitlist without payment, verify all creation features work, confirm publish is blocked with clear messaging, test draft persistence across sessions.",
+          "status": "pending",
+          "parentTaskId": 39
+        },
+        {
+          "id": 4,
+          "title": "Fix Publish Flow to Redirect to Sharing Page Instead of Dashboard",
+          "description": "Correct the post-publication redirect logic to send users to the sharing page where they can immediately promote their waitlist.",
+          "dependencies": [
+            3
+          ],
+          "details": "Implementation steps: 1) Locate publish action handler and identify current redirect logic. 2) Update redirect destination from dashboard to sharing page, ensuring proper waitlist ID is passed. 3) Add progress indicators during publication process to improve user experience. 4) Implement proper error handling if publication fails, with user-friendly error messages. 5) Ensure sharing page receives proper context about the newly published waitlist. 6) Add success messaging on sharing page confirming publication. Testing: Publish a waitlist and verify redirect goes to sharing page, test with different waitlist types, confirm error handling works, verify sharing page displays correctly with new waitlist data.",
+          "status": "pending",
+          "parentTaskId": 39
+        },
+        {
+          "id": 5,
+          "title": "Implement Proper State Management and Error Handling Throughout Creation Flow",
+          "description": "Ensure the entire waitlist creation and publication flow maintains proper state, context, and handles errors gracefully.",
+          "dependencies": [
+            1,
+            3,
+            4
+          ],
+          "details": "Implementation steps: 1) Review route handlers throughout the creation flow to prevent unwanted redirects. 2) Implement consistent state management to track user progress through creation, payment, and publication. 3) Update payment processing callbacks to maintain proper user context and flow state. 4) Add comprehensive error handling with user-friendly messages at each step. 5) Ensure session persistence maintains creation progress even if user navigates away. 6) Add loading states and progress indicators where appropriate. Testing: Test complete flow with various interruptions (page refresh, navigation away, errors), verify state persistence, confirm error messages are helpful and actionable.",
+          "status": "pending",
+          "parentTaskId": 39
+        },
+        {
+          "id": 6,
+          "title": "End-to-End Testing and Validation of Complete User Flow",
+          "description": "Comprehensive testing of the entire user journey from signup through waitlist creation, payment, publication, and sharing to ensure all fixes work together seamlessly.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "details": "Implementation steps: 1) Create comprehensive test scenarios covering: new user signup → waitlist creation → payment → publication → sharing. 2) Test edge cases: payment failures, network interruptions, browser back/forward navigation, multiple waitlists. 3) Verify all navigation paths work correctly including new dashboard link and payment success buttons. 4) Test paywall behavior: creation without payment, publish blocking, upgrade flow. 5) Validate user experience flow feels natural and intuitive. 6) Performance test the flow under various conditions. Testing: Execute full user journey tests, document any remaining issues, verify all original bug reports are resolved, conduct user acceptance testing if possible, confirm analytics tracking works throughout flow.",
+          "status": "pending",
+          "parentTaskId": 39
+        }
+      ]
     }
   ],
   "metadata": {
