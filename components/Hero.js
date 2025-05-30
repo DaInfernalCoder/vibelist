@@ -1,5 +1,5 @@
 import Image from "next/image";
-import TestimonialsAvatars from "./TestimonialsAvatars";
+// import TestimonialsAvatars from "./TestimonialsAvatars";
 import config from "@/config";
 
 const Hero = () => {
@@ -42,7 +42,7 @@ const Hero = () => {
           Create your first waitlist
         </a>
 
-        <TestimonialsAvatars priority={true} />
+        {/* <TestimonialsAvatars priority={true} /> */}
       </div>
 
       {/* Creative Multi-Image Hero Design */}

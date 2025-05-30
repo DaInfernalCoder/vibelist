@@ -8,7 +8,7 @@ import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import FeaturesGrid from "@/components/FeaturesGrid";
 import Problem from "@/components/Problem";
-import Testimonials11 from "@/components/Testimonials11";
+// import Testimonials11 from "@/components/Testimonials11";
 
 export default function Home() {
   return (
@@ -23,7 +23,7 @@ export default function Home() {
         <DemoSection />
         <Pricing />
         <FAQ />
-        <Testimonials11 />
+        {/* <Testimonials11 /> */}
         <CTA />
       </main>
       <Footer />
