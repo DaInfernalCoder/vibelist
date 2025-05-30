@@ -19,11 +19,10 @@ const PaymentSuccessContent = () => {
   useEffect(() => {
     const verifyPaymentAndRefreshStatus = async () => {
       if (!sessionId) {
-        // If no session ID, redirect to dashboard after a short delay
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 2000);
-        setError("Redirecting to dashboard...");
+        // If no session ID, show error instead of auto-redirecting
+        setError(
+          "No payment session found. Please check your payment confirmation email or contact support."
+        );
         setIsLoading(false);
         return;
       }
@@ -39,18 +38,14 @@ const PaymentSuccessContent = () => {
         // If user is already authenticated and we have a session_id,
         // check if this is a repeat visit (they might have already seen this page)
         if (currentUser && sessionId) {
-          // Check if they already have access - if so, redirect to dashboard
+          // Check if they already have access - if so, they can still see the success page
           const { data: profile } = await supabase
             .from("profiles")
             .select("has_access")
             .eq("id", currentUser.id)
             .single();
 
-          if (profile?.has_access) {
-            // User already has access and is authenticated, redirect to dashboard
-            router.push("/dashboard/create");
-            return;
-          }
+          // Don't auto-redirect anymore - let user choose where to go
         }
 
         // Verify payment with our API first
@@ -150,7 +145,7 @@ const PaymentSuccessContent = () => {
           <h1 className="text-2xl font-bold text-base-content mb-4">
             {error.includes("Check your email")
               ? "Sign In Required"
-              : "Payment Verification Failed"}
+              : "Payment Verification Issue"}
           </h1>
           <p className="text-base-content/70 mb-6">{error}</p>
           {error.includes("Check your email") ? (
@@ -159,14 +154,24 @@ const PaymentSuccessContent = () => {
                 We&apos;ve sent a magic link to your email. Click it to complete
                 your account setup.
               </p>
-              <Link href="/signin" className="btn btn-primary">
-                Or Sign In Manually
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/signin" className="btn btn-primary">
+                  Sign In Manually
+                </Link>
+                <Link href="/dashboard" className="btn btn-outline">
+                  Go to Dashboard
+                </Link>
+              </div>
             </div>
           ) : (
-            <Link href="/dashboard" className="btn btn-primary">
-              Go to Dashboard
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/dashboard" className="btn btn-primary">
+                Go to Dashboard
+              </Link>
+              <Link href="/pricing" className="btn btn-outline">
+                View Pricing
+              </Link>
+            </div>
           )}
         </div>
       </div>
@@ -272,16 +277,65 @@ const PaymentSuccessContent = () => {
             </div>
           </div>
 
-          {/* Next Steps */}
-          <div className="text-center space-y-4">
+          {/* Next Steps with Clear Navigation */}
+          <div className="text-center space-y-6">
             <h3 className="text-2xl font-bold text-base-content mb-4">
               What&apos;s Next?
             </h3>
+            <p className="text-base-content/70 mb-6">
+              Choose where you&apos;d like to go next. Your premium features are
+              ready to use!
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/dashboard/create" className="btn btn-primary btn-lg">
+              <Link href="/dashboard" className="btn btn-primary btn-lg">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7"
+                  />
+                </svg>
+                Go to Dashboard
+              </Link>
+              <Link href="/dashboard/create" className="btn btn-outline btn-lg">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
                 Create Your First Waitlist
               </Link>
-              <Link href="/dashboard/market" className="btn btn-outline btn-lg">
+              <Link href="/dashboard/market" className="btn btn-ghost btn-lg">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
+                  />
+                </svg>
                 Explore Marketplace
               </Link>
             </div>

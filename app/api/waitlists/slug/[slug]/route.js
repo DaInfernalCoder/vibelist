@@ -1,6 +1,11 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+
+// Create public client for unauthenticated operations (cross-device compatible)
+const publicSupabase = createSupabaseClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 // Generate a unique request ID for API tracing
 const generateRequestId = () => {
@@ -17,27 +22,8 @@ export async function GET(request, { params }) {
   const requestId = generateRequestId();
   console.log(`[${requestId}] API: GET /api/waitlists/slug/${params.slug}`);
 
-  const cookieStore = cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch (e) {
-            console.error(`[${requestId}] Error setting cookies:`, e);
-          }
-        },
-      },
-    }
-  );
+  // Use public client for cross-device compatibility
+  const supabase = publicSupabase;
 
   const { slug } = params;
 
@@ -142,6 +128,7 @@ export async function GET(request, { params }) {
       name: waitlistData.name,
       description: waitlistData.description,
       slug: waitlistData.url_slug,
+      published: true,
       template_data: template_data_for_public_page,
       created_at: waitlistData.created_at,
       updated_at: waitlistData.updated_at,

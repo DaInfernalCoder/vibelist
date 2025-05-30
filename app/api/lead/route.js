@@ -1,14 +1,74 @@
 import { createClient } from "@/libs/supabase/server";
 import { NextResponse } from "next/server";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-// For testing purposes - should be replaced with proper RLS in production
-const adminSupabase = process.env.SUPABASE_SERVICE_ROLE_KEY
-  ? createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
-  : null;
+// Create admin client for development/testing
+const adminSupabase =
+  process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      )
+    : null;
+
+// Create public client for unauthenticated operations
+const publicSupabase = createSupabaseClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+// Simple in-memory rate limiting (for production, use Redis)
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 3; // 3 signup attempts per email per minute (allows for retries)
+
+/**
+ * Rate limiting based on email address to prevent spam while allowing multiple users per IP
+ */
+function checkRateLimit(email) {
+  const now = Date.now();
+  const key = `rate_limit_email_${email.toLowerCase()}`;
+
+  if (!rateLimitMap.has(key)) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+
+  const limit = rateLimitMap.get(key);
+
+  // Reset if window has passed
+  if (now > limit.resetTime) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+
+  // Check if limit exceeded
+  if (limit.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+
+  // Increment count
+  limit.count++;
+  return true;
+}
+
+/**
+ * Add CORS headers to response
+ */
+function addCORSHeaders(response) {
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  response.headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type, Accept");
+  return response;
+}
+
+/**
+ * Create a JSON response with CORS headers
+ */
+function createCORSResponse(data, options = {}) {
+  const response = NextResponse.json(data, options);
+  return addCORSHeaders(response);
+}
 
 /**
  * Categorize database errors to provide better error handling and messages
@@ -85,15 +145,33 @@ function categorizeDbError(error) {
  * Accepts: email (required), name, waitlistId (required), custom fields, and referral source
  */
 export async function POST(req) {
-  const body = await req.json();
+  let body;
+  try {
+    body = await req.json();
+  } catch (error) {
+    return createCORSResponse(
+      { error: "Invalid JSON in request body" },
+      { status: 400 }
+    );
+  }
+
+  // Validate request size (prevent large payloads)
+  const requestSize = JSON.stringify(body).length;
+  if (requestSize > 1024) {
+    // 1KB limit
+    return createCORSResponse(
+      { error: "Request payload too large" },
+      { status: 413 }
+    );
+  }
 
   // Validate required fields
   if (!body.email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    return createCORSResponse({ error: "Email is required" }, { status: 400 });
   }
 
   if (!body.waitlistId) {
-    return NextResponse.json(
+    return createCORSResponse(
       { error: "Waitlist ID is required" },
       { status: 400 }
     );
@@ -102,21 +180,39 @@ export async function POST(req) {
   // Basic email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(body.email)) {
-    return NextResponse.json(
+    return createCORSResponse(
       { error: "Invalid email format" },
       { status: 400 }
     );
   }
 
+  // Check rate limit per email (after email validation)
+  if (!checkRateLimit(body.email)) {
+    console.warn(`Rate limit exceeded for email: ${body.email}`);
+    return createCORSResponse(
+      {
+        error: "Too many signup attempts. Please try again later.",
+        code: "RATE_LIMITED",
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": "60",
+        },
+      }
+    );
+  }
+
   try {
-    // Use admin client in development mode for testing
-    // In production, we should fix the RLS policies instead
+    // Use public client for all waitlist operations to ensure cross-device compatibility
+    // This allows unauthenticated users to sign up for published waitlists
+    // Admin client is only used in development for testing/debugging
     const supabase =
       process.env.NODE_ENV === "development" && adminSupabase
         ? adminSupabase
-        : createClient();
+        : publicSupabase;
 
-    // Check if waitlist exists and is published
+    // Check if waitlist exists and is published using public client
     const { data: waitlist, error: waitlistError } = await supabase
       .from("waitlists")
       .select("id, published")
@@ -128,14 +224,14 @@ export async function POST(req) {
         "Waitlist not found:",
         waitlistError?.message || "Unknown error"
       );
-      return NextResponse.json(
+      return createCORSResponse(
         { error: "Waitlist not found", details: waitlistError?.message },
         { status: 404 }
       );
     }
 
     if (!waitlist.published) {
-      return NextResponse.json(
+      return createCORSResponse(
         { error: "This waitlist is not currently accepting signups" },
         { status: 403 }
       );
@@ -151,7 +247,7 @@ export async function POST(req) {
 
     if (checkError) {
       console.error("Error checking for existing signup:", checkError.message);
-      return NextResponse.json(
+      return createCORSResponse(
         {
           error: "Failed to process signup",
           details: `Error checking for existing signup: ${checkError.message}`,
@@ -161,7 +257,7 @@ export async function POST(req) {
     }
 
     if (existingSignup) {
-      return NextResponse.json(
+      return createCORSResponse(
         { error: "This email is already registered for this waitlist" },
         { status: 409 } // 409 Conflict
       );
@@ -239,7 +335,7 @@ export async function POST(req) {
                 "Fallback signup attempt also failed:",
                 fallbackError.message
               );
-              return NextResponse.json(
+              return createCORSResponse(
                 {
                   error: "Failed to join waitlist",
                   details: `Insert error: ${fallbackError.message}`,
@@ -253,7 +349,7 @@ export async function POST(req) {
             await supabase.rpc("toggle_analytics_triggers", { p_enable: true });
 
             // Successfully created signup with fallback
-            return NextResponse.json({
+            return createCORSResponse({
               success: true,
               message: "Successfully joined the waitlist",
               id: fallbackSignup.id,
@@ -267,7 +363,7 @@ export async function POST(req) {
         }
 
         // Return original error if no fallback or fallback failed
-        return NextResponse.json(
+        return createCORSResponse(
           {
             error: errorInfo.userMessage,
             details: `Insert error: ${insertError.message}`,
@@ -278,7 +374,7 @@ export async function POST(req) {
       }
 
       // Successfully created signup
-      return NextResponse.json({
+      return createCORSResponse({
         success: true,
         message: "Successfully joined the waitlist",
         id: signup.id,
@@ -289,7 +385,7 @@ export async function POST(req) {
     }
   } catch (e) {
     console.error("Unexpected error in waitlist signup:", e.message, e.stack);
-    return NextResponse.json(
+    return createCORSResponse(
       {
         error: "An unexpected error occurred",
         details: e.message,
@@ -298,4 +394,19 @@ export async function POST(req) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Handle CORS preflight requests
+ */
+export async function OPTIONS(request) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Accept",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
 }

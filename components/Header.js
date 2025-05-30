@@ -7,6 +7,7 @@ import Image from "next/image";
 import ButtonSignin from "./ButtonSignin";
 import logo from "@/app/icon.png";
 import config from "@/config";
+import { createClient } from "@/libs/supabase/client";
 
 const links = [
   {
@@ -27,20 +28,72 @@ const links = [
   },
 ];
 
-const cta = (
-  <ButtonSignin extraStyle="bg-[#9334E9] hover:bg-[#7C2D9E] text-white border-0" />
-);
-
 // A header with a logo on the left, links in the center (like Pricing, etc...), and a CTA (like Get Started or Login) on the right.
 // The header is responsive, and on mobile, the links are hidden behind a burger button.
 const Header = () => {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Get user authentication status
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error("Error getting user:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getUser();
+  }, []);
 
   // setIsOpen(false) when the route changes (i.e: when the user clicks on a link on mobile)
   useEffect(() => {
     setIsOpen(false);
   }, [searchParams]);
+
+  // Determine what to show in the CTA area
+  const getCTA = () => {
+    if (isLoading) {
+      return (
+        <div className="w-24 h-10 bg-base-300 animate-pulse rounded"></div>
+      );
+    }
+
+    if (user) {
+      return (
+        <Link href="/dashboard" className="btn btn-primary">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7"
+            />
+          </svg>
+          Dashboard
+        </Link>
+      );
+    }
+
+    return (
+      <ButtonSignin extraStyle="bg-[#9334E9] hover:bg-[#7C2D9E] text-white border-0" />
+    );
+  };
 
   return (
     <header className="bg-base-100">
@@ -94,6 +147,30 @@ const Header = () => {
 
         {/* Your links on large screens */}
         <div className="hidden lg:flex lg:justify-center lg:gap-12 lg:items-center">
+          {/* Show dashboard link for authenticated users */}
+          {user && (
+            <Link
+              href="/dashboard"
+              className="link link-hover flex items-center gap-2"
+              title="Dashboard"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7"
+                />
+              </svg>
+              Dashboard
+            </Link>
+          )}
           {links.map((link) => (
             <Link
               href={link.href}
@@ -107,7 +184,9 @@ const Header = () => {
         </div>
 
         {/* CTA on large screens */}
-        <div className="hidden lg:flex lg:justify-end lg:flex-1">{cta}</div>
+        <div className="hidden lg:flex lg:justify-end lg:flex-1">
+          {getCTA()}
+        </div>
       </nav>
 
       {/* Mobile menu, show/hide based on menu state. */}
@@ -160,6 +239,30 @@ const Header = () => {
           <div className="flow-root mt-6">
             <div className="py-4">
               <div className="flex flex-col gap-y-4 items-start">
+                {/* Show dashboard link for authenticated users on mobile */}
+                {user && (
+                  <Link
+                    href="/dashboard"
+                    className="link link-hover flex items-center gap-2"
+                    title="Dashboard"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7"
+                      />
+                    </svg>
+                    Dashboard
+                  </Link>
+                )}
                 {links.map((link) => (
                   <Link
                     href={link.href}
@@ -174,7 +277,7 @@ const Header = () => {
             </div>
             <div className="divider"></div>
             {/* Your CTA on small screens */}
-            <div className="flex flex-col">{cta}</div>
+            <div className="flex flex-col">{getCTA()}</div>
           </div>
         </div>
       </div>
