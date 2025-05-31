@@ -128,7 +128,11 @@ export default function EditWaitlistPage() {
           <p className="text-destructive mb-4">
             {error || "Waitlist not found"}
           </p>
-          <Button asChild>
+          <Button
+            asChild
+            className="text-white border-0"
+            style={{ backgroundColor: "#9334E8" }}
+          >
             <Link href="/dashboard/create">Create New Waitlist</Link>
           </Button>
         </div>

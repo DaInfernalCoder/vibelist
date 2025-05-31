@@ -134,7 +134,11 @@ export default async function Dashboard() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
-          <Link href="/dashboard/create" className="btn btn-primary">
+          <Link
+            href="/dashboard/create"
+            className="btn text-white border-0"
+            style={{ backgroundColor: "#9334E8" }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 mr-2"
@@ -198,7 +202,8 @@ export default async function Dashboard() {
                   <div className="card-actions justify-end">
                     <Link
                       href={`/dashboard/waitlist/${waitlist.id}`}
-                      className="btn btn-sm btn-primary"
+                      className="btn btn-sm text-white border-0"
+                      style={{ backgroundColor: "#9334E8" }}
                     >
                       Manage
                     </Link>
@@ -226,7 +231,11 @@ export default async function Dashboard() {
                 Create your first waitlist to start building your audience and
                 collecting signups.
               </p>
-              <Link href="/dashboard/create" className="btn btn-primary">
+              <Link
+                href="/dashboard/create"
+                className="btn text-white border-0"
+                style={{ backgroundColor: "#9334E8" }}
+              >
                 Create Your First Waitlist
               </Link>
             </div>

@@ -31,7 +31,11 @@ const EmptyState = () => {
           </div>
 
           <div className="space-y-3">
-            <Button asChild className="w-full">
+            <Button
+              asChild
+              className="w-full text-white border-0"
+              style={{ backgroundColor: "#9334E8" }}
+            >
               <Link href="/dashboard/create">Create New Waitlist</Link>
             </Button>
             <p className="text-sm text-muted-foreground">
