@@ -95,6 +95,18 @@ const PaymentSuccessContent = () => {
 
         setUser(currentUser);
 
+        // Set flag to show payment success notification when user navigates
+        if (sessionId && data.success) {
+          const notificationData = {
+            timestamp: Date.now(),
+            sessionId: sessionId,
+          };
+          localStorage.setItem(
+            "show_payment_success_notification",
+            JSON.stringify(notificationData)
+          );
+        }
+
         // Refresh subscription status
         const statusResponse = await fetch("/api/subscription/refresh", {
           method: "POST",
@@ -197,6 +209,8 @@ const PaymentSuccessContent = () => {
             </h1>
             <p className="text-xl text-base-content/70">
               Welcome to VibeList Pro! Your premium features are now unlocked.
+              Thank you for supporting a small creator, I truly appreciate you
+              from the bottom of my heart.
             </p>
           </div>
 
@@ -244,34 +258,40 @@ const PaymentSuccessContent = () => {
           {/* Premium Features Unlocked */}
           <div className="card bg-base-100 shadow-xl mb-8">
             <div className="card-body">
-              <h2 className="card-title text-secondary mb-4">
+              <h2 className="card-title text-black mb-4">
                 <SparklesIcon className="w-6 h-6" />
                 Premium Features Unlocked
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-success" />
-                  <span>Advanced Analytics Dashboard</span>
+                  <span className="text-black">
+                    Advanced Analytics Dashboard
+                  </span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-success" />
-                  <span>Waitlist Marketplace Access</span>
+                  <span className="text-black">
+                    Waitlist Marketplace Access
+                  </span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-success" />
-                  <span>Unlimited Waitlist Publishing</span>
+                  <span className="text-black">
+                    Unlimited Waitlist Publishing
+                  </span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-success" />
-                  <span>Priority Customer Support</span>
+                  <span className="text-black">Priority Customer Support</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-success" />
-                  <span>Custom Branding Options</span>
+                  <span className="text-black">Custom Branding Options</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircleIcon className="w-5 h-5 text-success" />
-                  <span>Export Data & Analytics</span>
+                  <span className="text-black">Export Data & Analytics</span>
                 </div>
               </div>
             </div>
@@ -287,7 +307,11 @@ const PaymentSuccessContent = () => {
               ready to use!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/dashboard" className="btn btn-primary btn-lg">
+              <Link
+                href="/dashboard"
+                className="btn btn-lg text-white border-0"
+                style={{ backgroundColor: "#9334E8" }}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5 mr-2"
@@ -339,18 +363,6 @@ const PaymentSuccessContent = () => {
                 Explore Marketplace
               </Link>
             </div>
-          </div>
-
-          {/* Receipt */}
-          <div className="mt-8 p-4 bg-base-200 rounded-lg text-center">
-            <p className="text-sm text-base-content/60 mb-2">
-              A receipt has been sent to your email address.
-            </p>
-            {sessionId && (
-              <p className="text-xs text-base-content/50">
-                Session ID: {sessionId}
-              </p>
-            )}
           </div>
         </div>
       </div>

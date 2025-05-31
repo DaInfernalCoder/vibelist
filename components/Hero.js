@@ -4,7 +4,7 @@ import config from "@/config";
 
 const Hero = () => {
   return (
-    <section className="max-w-7xl mx-auto bg-base-100 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 lg:py-20">
+    <section className="max-w-7xl mx-auto bg-base-100 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 lg:py-20 overflow-hidden">
       <div className="flex flex-col gap-10 lg:gap-14 items-center justify-center text-center lg:text-left lg:items-start">
         <h1 className="font-extrabold text-4xl lg:text-6xl tracking-tight md:-mb-4">
           Create beautiful waitlists to validate ideas{" "}
@@ -47,7 +47,7 @@ const Hero = () => {
       </div>
 
       {/* Creative Multi-Image Hero Design */}
-      <div className="lg:w-full relative">
+      <div className="lg:w-full relative overflow-hidden">
         <div className="relative w-full h-[500px] lg:h-[600px]">
           {/* Background Image - Main Screenshot */}
           <div className="absolute inset-0 transform rotate-2 hover:rotate-1 transition-transform duration-500 ease-out">
@@ -63,7 +63,7 @@ const Hero = () => {
           </div>
 
           {/* Floating Card 1 - Interactive Demo */}
-          <div className="absolute top-8 -left-4 lg:-left-8 w-64 lg:w-80 transform -rotate-6 hover:-rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
+          <div className="absolute top-8 left-0 lg:-left-8 w-64 lg:w-80 transform -rotate-6 hover:-rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
             <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
               <Image
                 src="/demos/Interactive Product Demo Screenshot.png"
@@ -76,7 +76,7 @@ const Hero = () => {
           </div>
 
           {/* Floating Card 2 - Second Screenshot */}
-          <div className="absolute bottom-8 -right-4 lg:-right-8 w-56 lg:w-72 transform rotate-6 hover:rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
+          <div className="absolute bottom-8 right-0 lg:-right-8 w-56 lg:w-72 transform rotate-6 hover:rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
             <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
               <Image
                 src="/demos/Screenshot May 28 2025 (1).png"

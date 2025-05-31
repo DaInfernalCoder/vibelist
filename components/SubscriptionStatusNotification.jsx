@@ -27,19 +27,75 @@ const SubscriptionStatusNotification = () => {
       const now = new Date();
       const timeDiff = now - refreshTime;
 
-      // If the refresh was recent (within last 30 seconds), show success notification
+      // If the refresh was recent (within last 30 seconds), check if we should show notification
       if (timeDiff < 30000) {
-        setNotification({
-          type: "success",
-          title: "Premium Access Activated!",
-          message:
-            "Your subscription is now active. Enjoy all premium features!",
-          icon: CheckCircle,
-        });
-        setShowNotification(true);
+        // Check if this is a payment success scenario by looking for URL params or localStorage flag
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get("session_id");
+        const isPaymentSuccess =
+          window.location.pathname === "/payment/success";
 
-        // Auto-hide after 5 seconds
-        setTimeout(() => setShowNotification(false), 5000);
+        // Check if we've already shown the notification for this session
+        const notificationKey = `payment_success_shown_${sessionId || "general"}`;
+        const hasShownNotification = localStorage.getItem(notificationKey);
+
+        // Check for payment success flag with timestamp validation
+        let hasRecentPaymentFlag = false;
+        try {
+          const paymentFlagData = localStorage.getItem(
+            "show_payment_success_notification"
+          );
+          if (paymentFlagData) {
+            const parsedData = JSON.parse(paymentFlagData);
+            const flagAge = Date.now() - parsedData.timestamp;
+            // Only consider the flag valid if it's less than 5 minutes old
+            hasRecentPaymentFlag = flagAge < 5 * 60 * 1000;
+
+            // Clean up old flags
+            if (!hasRecentPaymentFlag) {
+              localStorage.removeItem("show_payment_success_notification");
+            }
+          }
+        } catch (e) {
+          // Handle legacy format or corrupted data
+          const legacyFlag = localStorage.getItem(
+            "show_payment_success_notification"
+          );
+          hasRecentPaymentFlag = legacyFlag === "true";
+        }
+
+        // Only show if:
+        // 1. We're on the payment success page with a session_id, OR
+        // 2. We have a recent payment flag in localStorage
+        const shouldShowNotification =
+          (isPaymentSuccess && sessionId && !hasShownNotification) ||
+          hasRecentPaymentFlag;
+
+        // Additional check: don't show if we've already shown a notification for this refresh cycle
+        const currentRefreshKey = `notification_shown_${lastRefresh}`;
+        const hasShownForThisRefresh =
+          sessionStorage.getItem(currentRefreshKey);
+
+        if (shouldShowNotification && !hasShownForThisRefresh) {
+          setNotification({
+            type: "success",
+            title: "Premium Access Activated!",
+            message:
+              "Your subscription is now active. Enjoy all premium features!",
+            icon: CheckCircle,
+          });
+          setShowNotification(true);
+
+          // Mark as shown to prevent showing again
+          if (sessionId) {
+            localStorage.setItem(notificationKey, "true");
+          }
+          localStorage.removeItem("show_payment_success_notification");
+          sessionStorage.setItem(currentRefreshKey, "true");
+
+          // Auto-hide after 5 seconds
+          setTimeout(() => setShowNotification(false), 5000);
+        }
       }
     }
 
