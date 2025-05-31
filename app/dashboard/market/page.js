@@ -54,48 +54,66 @@ export default function MarketPage() {
     );
   }
 
-  // Main market content for paid users
+  // Main market content for paid users with blur and coming soon overlay
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Market</h1>
-          <p className="text-muted-foreground mt-2">
-            Discover and promote your waitlists
-          </p>
+    <div className="relative space-y-6">
+      {/* Blurred content */}
+      <div className="filter blur-sm pointer-events-none select-none">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Market</h1>
+            <p className="text-muted-foreground mt-2">
+              Discover and promote your waitlists
+            </p>
+          </div>
+        </div>
+
+        {/* Market content will go here */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h2 className="card-title">Trending Waitlists</h2>
+              <p>Discover what&apos;s popular in the waitlist community</p>
+              <div className="card-actions justify-end">
+                <button className="btn btn-primary">Explore</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h2 className="card-title">Promote Your Waitlist</h2>
+              <p>Get your waitlist featured and increase signups</p>
+              <div className="card-actions justify-end">
+                <button className="btn btn-primary">Promote</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h2 className="card-title">Community</h2>
+              <p>Connect with other waitlist creators</p>
+              <div className="card-actions justify-end">
+                <button className="btn btn-primary">Join</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Market content will go here */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Trending Waitlists</h2>
-            <p>Discover what&apos;s popular in the waitlist community</p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Explore</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Promote Your Waitlist</h2>
-            <p>Get your waitlist featured and increase signups</p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Promote</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title">Community</h2>
-            <p>Connect with other waitlist creators</p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Join</button>
-            </div>
-          </div>
+      {/* Coming Soon Overlay */}
+      <div className="absolute inset-0 flex items-center justify-center bg-base-100/80 backdrop-blur-sm">
+        <div className="text-center p-8 max-w-md">
+          <div className="text-6xl mb-4">🚀</div>
+          <h2 className="text-4xl font-bold mb-4 text-primary">Coming Soon</h2>
+          <p className="text-lg text-base-content/70 mb-6">
+            We&apos;re working hard to bring you amazing marketing tools and
+            community features.
+          </p>
+          <p className="text-sm text-base-content/50">
+            Stay tuned for updates!
+          </p>
         </div>
       </div>
     </div>
