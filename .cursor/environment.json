@@ -3,5 +3,7 @@
     "dockerfile": "Dockerfile",
     "context": "."
   },
-  "terminals": []
+  "terminals": [],
+  "install": "npm install",
+  "start": "npm run dev"
 }

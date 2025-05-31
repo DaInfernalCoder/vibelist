@@ -24,10 +24,11 @@ const CTA = () => {
 
           <a
             href="/dashboard/create"
-            className="btn btn-wide bg-[#9334E9] hover:bg-[#7C2D9E] text-white border-0"
+            className="btn btn-wide text-white border-0"
+            style={{ backgroundColor: "#9334E8" }}
             target="_blank"
           >
-            Get {config.appName}
+            Get Started
           </a>
         </div>
       </div>

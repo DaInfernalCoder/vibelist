@@ -70,7 +70,15 @@ const Header = () => {
 
     if (user) {
       return (
-        <Link href="/dashboard" className="btn btn-primary">
+        <Link
+          href="/dashboard/create"
+          className="btn"
+          style={{
+            backgroundColor: "#9334E8",
+            borderColor: "#9334E8",
+            color: "white",
+          }}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-4 w-4 mr-2"
@@ -82,10 +90,10 @@ const Header = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7"
+              d="M12 4v16m8-8H4"
             />
           </svg>
-          Dashboard
+          Get Started
         </Link>
       );
     }
@@ -147,30 +155,6 @@ const Header = () => {
 
         {/* Your links on large screens */}
         <div className="hidden lg:flex lg:justify-center lg:gap-12 lg:items-center">
-          {/* Show dashboard link for authenticated users */}
-          {user && (
-            <Link
-              href="/dashboard"
-              className="link link-hover flex items-center gap-2"
-              title="Dashboard"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7"
-                />
-              </svg>
-              Dashboard
-            </Link>
-          )}
           {links.map((link) => (
             <Link
               href={link.href}
@@ -239,30 +223,6 @@ const Header = () => {
           <div className="flow-root mt-6">
             <div className="py-4">
               <div className="flex flex-col gap-y-4 items-start">
-                {/* Show dashboard link for authenticated users on mobile */}
-                {user && (
-                  <Link
-                    href="/dashboard"
-                    className="link link-hover flex items-center gap-2"
-                    title="Dashboard"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2V7"
-                      />
-                    </svg>
-                    Dashboard
-                  </Link>
-                )}
                 {links.map((link) => (
                   <Link
                     href={link.href}
