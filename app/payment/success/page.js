@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircleIcon, SparklesIcon } from "@heroicons/react/24/solid";
 import { createClient } from "@/libs/supabase/client";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 
 const PaymentSuccessContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const { forceRefreshSubscriptionStatus, hasValidAccess } = useSubscription();
 
   const [isLoading, setIsLoading] = useState(true);
   const [paymentData, setPaymentData] = useState(null);
@@ -107,13 +109,63 @@ const PaymentSuccessContent = () => {
           );
         }
 
-        // Refresh subscription status
-        const statusResponse = await fetch("/api/subscription/refresh", {
-          method: "POST",
-        });
+        // Force refresh subscription status with multiple attempts
+        let refreshAttempts = 0;
+        const maxRefreshAttempts = 3;
+        let subscriptionRefreshed = false;
 
-        if (!statusResponse.ok) {
-          console.warn("Failed to refresh subscription status");
+        while (refreshAttempts < maxRefreshAttempts && !subscriptionRefreshed) {
+          try {
+            const statusResponse = await fetch("/api/subscription/refresh", {
+              method: "POST",
+              headers: {
+                "Cache-Control": "no-cache",
+                Pragma: "no-cache",
+              },
+            });
+
+            if (statusResponse.ok) {
+              const refreshData = await statusResponse.json();
+              if (refreshData.hasAccess) {
+                subscriptionRefreshed = true;
+                console.log("Subscription status successfully refreshed");
+                break;
+              }
+            }
+          } catch (refreshError) {
+            console.warn(
+              `Subscription refresh attempt ${refreshAttempts + 1} failed:`,
+              refreshError
+            );
+          }
+
+          refreshAttempts++;
+          if (refreshAttempts < maxRefreshAttempts) {
+            // Wait before retrying (exponential backoff)
+            await new Promise((resolve) =>
+              setTimeout(resolve, 1000 * refreshAttempts)
+            );
+          }
+        }
+
+        if (!subscriptionRefreshed) {
+          console.warn(
+            "Failed to refresh subscription status after all attempts"
+          );
+        }
+
+        // Force refresh the client-side subscription context
+        try {
+          console.log("Force refreshing client-side subscription context...");
+          await forceRefreshSubscriptionStatus();
+          console.log(
+            "Client-side subscription context refreshed successfully"
+          );
+        } catch (contextError) {
+          console.warn(
+            "Failed to refresh client-side subscription context:",
+            contextError
+          );
         }
       } catch (err) {
         console.error("Payment verification error:", err);

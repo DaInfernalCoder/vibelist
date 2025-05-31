@@ -2735,6 +2735,86 @@
           "parentTaskId": 42
         }
       ]
+    },
+    {
+      "id": 43,
+      "title": "Fix Post-Payment Paywall Persistence Bug",
+      "description": "Resolve the critical issue where paid customers continue to see paywall restrictions and upgrade prompts after completing payment, preventing them from accessing purchased features like publishing waitlists.",
+      "details": "This task requires identifying and fixing the disconnect between payment processing and feature access throughout the application. The developer should:\n\n1. Review the payment confirmation flow and verify that user subscription status is properly updated in the database after Stripe webhook events are received\n\n2. Examine the caching mechanism for user subscription status - implement proper cache invalidation when payment is processed\n\n3. Audit all paywall-related code to ensure it correctly checks the current subscription status rather than using potentially stale data\n\n4. Modify the waitlist publishing functionality to properly recognize paid status before showing restrictions\n\n5. Update the logic for displaying upgrade banners and prompts to include a reliable check for active subscriptions\n\n6. Implement a more robust state management approach that ensures subscription status is consistently reflected across all application components\n\n7. Add logging around payment status changes to help diagnose any future issues\n\n8. Consider adding a force-refresh mechanism that updates the application state when a user returns after payment completion\n\n9. Review Stripe webhook handling to ensure it's properly processing all relevant event types (payment_intent.succeeded, checkout.session.completed, etc.)\n\n10. Ensure database transactions around subscription status updates are atomic and reliable",
+      "testStrategy": "Testing should cover the complete payment-to-access flow and verify the bug is fully resolved:\n\n1. **End-to-end test**: Complete a test payment using Stripe test mode, then verify all paywall restrictions are immediately removed\n\n2. **Webhook simulation test**: Manually trigger Stripe webhooks to simulate payment completion and verify the application responds correctly\n\n3. **UI verification**: Create a test suite that checks all UI components that should change based on payment status (upgrade buttons, restriction notices, paywall overlays)\n\n4. **Session handling test**: Verify that a user's paid status persists correctly across multiple sessions and page refreshes\n\n5. **Edge case testing**:\n   - Test behavior when a user completes payment but closes the browser before returning to the app\n   - Test with network interruptions during the payment confirmation process\n   - Test with various subscription plans to ensure all paid tiers correctly remove restrictions\n\n6. **Regression testing**: Verify that the fix doesn't affect other payment-related functionality\n\n7. **Performance testing**: Ensure the subscription status checks don't introduce significant latency\n\n8. **Manual verification**: Have QA perform a complete payment flow and verify all restrictions are removed without requiring refresh or logout/login\n\n9. **Production monitoring**: Implement temporary enhanced logging in production to verify the fix works for real customers",
+      "status": "in-progress",
+      "dependencies": [
+        34,
+        35
+      ],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Audit and Fix Stripe Webhook Processing",
+          "description": "Review and enhance the Stripe webhook handling system to ensure all payment-related events are properly processed and subscription status updates are atomic and reliable.",
+          "dependencies": [],
+          "details": "Implementation steps: 1) Audit current webhook endpoints for payment_intent.succeeded, checkout.session.completed, invoice.payment_succeeded, and customer.subscription.updated events. 2) Implement proper error handling and retry logic for webhook processing. 3) Ensure database transactions for subscription status updates are atomic using database transactions or locks. 4) Add comprehensive logging for all webhook events and their processing results. 5) Implement webhook signature verification for security. 6) Create unit tests for each webhook handler. 7) Test webhook processing using Stripe CLI for local development and staging environment validation.",
+          "status": "pending",
+          "parentTaskId": 43
+        },
+        {
+          "id": 2,
+          "title": "Implement Subscription Status Cache Invalidation System",
+          "description": "Design and implement a robust cache invalidation mechanism that immediately updates cached subscription status when payment events are processed.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implementation steps: 1) Identify all locations where subscription status is cached (Redis, in-memory, session storage, etc.). 2) Create a centralized cache invalidation service that can be triggered from webhook handlers. 3) Implement cache keys that include user ID and subscription status for granular invalidation. 4) Add cache invalidation calls to all webhook handlers from subtask 1. 5) Implement a fallback mechanism that bypasses cache for critical subscription checks. 6) Add monitoring and logging for cache invalidation events. 7) Create integration tests that verify cache is properly invalidated after payment processing. 8) Consider implementing cache warming strategies for frequently accessed subscription data.\n\n<info added on 2025-05-31T01:39:01.190Z>\n**Technical Implementation Details:**\n\n**Cache Key Strategy:**\n```javascript\n// Standardized cache key patterns\nconst CACHE_KEYS = {\n  subscription: (userId) => `sub:${userId}:status`,\n  features: (userId) => `sub:${userId}:features`,\n  billing: (userId) => `sub:${userId}:billing`,\n  metadata: (userId) => `sub:${userId}:meta`\n};\n```\n\n**Enhanced SubscriptionContext Implementation:**\n```javascript\n// Add force refresh method to context\nconst forceRefresh = useCallback(async () => {\n  // Clear localStorage immediately\n  localStorage.removeItem('subscription_cache');\n  localStorage.removeItem('subscription_timestamp');\n  \n  // Reset context state\n  setSubscription(null);\n  setLoading(true);\n  \n  // Fetch fresh data with cache-busting\n  const freshData = await fetchSubscription({ \n    bypassCache: true,\n    timestamp: Date.now() \n  });\n  \n  setSubscription(freshData);\n  setLoading(false);\n}, []);\n```\n\n**Payment Success Page Integration:**\n```javascript\n// In payment success component\nuseEffect(() => {\n  const handlePaymentSuccess = async () => {\n    // Force subscription context refresh\n    await subscriptionContext.forceRefresh();\n    \n    // Clear any related caches\n    queryClient.invalidateQueries(['subscription']);\n    queryClient.invalidateQueries(['user-features']);\n    \n    // Verify subscription status before showing success\n    const retryCount = 3;\n    await pollSubscriptionStatus(retryCount);\n  };\n  \n  handlePaymentSuccess();\n}, []);\n```\n\n**Webhook Handler Cache Invalidation:**\n```javascript\n// Centralized invalidation service\nclass CacheInvalidationService {\n  static async invalidateUserSubscription(userId) {\n    const operations = [\n      // Clear Redis cache\n      redis.del(CACHE_KEYS.subscription(userId)),\n      redis.del(CACHE_KEYS.features(userId)),\n      \n      // Broadcast to other instances\n      pubsub.publish('cache:invalidate', { \n        type: 'subscription', \n        userId \n      }),\n      \n      // Log invalidation event\n      logger.info('Cache invalidated', { userId, timestamp: Date.now() })\n    ];\n    \n    await Promise.allSettled(operations);\n  }\n}\n```\n\n**Polling Strategy for Payment Success:**\n```javascript\nconst pollSubscriptionStatus = async (maxRetries = 3, delay = 1000) => {\n  for (let i = 0; i < maxRetries; i++) {\n    const status = await fetchSubscriptionStatus({ bypassCache: true });\n    \n    if (status.isActive) {\n      return status;\n    }\n    \n    if (i < maxRetries - 1) {\n      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));\n    }\n  }\n  \n  throw new Error('Subscription status not updated after payment');\n};\n```\n\n**Error Handling & Fallback Mechanisms:**\n```javascript\n// Graceful degradation for cache failures\nconst getSubscriptionWithFallback = async (userId) => {\n  try {\n    // Try cache first\n    const cached = await getCachedSubscription(userId);\n    if (cached && !isStale(cached)) return cached;\n  } catch (cacheError) {\n    logger.warn('Cache read failed, falling back to DB', { userId, error: cacheError });\n  }\n  \n  // Fallback to direct DB query\n  const fresh = await fetchSubscriptionFromDB(userId);\n  \n  // Attempt to update cache (fire and forget)\n  setCachedSubscription(userId, fresh).catch(err => \n    logger.warn('Cache write failed', { userId, error: err })\n  );\n  \n  return fresh;\n};\n```\n\n**Integration Test Patterns:**\n```javascript\n// Test cache invalidation flow\ndescribe('Cache Invalidation', () => {\n  it('should clear cache on payment webhook', async () => {\n    // Setup: Cache subscription data\n    await setCachedSubscription(userId, { status: 'inactive' });\n    \n    // Action: Process payment webhook\n    await processPaymentWebhook({ userId, status: 'paid' });\n    \n    // Verify: Cache is cleared and fresh data is fetched\n    const cached = await getCachedSubscription(userId);\n    expect(cached).toBeNull();\n    \n    const fresh = await getSubscriptionStatus(userId);\n    expect(fresh.status).toBe('active');\n  });\n});\n```\n\n**Monitoring & Observability:**\n```javascript\n// Cache invalidation metrics\nconst metrics = {\n  cacheInvalidations: new Counter('cache_invalidations_total'),\n  cacheHitRate: new Histogram('cache_hit_rate'),\n  invalidationLatency: new Histogram('cache_invalidation_duration_ms')\n};\n\n// Track invalidation performance\nconst trackInvalidation = async (operation) => {\n  const start = Date.now();\n  try {\n    await operation();\n    metrics.cacheInvalidations.inc({ status: 'success' });\n  } catch (error) {\n    metrics.cacheInvalidations.inc({ status: 'error' });\n    throw error;\n  } finally {\n    metrics.invalidationLatency.observe(Date.now() - start);\n  }\n};\n```\n</info added on 2025-05-31T01:39:01.190Z>",
+          "status": "pending",
+          "parentTaskId": 43
+        },
+        {
+          "id": 3,
+          "title": "Refactor Subscription Status Checking Logic",
+          "description": "Create a centralized, reliable subscription status checking system that all paywall-related components can use to get current subscription state.",
+          "dependencies": [
+            2
+          ],
+          "details": "Implementation steps: 1) Create a SubscriptionService class that provides a single source of truth for subscription status. 2) Implement methods like isActiveSubscriber(), getSubscriptionTier(), and hasFeatureAccess() with proper database queries. 3) Replace all scattered subscription checks throughout the codebase with calls to this centralized service. 4) Implement proper error handling and fallback logic when subscription status cannot be determined. 5) Add database indexes on subscription-related fields for performance. 6) Create a subscription status middleware for API routes that need authentication. 7) Write comprehensive unit tests for all subscription checking logic. 8) Add integration tests that verify subscription status is correctly determined after payment completion.",
+          "status": "pending",
+          "parentTaskId": 43
+        },
+        {
+          "id": 4,
+          "title": "Fix Waitlist Publishing Feature Access Control",
+          "description": "Update the waitlist publishing functionality to properly recognize paid status and remove restrictions for paying customers.",
+          "dependencies": [
+            3
+          ],
+          "details": "Implementation steps: 1) Audit the waitlist publishing flow to identify all paywall checkpoints. 2) Replace existing subscription checks with calls to the centralized SubscriptionService from subtask 3. 3) Implement proper error messaging for different subscription states (expired, pending, active). 4) Add real-time subscription status validation before allowing publish actions. 5) Update the UI to dynamically show/hide publishing restrictions based on current subscription status. 6) Implement client-side subscription status polling or WebSocket updates for immediate UI updates. 7) Create end-to-end tests that simulate the complete flow from payment to successful waitlist publishing. 8) Add analytics tracking for successful feature access after payment completion.",
+          "status": "pending",
+          "parentTaskId": 43
+        },
+        {
+          "id": 5,
+          "title": "Update Upgrade Prompts and Banner Display Logic",
+          "description": "Modify all upgrade banners, prompts, and upsell components to accurately reflect current subscription status and hide appropriately for paying customers.",
+          "dependencies": [
+            3
+          ],
+          "details": "Implementation steps: 1) Inventory all upgrade prompts, banners, and upsell components across the application. 2) Update each component to use the centralized SubscriptionService for status checking. 3) Implement conditional rendering logic that hides upgrade prompts for active subscribers. 4) Add proper loading states while subscription status is being verified. 5) Create different messaging for different subscription states (trial, expired, active, etc.). 6) Implement A/B testing framework for upgrade prompts to measure effectiveness. 7) Add user preference settings to allow customers to control promotional messaging. 8) Create visual regression tests to ensure upgrade prompts display correctly for different user states.",
+          "status": "pending",
+          "parentTaskId": 43
+        },
+        {
+          "id": 6,
+          "title": "Implement Application State Refresh and Monitoring",
+          "description": "Create a comprehensive system for refreshing application state after payment completion and implement monitoring to detect and prevent future paywall persistence issues.",
+          "dependencies": [
+            4,
+            5
+          ],
+          "details": "Implementation steps: 1) Implement a force-refresh mechanism that updates subscription status when users return from payment flows. 2) Add URL parameters or session flags to trigger state refresh after successful payments. 3) Create a subscription status synchronization endpoint that can be called manually or automatically. 4) Implement real-time monitoring dashboards for subscription status consistency across the application. 5) Add automated alerts for when users report paywall issues after payment. 6) Create a customer support tool that allows manual subscription status refresh for affected users. 7) Implement comprehensive logging and metrics around subscription status changes and feature access. 8) Set up automated testing that regularly verifies the complete payment-to-feature-access flow works correctly.",
+          "status": "pending",
+          "parentTaskId": 43
+        }
+      ]
     }
   ],
   "metadata": {

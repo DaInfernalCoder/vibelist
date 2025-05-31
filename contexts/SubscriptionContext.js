@@ -72,12 +72,53 @@ const clearSubscriptionCache = () => {
   if (typeof window === "undefined") return;
   try {
     localStorage.removeItem(CACHE_KEY);
+    // Also clear any related payment flags
+    localStorage.removeItem("show_payment_success_notification");
+    // Clear session storage items that might contain stale data
+    sessionStorage.removeItem("subscription_refresh_pending");
   } catch (error) {
     const appError = ErrorCreators.internalError(
       "Failed to clear subscription cache",
       error
     );
     ErrorLogger.log(appError, { context: "subscription_cache" });
+  }
+};
+
+// Force clear all subscription-related cache and storage
+const forceInvalidateAllCache = () => {
+  if (typeof window === "undefined") return;
+  try {
+    // Clear localStorage items
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (
+        key &&
+        (key.includes("subscription") ||
+          key.includes("payment") ||
+          key === CACHE_KEY)
+      ) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+    // Clear sessionStorage items
+    const sessionKeysToRemove = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && (key.includes("subscription") || key.includes("payment"))) {
+        sessionKeysToRemove.push(key);
+      }
+    }
+    sessionKeysToRemove.forEach((key) => sessionStorage.removeItem(key));
+  } catch (error) {
+    const appError = ErrorCreators.internalError(
+      "Failed to force invalidate cache",
+      error
+    );
+    ErrorLogger.log(appError, { context: "subscription_cache_force_clear" });
   }
 };
 
@@ -194,6 +235,25 @@ export const SubscriptionProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, [debugLog, handleSubscriptionError]);
 
+  // Force refresh subscription status with complete cache invalidation
+  const forceRefreshSubscriptionStatus = useCallback(async () => {
+    debugLog("Force refreshing subscription status - clearing all caches");
+
+    // Clear all caches immediately
+    forceInvalidateAllCache();
+
+    // Reset state to loading
+    setSubscriptionState((prev) => ({
+      ...prev,
+      loading: true,
+      error: null,
+      hasAccess: false, // Reset to false while loading
+    }));
+
+    // Force a fresh fetch
+    return await refreshSubscriptionStatus(true);
+  }, [debugLog, refreshSubscriptionStatus]);
+
   // Refresh subscription status from API with enhanced error handling
   const refreshSubscriptionStatus = useCallback(
     async (force = false) => {
@@ -224,6 +284,9 @@ export const SubscriptionProvider = ({ children }) => {
           }));
           return cached;
         }
+      } else {
+        // If forced, clear cache first
+        clearSubscriptionCache();
       }
 
       setSubscriptionState((prev) => ({ ...prev, loading: true, error: null }));
@@ -389,7 +452,9 @@ export const SubscriptionProvider = ({ children }) => {
 
     // Actions
     refreshSubscriptionStatus,
+    forceRefreshSubscriptionStatus,
     clearCache: clearSubscriptionCache,
+    forceInvalidateAllCache,
 
     // Error handling
     retryCount,
