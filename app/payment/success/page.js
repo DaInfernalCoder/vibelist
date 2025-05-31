@@ -208,9 +208,9 @@ const PaymentSuccessContent = () => {
               Payment Successful! 🎉
             </h1>
             <p className="text-xl text-base-content/70">
-              Welcome to VibeList Pro! Your premium features are now unlocked.
-              Thank you for supporting a small creator, I truly appreciate you
-              from the bottom of my heart.
+              Welcome to VibeList! Your premium features are now unlocked. Thank
+              you for supporting a small creator, I truly appreciate you from
+              the bottom of my heart.
             </p>
           </div>
 
