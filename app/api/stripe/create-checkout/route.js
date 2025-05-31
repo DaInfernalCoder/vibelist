@@ -2,6 +2,10 @@ import { createCheckout } from "@/libs/stripe";
 import { createClient } from "@/libs/supabase/server";
 import { NextResponse } from "next/server";
 
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 // This function is used to create a Stripe Checkout Session (one-time payment or subscription)
 // It's called by the <ButtonCheckout /> component
 // Users must be authenticated. It will prefill the Checkout data with their email and/or credit card (if any)

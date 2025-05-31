@@ -176,7 +176,7 @@ const PaymentSuccessContent = () => {
     };
 
     verifyPaymentAndRefreshStatus();
-  }, [sessionId, router]);
+  }, [sessionId, router, forceRefreshSubscriptionStatus]);
 
   if (isLoading) {
     return (

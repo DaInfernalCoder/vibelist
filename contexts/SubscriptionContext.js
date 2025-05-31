@@ -123,6 +123,9 @@ const forceInvalidateAllCache = () => {
 };
 
 export const SubscriptionProvider = ({ children }) => {
+  // Prevent SSR/static generation issues
+  const [isClient, setIsClient] = useState(false);
+
   const [subscriptionState, setSubscriptionState] = useState({
     hasAccess: false,
     expiresAt: null,
@@ -137,6 +140,11 @@ export const SubscriptionProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
+
+  // Set client flag after hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Debug logging
   const debugLog = useCallback((message, data = {}) => {
@@ -164,6 +172,9 @@ export const SubscriptionProvider = ({ children }) => {
 
   // Initialize Supabase client and auth listener
   useEffect(() => {
+    // Only run on client side
+    if (!isClient) return;
+
     const supabase = createClient();
 
     // Get initial user
@@ -233,26 +244,7 @@ export const SubscriptionProvider = ({ children }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [debugLog, handleSubscriptionError]);
-
-  // Force refresh subscription status with complete cache invalidation
-  const forceRefreshSubscriptionStatus = useCallback(async () => {
-    debugLog("Force refreshing subscription status - clearing all caches");
-
-    // Clear all caches immediately
-    forceInvalidateAllCache();
-
-    // Reset state to loading
-    setSubscriptionState((prev) => ({
-      ...prev,
-      loading: true,
-      error: null,
-      hasAccess: false, // Reset to false while loading
-    }));
-
-    // Force a fresh fetch
-    return await refreshSubscriptionStatus(true);
-  }, [debugLog, refreshSubscriptionStatus]);
+  }, [isClient, debugLog, handleSubscriptionError]);
 
   // Refresh subscription status from API with enhanced error handling
   const refreshSubscriptionStatus = useCallback(
@@ -388,6 +380,25 @@ export const SubscriptionProvider = ({ children }) => {
     [user, retryCount, debugLog, handleSubscriptionError]
   );
 
+  // Force refresh subscription status with complete cache invalidation
+  const forceRefreshSubscriptionStatus = useCallback(async () => {
+    debugLog("Force refreshing subscription status - clearing all caches");
+
+    // Clear all caches immediately
+    forceInvalidateAllCache();
+
+    // Reset state to loading
+    setSubscriptionState((prev) => ({
+      ...prev,
+      loading: true,
+      error: null,
+      hasAccess: false, // Reset to false while loading
+    }));
+
+    // Force a fresh fetch
+    return await refreshSubscriptionStatus(true);
+  }, [debugLog, refreshSubscriptionStatus]);
+
   // Determine if an error should trigger a retry
   const shouldRetry = (error) => {
     if (!error.type) return false;
@@ -402,13 +413,16 @@ export const SubscriptionProvider = ({ children }) => {
 
   // Auto-refresh subscription status when user changes
   useEffect(() => {
-    if (user) {
+    if (isClient && user) {
       refreshSubscriptionStatus();
     }
-  }, [user, refreshSubscriptionStatus]);
+  }, [isClient, user, refreshSubscriptionStatus]);
 
   // Listen for storage changes (for multi-tab sync)
   useEffect(() => {
+    // Only run on client side
+    if (!isClient) return;
+
     const handleStorageChange = (e) => {
       if (e.key === CACHE_KEY) {
         try {
@@ -434,7 +448,7 @@ export const SubscriptionProvider = ({ children }) => {
 
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, [debugLog, handleSubscriptionError]);
+  }, [isClient, debugLog, handleSubscriptionError]);
 
   // Computed values
   const isAuthenticated = !!user;

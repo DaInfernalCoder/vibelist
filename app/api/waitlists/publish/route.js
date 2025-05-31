@@ -1,6 +1,10 @@
 // app/api/waitlists/publish/route.js
 import { createClient } from "@/libs/supabase/server";
 import { NextResponse } from "next/server";
+
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
 import {

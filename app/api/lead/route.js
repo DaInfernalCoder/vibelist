@@ -1,5 +1,9 @@
 import { createClient } from "@/libs/supabase/server";
 import { NextResponse } from "next/server";
+
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 // Create admin client for development/testing

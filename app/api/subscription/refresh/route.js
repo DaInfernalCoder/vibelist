@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/libs/supabase/server";
 
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export async function POST() {
   try {
     const supabase = createClient();
