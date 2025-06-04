@@ -42,8 +42,8 @@ const Step = ({ emoji, text }) => {
 // - Features: "VibeList has customizable waitlists, analytics, and validation tools all set up for you"
 const Problem = () => {
   return (
-    <section className="bg-base-100 text-base-content">
-      <div className="max-w-7xl mx-auto px-8 py-16 md:py-32 text-center">
+    <section className="bg-base-100 text-base-content mt-0">
+      <div className="max-w-7xl mx-auto px-8 pt-0 pb-16 md:py-32 text-center">
         <h2 className="max-w-3xl mx-auto font-extrabold text-4xl md:text-5xl tracking-tight mb-6 md:mb-8">
           90% of entrepreneurs build products nobody wants
         </h2>

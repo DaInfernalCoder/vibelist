@@ -7,13 +7,16 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 export function PostHogProvider({ children }) {
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-      api_host: "/ingest",
-      ui_host: "https://us.posthog.com",
-      capture_pageview: false, // We capture pageviews manually
-      capture_pageleave: true, // Enable pageleave capture
-      debug: process.env.NODE_ENV === "development",
-    });
+    // Only initialize PostHog on the client side
+    if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+        api_host: "/ingest",
+        ui_host: "https://us.posthog.com",
+        capture_pageview: false, // We capture pageviews manually
+        capture_pageleave: true, // Enable pageleave capture
+        debug: process.env.NODE_ENV === "development",
+      });
+    }
   }, []);
 
   return (
@@ -30,7 +33,7 @@ function PostHogPageView() {
   const posthogClient = usePostHog();
 
   useEffect(() => {
-    if (pathname && posthogClient) {
+    if (typeof window !== "undefined" && pathname && posthogClient) {
       let url = window.origin + pathname;
       const search = searchParams.toString();
       if (search) {

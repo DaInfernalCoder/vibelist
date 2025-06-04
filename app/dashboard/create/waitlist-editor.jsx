@@ -117,19 +117,25 @@ function EditorLayout() {
   ]);
 
   return (
-    <div className="container">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="container px-4 sm:px-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
         {/* Editor Panel */}
-        <div>
+        <div className="order-2 xl:order-1">
           <Tabs defaultValue="setup" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="setup">Setup</TabsTrigger>
-              <TabsTrigger value="design">Design</TabsTrigger>
-              <TabsTrigger value="themes">Themes & Saved</TabsTrigger>
+            <TabsList className="mb-4 w-full">
+              <TabsTrigger value="setup" className="flex-1">
+                Setup
+              </TabsTrigger>
+              <TabsTrigger value="design" className="flex-1">
+                Design
+              </TabsTrigger>
+              <TabsTrigger value="themes" className="flex-1">
+                Themes & Saved
+              </TabsTrigger>
             </TabsList>
 
-            <Card className="p-6">
-              <ScrollArea className="h-[calc(100vh-280px)] pr-4">
+            <Card className="p-4 sm:p-6">
+              <ScrollArea className="h-[calc(100vh-280px)] pr-2 sm:pr-4">
                 {" "}
                 {/* Adjusted height */}
                 <TabsContent value="setup">
@@ -147,7 +153,7 @@ function EditorLayout() {
         </div>
 
         {/* Preview Panel */}
-        <div className="flex flex-col">
+        <div className="flex flex-col order-1 xl:order-2">
           <PreviewControls />
 
           <Card className="rounded-lg flex-grow overflow-hidden flex flex-col items-center justify-center mb-4">
@@ -155,10 +161,10 @@ function EditorLayout() {
           </Card>
 
           {/* Action buttons below preview */}
-          <div className="flex justify-center gap-4 p-6 bg-muted rounded-lg">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 p-4 sm:p-6 bg-muted rounded-lg">
             <Button
               variant="outline"
-              className="px-6"
+              className="px-4 sm:px-6 w-full sm:w-auto"
               onClick={() => setIsFullPreview(true)}
             >
               <Maximize2 className="h-4 w-4 mr-2" />
@@ -166,7 +172,7 @@ function EditorLayout() {
             </Button>
             <Button
               variant="default"
-              className="px-6"
+              className="px-4 sm:px-6 w-full sm:w-auto"
               onClick={saveTemplate}
               disabled={isSaving || !hasUnsavedChanges}
             >
@@ -184,7 +190,7 @@ function EditorLayout() {
             </Button>
             <Button
               variant="primary"
-              className="px-6"
+              className="px-4 sm:px-6 w-full sm:w-auto"
               onClick={handlePublishClick}
             >
               <Send className="h-4 w-4 mr-2" />

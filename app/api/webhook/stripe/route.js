@@ -1,7 +1,6 @@
 import configFile from "@/config";
 import { findCheckoutSession } from "@/libs/stripe";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -16,8 +15,9 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 // See more: https://shipfa.st/docs/features/payments
 export async function POST(req) {
   const body = await req.text();
+  const bodyBuffer = Buffer.from(body);
 
-  const signature = headers().get("stripe-signature");
+  const signature = req.headers.get("stripe-signature");
 
   let eventType;
   let event;
@@ -30,7 +30,11 @@ export async function POST(req) {
 
   // verify Stripe event is legit
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    event = stripe.webhooks.constructEvent(
+      bodyBuffer,
+      signature,
+      webhookSecret
+    );
   } catch (err) {
     console.error(`Webhook signature verification failed. ${err.message}`);
     return NextResponse.json({ error: err.message }, { status: 400 });

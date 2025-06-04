@@ -35,7 +35,7 @@ const CrispChat = () => {
   }, [supabase.auth]);
 
   useEffect(() => {
-    if (config?.crisp?.id) {
+    if (typeof window !== "undefined" && config?.crisp?.id) {
       // Set up Crisp
       Crisp.configure(config.crisp.id);
 

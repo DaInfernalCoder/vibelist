@@ -39,6 +39,11 @@ public/robots.txt
 public/sitemap.xml
 public/sitemap-0.xml
 
+# stagewise dev tool (development only)
+components/StagewiseToolbar.js
+**/stagewise*
+.stagewise/
+
 # Added by Claude Task Master
 # Logs
 logs

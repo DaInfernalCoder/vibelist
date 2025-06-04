@@ -27,10 +27,10 @@ export default async function Dashboard() {
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-screen p-8 pb-24">
+    <main className="min-h-screen pb-24">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">Dashboard</h1>
             <p className="text-base-content/80 mt-2">
@@ -39,7 +39,7 @@ export default async function Dashboard() {
           </div>
 
           {/* Subscription Status */}
-          <div className="text-right">
+          <div className="text-left md:text-right">
             {subscriptionDetails.status === "active" && (
               <div className="badge badge-success gap-2">
                 <svg
@@ -133,10 +133,10 @@ export default async function Dashboard() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <Link
             href="/dashboard/create"
-            className="btn text-white border-0"
+            className="btn text-white border-0 flex-1 sm:flex-none"
             style={{ backgroundColor: "#9334E8" }}
           >
             <svg
@@ -156,7 +156,10 @@ export default async function Dashboard() {
             Create New Waitlist
           </Link>
 
-          <Link href="/dashboard/analytics" className="btn btn-outline">
+          <Link
+            href="/dashboard/analytics"
+            className="btn btn-outline flex-1 sm:flex-none"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 mr-2"
@@ -199,10 +202,10 @@ export default async function Dashboard() {
                     </p>
                   )}
 
-                  <div className="card-actions justify-end">
+                  <div className="card-actions justify-end flex-col sm:flex-row gap-2">
                     <Link
                       href={`/dashboard/waitlist/${waitlist.id}`}
-                      className="btn btn-sm text-white border-0"
+                      className="btn btn-sm text-white border-0 w-full sm:w-auto"
                       style={{ backgroundColor: "#9334E8" }}
                     >
                       Manage
@@ -212,7 +215,7 @@ export default async function Dashboard() {
                       <Link
                         href={`/waitlist/${waitlist.url_slug}`}
                         target="_blank"
-                        className="btn btn-sm btn-outline"
+                        className="btn btn-sm btn-outline w-full sm:w-auto"
                       >
                         View
                       </Link>

@@ -31,8 +31,8 @@ export default async function LayoutPrivate({ children }) {
     <WaitlistProvider>
       <div className="flex min-h-screen">
         <SessionNavBar />
-        <div className="flex-1 pl-[3.05rem] transition-all duration-200">
-          <div className="container mx-auto p-6">{children}</div>
+        <div className="flex-1 pl-0 sm:pl-[3.05rem] transition-all duration-200">
+          <div className="container mx-auto p-4 sm:p-6">{children}</div>
         </div>
       </div>
     </WaitlistProvider>
