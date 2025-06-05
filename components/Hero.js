@@ -47,8 +47,8 @@ const Hero = () => {
       </div>
 
       {/* Creative Multi-Image Hero Design */}
-      <div className="lg:w-full relative overflow-hidden">
-        <div className="relative w-full h-[500px] lg:h-[600px]">
+      <div className="w-full lg:w-full relative overflow-hidden">
+        <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px]">
           {/* Background Image - Main Screenshot */}
           <div className="absolute inset-0 transform rotate-2 hover:rotate-1 transition-transform duration-500 ease-out">
             <div className="relative w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl shadow-2xl overflow-hidden">
@@ -63,7 +63,7 @@ const Hero = () => {
           </div>
 
           {/* Floating Card 1 - Interactive Demo */}
-          <div className="absolute top-8 left-0 lg:-left-8 w-64 lg:w-80 transform -rotate-6 hover:-rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
+          <div className="absolute top-4 left-0 md:top-8 md:left-0 lg:-left-8 w-48 md:w-64 lg:w-80 transform -rotate-6 hover:-rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
             <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
               <Image
                 src="/demos/Interactive Product Demo Screenshot.png"
@@ -76,7 +76,7 @@ const Hero = () => {
           </div>
 
           {/* Floating Card 2 - Second Screenshot */}
-          <div className="absolute bottom-8 right-0 lg:-right-8 w-56 lg:w-72 transform rotate-6 hover:rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
+          <div className="absolute bottom-4 right-0 md:bottom-8 md:right-0 lg:-right-8 w-44 md:w-56 lg:w-72 transform rotate-6 hover:rotate-3 transition-all duration-500 ease-out hover:scale-105 z-10">
             <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
               <Image
                 src="/demos/Screenshot May 28 2025 (1).png"
