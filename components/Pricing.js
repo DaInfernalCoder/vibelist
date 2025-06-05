@@ -95,9 +95,14 @@ const Pricing = () => {
                 <div className="space-y-2">
                   <ButtonCheckout priceId={plan.priceId} />
 
-                  <p className="flex items-center justify-center gap-2 text-sm text-center text-base-content/80 font-medium relative">
-                    Pay once. Subscribe never.
-                  </p>
+                  {/* Only show "Pay once. Subscribe never." for plans with lifetime access */}
+                  {plan.features?.some((feature) =>
+                    feature.name.toLowerCase().includes("lifetime")
+                  ) && (
+                    <p className="flex items-center justify-center gap-2 text-sm text-center text-base-content/80 font-medium relative">
+                      Pay once. Subscribe never.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
