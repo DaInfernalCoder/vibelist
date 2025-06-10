@@ -2835,6 +2835,76 @@
       "status": "pending",
       "dependencies": [],
       "priority": "high"
+    },
+    {
+      "id": 46,
+      "title": "Fix Supabase Profile Updates After Stripe Payment Processing",
+      "description": "Resolve the critical issue where users' Supabase profiles are not being updated with access permissions after successful Stripe payments, causing users to remain blocked by paywalls despite completed transactions.",
+      "details": "This task addresses the disconnect between successful Stripe payments and Supabase profile updates:\n\n1. **Webhook Endpoint Debugging**:\n   - Add comprehensive logging to the webhook endpoint to capture incoming Stripe events\n   - Verify webhook signature validation is working correctly with proper Next.js 14 App Router patterns\n   - Ensure the webhook is receiving the correct event types (`checkout.session.completed`, `customer.subscription.created`)\n   - Log the full payload of incoming webhook events for analysis\n\n2. **Database Update Implementation**:\n   - Fix the profile update logic in the webhook handler to properly set:\n     ```typescript\n     // Update user profile with payment information\n     const { error } = await supabase\n       .from('profiles')\n       .update({\n         has_access: true,\n         customer_id: session.customer,\n         price_id: session.metadata.price_id,\n         access_expires_at: priceId === 'pro_plan' ? \n           new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : \n           null // null for lifetime (Hacker plan)\n       })\n       .eq('id', userId);\n     \n     if (error) {\n       console.error('Error updating user profile:', error);\n       return new Response(\n         JSON.stringify({ error: 'Failed to update user profile' }),\n         { status: 500 }\n       );\n     }\n     ```\n\n3. **RLS Policy Verification**:\n   - Review and fix Row Level Security policies to ensure the webhook service role has permission to update user profiles\n   - Create or modify the RLS policy for the profiles table:\n     ```sql\n     CREATE POLICY \"Allow service role to update profiles\"\n     ON profiles\n     FOR UPDATE\n     USING (true)\n     WITH CHECK (true);\n     ```\n\n4. **Subscription Refresh API Fix**:\n   - Ensure the subscription refresh API correctly queries the database for the latest user status\n   - Implement proper caching invalidation after payment processing\n   - Add error handling and retry logic for subscription status checks\n\n5. **Testing with Stripe Test Mode**:\n   - Create a test payment flow using Stripe test cards\n   - Verify webhook events are triggered and processed correctly\n   - Confirm database updates occur as expected\n\n6. **Monitoring and Alerting**:\n   - Implement webhook failure alerts\n   - Add monitoring for failed profile updates\n   - Create a dashboard to track payment-to-access conversion rates\n\n7. **Retroactive Fix for Affected Users**:\n   - Identify all users with successful payments but no access\n   - Create a script to retroactively update their profiles\n   - Send apology emails with confirmation of fixed access",
+      "testStrategy": "1. **Manual Testing**:\n   - Complete a test payment using Stripe test mode with card number 4242 4242 4242 4242\n   - Verify the webhook receives the event (check logs)\n   - Confirm the user profile is updated with correct values:\n     - has_access = true\n     - customer_id matches Stripe customer ID\n     - price_id matches selected plan\n     - access_expires_at is set correctly (1 year for Pro, null for Hacker)\n   - Test both Pro plan ($25) and Hacker plan ($50) purchases\n\n2. **Database Verification**:\n   - Query the profiles table directly after payment to verify updates:\n     ```sql\n     SELECT has_access, customer_id, price_id, access_expires_at \n     FROM profiles \n     WHERE id = '[test-user-id]';\n     ```\n   - Confirm values match expected outcomes\n\n3. **Frontend Testing**:\n   - After payment, navigate to previously paywalled areas\n   - Verify paywall is removed and premium content is accessible\n   - Check that subscription status is correctly displayed in user dashboard\n   - Confirm no upgrade prompts appear for paid users\n\n4. **Webhook Testing**:\n   - Use Stripe CLI to simulate webhook events locally\n   - Verify correct handling of various event types\n   - Test error scenarios (invalid signature, malformed payload)\n\n5. **Retroactive Fix Testing**:\n   - Run the retroactive fix script on the specific user mentioned (931bae85-274d-4aa9-85b8-63718a05c6f9)\n   - Verify their profile is correctly updated\n   - Confirm they can access premium features\n\n6. **End-to-End Testing**:\n   - Create a new test user\n   - Complete the entire payment flow\n   - Verify immediate access to premium features\n   - Test on multiple browsers and devices\n\n7. **Regression Testing**:\n   - Ensure other Stripe-related functionality still works\n   - Verify existing paid users maintain their access\n   - Check that analytics and reporting are accurate",
+      "status": "done",
+      "dependencies": [
+        45,
+        38,
+        34,
+        2
+      ],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement comprehensive webhook logging",
+          "description": "Add detailed logging to the Stripe webhook endpoint to capture all incoming events, payloads, and error conditions",
+          "dependencies": [],
+          "details": "Enhance the webhook handler to log: 1) Raw request body before parsing, 2) Signature verification attempts and results, 3) Event type identification, 4) Full payload contents including metadata and customer information, 5) Any errors encountered during processing. Ensure logs are properly formatted and include timestamps and correlation IDs. This will help identify if the issue is with webhook delivery, signature verification, or payload structure.",
+          "status": "done",
+          "testStrategy": "Trigger test webhook events from Stripe dashboard and verify all expected log entries are created with appropriate detail level. Check logs for any signature verification failures."
+        },
+        {
+          "id": 2,
+          "title": "Fix webhook signature verification",
+          "description": "Resolve issues with Stripe webhook signature verification to ensure events are properly validated",
+          "dependencies": [
+            1
+          ],
+          "details": "Based on the search results, a common issue is improper handling of the raw request body for signature verification. Modify the webhook handler to: 1) Correctly access the raw request body using .text() method instead of parsed JSON, 2) Verify the signature using the proper Stripe webhook secret from environment variables, 3) Implement proper error handling for signature verification failures. This addresses the 'No signatures found matching the expected signature for payload' error seen in the search results.",
+          "status": "done",
+          "testStrategy": "Send test webhook events from Stripe dashboard with valid and invalid signatures to verify proper validation. Confirm that valid events are processed and invalid ones are rejected with appropriate error messages."
+        },
+        {
+          "id": 3,
+          "title": "Debug and fix Supabase profile update logic",
+          "description": "Identify and resolve issues preventing successful updates to user profiles in Supabase after payment processing",
+          "dependencies": [
+            2
+          ],
+          "details": "After confirming webhook events are properly received and validated, focus on the database update logic: 1) Add detailed error logging around the Supabase profile update operation, 2) Verify the user ID extraction from webhook payload is correct, 3) Check that all required fields (has_access, customer_id, price_id, access_expires_at) are properly formatted, 4) Implement proper error handling for database operations. Pay special attention to how the userId is being extracted and used in the query.",
+          "status": "done",
+          "testStrategy": "Create test users and process test payments, then verify profile updates in Supabase. Monitor logs for any database errors or unexpected behavior."
+        },
+        {
+          "id": 4,
+          "title": "Review and update Supabase RLS policies",
+          "description": "Ensure Row Level Security policies allow the webhook service role to update user profiles",
+          "dependencies": [
+            3
+          ],
+          "details": "The webhook may be failing due to insufficient database permissions: 1) Review existing RLS policies for the profiles table, 2) Verify the service role being used by the webhook has appropriate update permissions, 3) Create or modify RLS policies to allow the service role to update profiles based on user ID, 4) Test policy changes to ensure they work as expected without compromising security. Consider implementing the policy suggested in the task description to allow service role updates.\n<info added on 2025-06-10T02:42:12.638Z>\n## RLS Policy Issue Identified and Fixed\n\n**Root Cause Found**: The webhook was failing to update user profiles because there was no RLS policy allowing the service_role to UPDATE profiles. The existing policies only allowed:\n- Users to select/update their own profiles (auth.uid() = id)  \n- Service role to INSERT profiles (for the trigger)\n\n**Solution Implemented**: Created a new RLS policy `service_role_update_profiles` that allows the service role to update any profile:\n\n```sql\nCREATE POLICY \"service_role_update_profiles\" \nON public.profiles\nFOR UPDATE\nTO service_role\nUSING (true)\nWITH CHECK (true);\n```\n\n**Verification**: Confirmed the policy was created successfully and is now active. The webhook should now be able to update user profiles after successful Stripe payments.\n\n**Security Note**: This policy is secure because:\n1. It only applies to the service_role (not public users)\n2. The service_role key is only used server-side in controlled environments\n3. The webhook validates Stripe signatures before processing\n4. Users still can only update their own profiles via the existing policy\n\nThis was the critical missing piece preventing profile updates after successful payments.\n</info added on 2025-06-10T02:42:12.638Z>",
+          "status": "done",
+          "testStrategy": "Attempt profile updates using the service role credentials to verify permissions. Test both positive cases (updates should succeed) and negative cases (unauthorized updates should fail)."
+        },
+        {
+          "id": 5,
+          "title": "Implement event filtering for Stripe webhooks",
+          "description": "Add metadata-based filtering to ensure webhook processing only occurs for relevant payment events",
+          "dependencies": [
+            2
+          ],
+          "details": "Based on search result [3], implement metadata filtering to ensure webhook processing only occurs for relevant events: 1) Add appropriate metadata to payment intents and checkout sessions (e.g., source: 'app-payment'), 2) Modify webhook handler to check for this metadata before processing events, 3) Implement conditional logic to only process events with the correct metadata, 4) Add logging to track filtered vs. processed events. This prevents unrelated Stripe events from triggering profile updates and helps isolate the specific events that should update user profiles.\n<info added on 2025-06-10T02:43:43.098Z>\n✅ COMPLETED: Event Filtering Implementation\n\n**Metadata Added to Checkout Sessions**: Modified `libs/stripe.js` to add identifying metadata to all checkout sessions:\n\n```javascript\nmetadata: {\n  source: \"vibelist-app\",\n  app_version: \"1.0\", \n  payment_type: \"subscription\",\n}\n```\n\n**Webhook Filtering Logic**: Added comprehensive filtering to the `checkout.session.completed` event handler in the webhook:\n\n1. **Metadata Extraction**: Safely extracts metadata from the Stripe event object\n2. **Source Validation**: Checks if `metadata.source === \"vibelist-app\"`\n3. **Detailed Logging**: Logs filtering decisions for debugging\n4. **Early Exit**: Skips processing if event is not from VibeList app\n\n**Implementation Details**:\n- Added filtering right after metadata logging but before session retrieval\n- Includes comprehensive logging to track filtered vs processed events\n- Uses safe metadata access with fallback to empty object\n- Provides clear log messages for debugging\n\n**Other Event Types**: \n- `invoice.paid` and `customer.subscription.deleted` don't need explicit filtering since they only process customers that already exist in our profiles table (implicitly filtered to VibeList customers)\n- Added explanatory comments for clarity\n\n**Benefits**:\n1. **Prevents Unrelated Events**: Only processes payments from the VibeList app\n2. **Debugging Support**: Clear logging shows which events are filtered vs processed  \n3. **Security**: Reduces risk of processing unintended Stripe events\n4. **Performance**: Avoids unnecessary processing of irrelevant events\n\nThis ensures the webhook only updates user profiles for legitimate VibeList payments while providing clear audit trails.\n</info added on 2025-06-10T02:43:43.098Z>",
+          "status": "done",
+          "testStrategy": "Create test payments with and without the required metadata and verify that only events with correct metadata trigger profile updates. Check logs to confirm proper filtering is occurring."
+        }
+      ]
     }
   ],
   "metadata": {

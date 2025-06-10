@@ -48,6 +48,11 @@ export const createCheckout = async ({
       : [],
     success_url: successUrl,
     cancel_url: cancelUrl,
+    metadata: {
+      source: "vibelist-app",
+      app_version: "1.0",
+      payment_type: "subscription",
+    },
     ...extraParams,
   });
 
