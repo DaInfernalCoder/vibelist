@@ -40,9 +40,12 @@ public/sitemap.xml
 public/sitemap-0.xml
 
 # stagewise dev tool (development only)
-components/StagewiseToolbar.js
+# Note: StagewiseToolbar.js is kept in repo for proper integration
 **/stagewise*
 .stagewise/
+.stagewise-*
+stagewise.config.*
+stagewise-*.json
 
 # Added by Claude Task Master
 # Logs

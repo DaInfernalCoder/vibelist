@@ -1,9 +1,9 @@
-import themes from "daisyui/src/theming/themes";
+import themes from "daisyui/src/theming/themes.js";
 import {
   getBaseUrl,
   getAuthCallbackUrl,
   getEnvironmentConfig,
-} from "./lib/env-utils";
+} from "./lib/env-utils.js";
 
 const config = {
   // REQUIRED
@@ -26,8 +26,8 @@ const config = {
         // REQUIRED — we use this to find the plan in the webhook (for instance if you want to update the user's credits based on the plan)
         priceId:
           process.env.NODE_ENV === "development"
-            ? "price_1RTt7BAGcHrscZ23J1TgJQyi"
-            : "price_1RTt7BAGcHrscZ23J1TgJQyi",
+            ? "price_1RTszKAGcHrscZ23vcIruj1U" // price id for pro plan
+            : "price_1RTszKAGcHrscZ23vcIruj1U", // price id for pro plan
         //  REQUIRED - Name of the plan, displayed on the pricing page
         name: "Pro",
         // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
@@ -51,8 +51,8 @@ const config = {
         isFeatured: true,
         priceId:
           process.env.NODE_ENV === "development"
-            ? "price_1RTtDMAGcHrscZ238DmjdRGv"
-            : "price_1RTtDMAGcHrscZ238DmjdRGv",
+            ? "price_1RTsylAGcHrscZ2330cQPwvC"
+            : "price_1RTsylAGcHrscZ2330cQPwvC",
         name: "Hacker",
         description:
           "For solopreners that are ALL IN and want to hit $10k Monthly Recurring Revenue with their next product",
