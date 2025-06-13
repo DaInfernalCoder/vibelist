@@ -2,7 +2,6 @@ import { Inter } from "next/font/google";
 import { getSEOTags } from "@/libs/seo";
 import ClientLayout from "@/components/LayoutClient";
 import { PostHogProvider } from "@/components/PostHogProvider";
-import StagewiseToolbar from "@/components/StagewiseToolbar";
 import config from "@/config";
 import "./globals.css";
 
@@ -26,8 +25,6 @@ export default function RootLayout({ children }) {
         <PostHogProvider>
           {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
           <ClientLayout>{children}</ClientLayout>
-          {/* Stagewise toolbar for development mode only */}
-          <StagewiseToolbar />
         </PostHogProvider>
       </body>
     </html>
