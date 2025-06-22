@@ -27,7 +27,7 @@ if (fs.existsSync(envLocalPath)) {
 }
 
 // Test configuration
-const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3001";
 const testEmail = `test-${Date.now()}@example.com`;
 const testName = "Test User";
 

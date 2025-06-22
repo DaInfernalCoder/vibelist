@@ -236,9 +236,26 @@ export default function DynamicForm({
       const data = await response.json();
       
       if (!response.ok) {
+        // In development, show detailed error information
+        if (process.env.NODE_ENV === "development") {
+          console.error("API Error Details:", {
+            status: response.status,
+            statusText: response.statusText,
+            data: data,
+            headers: Object.fromEntries(response.headers.entries()),
+            url: response.url
+          });
+        }
+        
         // Extract the most detailed error message available
         const errorMessage = data.error || data.details || data.message || "Failed to join waitlist";
-        throw new Error(errorMessage);
+        
+        // In development, show more context in error messages
+        const fullErrorMessage = process.env.NODE_ENV === "development" 
+          ? `${errorMessage} (Status: ${response.status}${data.code ? `, Code: ${data.code}` : ''})`
+          : errorMessage;
+          
+        throw new Error(fullErrorMessage);
       }
       
       // Success!
@@ -260,12 +277,29 @@ export default function DynamicForm({
         onSubmitSuccess();
       }
     } catch (err) {
-      console.error("Error joining waitlist:", err);
-      console.error("Error details:", {
+      // Enhanced error logging for better debugging
+      const errorReport = {
         message: err.message,
         waitlistId: waitlistId,
-        timestamp: new Date().toISOString()
-      });
+        email: formData.email?.substring(0, 3) + "***", // Privacy-safe email logging
+        timestamp: new Date().toISOString(),
+        userAgent: typeof window !== "undefined" ? window.navigator.userAgent : "unknown",
+        url: typeof window !== "undefined" ? window.location.href : "unknown",
+        formData: Object.keys(formData).filter(key => formData[key]), // Only show which fields had data
+        stack: err.stack,
+        // Add any analytics errors that might be blocking
+        analyticsBlocked: typeof window !== "undefined" && 
+          window.navigator.userAgent.includes("Blk") // Simple ad blocker detection
+      };
+      
+      console.error("Error joining waitlist:", err);
+      console.error("Detailed error report:", errorReport);
+      
+      // In development, also log to window for easy inspection
+      if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
+        window.waitlistErrorReport = errorReport;
+        console.log("Error report saved to window.waitlistErrorReport for inspection");
+      }
       
       toast({
         title: "Error",

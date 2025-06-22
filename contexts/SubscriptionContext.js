@@ -141,6 +141,10 @@ export const SubscriptionProvider = ({ children }) => {
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
 
+  // Check if we're on a waitlist page (should skip authentication)
+  const isWaitlistPage = typeof window !== "undefined" && 
+    window.location.pathname.startsWith("/waitlist/");
+
   // Set client flag after hydration
   useEffect(() => {
     setIsClient(true);
@@ -174,6 +178,19 @@ export const SubscriptionProvider = ({ children }) => {
   useEffect(() => {
     // Only run on client side
     if (!isClient) return;
+
+    // Skip authentication entirely on waitlist pages
+    if (isWaitlistPage) {
+      debugLog("Skipping authentication on waitlist page");
+      setSubscriptionState(prev => ({
+        ...prev,
+        loading: false,
+        error: null,
+        hasAccess: false
+      }));
+      setUser(null);
+      return;
+    }
 
     const supabase = createClient();
 
@@ -244,11 +261,17 @@ export const SubscriptionProvider = ({ children }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [isClient, debugLog, handleSubscriptionError]);
+  }, [isClient, isWaitlistPage, debugLog, handleSubscriptionError]);
 
   // Refresh subscription status from API with enhanced error handling
   const refreshSubscriptionStatus = useCallback(
     async (force = false) => {
+      // Skip subscription refresh on waitlist pages
+      if (isWaitlistPage) {
+        debugLog("Skipping subscription refresh on waitlist page");
+        return { hasAccess: false };
+      }
+
       // Don't make API calls if user is not authenticated
       if (!user) {
         debugLog("No authenticated user, skipping subscription refresh");
@@ -377,7 +400,7 @@ export const SubscriptionProvider = ({ children }) => {
         return { hasAccess: false, error: errorInfo };
       }
     },
-    [user, retryCount, debugLog, handleSubscriptionError]
+    [user, retryCount, isWaitlistPage, debugLog, handleSubscriptionError]
   );
 
   // Force refresh subscription status with complete cache invalidation
@@ -413,10 +436,10 @@ export const SubscriptionProvider = ({ children }) => {
 
   // Auto-refresh subscription status when user changes
   useEffect(() => {
-    if (isClient && user) {
+    if (isClient && user && !isWaitlistPage) {
       refreshSubscriptionStatus();
     }
-  }, [isClient, user, refreshSubscriptionStatus]);
+  }, [isClient, user, isWaitlistPage, refreshSubscriptionStatus]);
 
   // Listen for storage changes (for multi-tab sync)
   useEffect(() => {

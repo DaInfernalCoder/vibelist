@@ -1,14 +1,42 @@
 # Waitlist Signup Debug Plan
 
+## ❌ ATTEMPTED FIX FAILED (2025-06-22)
+
+**Issue**: Silent signup failures with generic "An unexpected error occurred" message masking real API errors.
+
+**Attempted Solution**: Updated API and client-side error handling to surface actual error messages in `/app/api/lead/route.js` and `/app/waitlist/[slug]/components/DynamicForm.jsx`.
+
+**Result**: FAILED - The changes did not resolve the signup issue. Users still cannot successfully sign up.
+
+**What Was Tried**:
+1. Modified API error handling to return `e.message` instead of generic error
+2. Enhanced client-side error extraction to check `data.error || data.details || data.message`  
+3. Added detailed error logging for debugging
+4. Code built successfully but problem persists
+
+**For Future Claude Sessions**: The error handling improvements were implemented but did not address the core signup failure. The real issue likely lies elsewhere in the signup flow.
+
+---
+
 ## Problem Summary
 - Waitlist URLs load correctly (e.g., `http://vibe-list.com/waitlist/digitalseobull-g--yln`)
 - Signup form appears and users can enter their information
 - When users click "Sign Up", spinner shows for a few seconds
 - **No success screen appears - signup fails silently**
+- **Console error**: `Error joining waitlist: Error: An unexpected error occurred`
+- **Additional error**: `POST https://www.vibe-list.com/ingest/e/?ip=1&_=1750634497612&ver=1.245.1 net::ERR_BLOCKED_BY_CLIENT`
+
+## Remaining Investigation Needed
+
+**Critical Clues for Next Claude Session**:
+1. **Analytics Blocking**: The `net::ERR_BLOCKED_BY_CLIENT` error suggests analytics/tracking requests are being blocked, which might be interfering with the signup flow
+2. **Real API Testing Needed**: Need to test the actual API endpoint with curl/Postman to see if it's working at all
+3. **Network Tab Analysis**: Check the actual HTTP response status and body when signup fails
+4. **Database Connection**: Verify if the issue is database connectivity vs application logic
 
 ## Root Cause Analysis
 
-Based on the codebase investigation, the most likely causes are:
+**UPDATED**: The error handling fixes did not resolve the issue, suggesting the problem is deeper in the signup flow. Most likely causes are:
 
 ### 1. **Analytics Trigger Database Errors** (High Priority)
 - **Issue**: SQL GROUP BY errors in analytics triggers cause API failures
@@ -238,21 +266,33 @@ export async function GET() {
 }
 ```
 
-## Quick Wins to Implement First
+## ❌ FAILED ATTEMPTS (Do Not Repeat)
 
-1. **Add console.error logging** in DynamicForm.jsx catch blocks
-2. **Check browser console** on failing signup attempts
-3. **Test API endpoint directly** with curl/Postman
-4. **Add error message display** in the signup form UI
-5. **Check Supabase logs** for database errors
+1. ~~**Add console.error logging** in DynamicForm.jsx catch blocks~~ - COMPLETED but did not fix issue
+2. ~~**Enhanced API error responses**~~ - COMPLETED but did not fix issue  
+3. ~~**Improved client-side error extraction**~~ - COMPLETED but did not fix issue
 
-## Expected Outcomes
+## Next Steps for Future Claude Sessions
+
+1. **Test API endpoint directly** with curl/Postman - CRITICAL FIRST STEP
+2. **Check browser Network tab** for actual HTTP response during signup
+3. **Investigate analytics blocking** - the `ERR_BLOCKED_BY_CLIENT` error may be key
+4. **Check Supabase logs** for database errors
+5. **Verify database connectivity** and RLS policies
+6. **Test with minimal payload** to isolate the issue
+
+## Files Modified (That Did Not Fix The Issue)
+
+1. **`/app/api/lead/route.js`** - Line 394: Changed `error: "An unexpected error occurred"` to `error: e.message || "An unexpected error occurred"`
+2. **`/app/waitlist/[slug]/components/DynamicForm.jsx`** - Lines 239-241: Enhanced error extraction to check multiple error fields
+3. **`/app/waitlist/[slug]/components/DynamicForm.jsx`** - Lines 264-268: Added detailed error logging
+
+## Expected Outcomes (If Working)
 
 After implementing these fixes:
-- Users will see clear error messages instead of silent failures
-- Detailed logs will help identify the root cause
-- Analytics issues won't block successful signups
-- Better monitoring will prevent future issues
+- Users should see specific error messages instead of generic ones
+- Console should show detailed error information for debugging
+- But signup failures still persist - the core issue remains unsolved
 
 ## Emergency Workaround
 
