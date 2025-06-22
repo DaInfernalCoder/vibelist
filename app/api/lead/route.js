@@ -391,7 +391,7 @@ export async function POST(req) {
     console.error("Unexpected error in waitlist signup:", e.message, e.stack);
     return createCORSResponse(
       {
-        error: "An unexpected error occurred",
+        error: e.message || "An unexpected error occurred",
         details: e.message,
         stack: process.env.NODE_ENV === "development" ? e.stack : undefined,
       },

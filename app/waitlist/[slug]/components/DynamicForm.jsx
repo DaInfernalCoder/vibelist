@@ -236,7 +236,9 @@ export default function DynamicForm({
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || "Failed to join waitlist");
+        // Extract the most detailed error message available
+        const errorMessage = data.error || data.details || data.message || "Failed to join waitlist";
+        throw new Error(errorMessage);
       }
       
       // Success!
@@ -259,6 +261,12 @@ export default function DynamicForm({
       }
     } catch (err) {
       console.error("Error joining waitlist:", err);
+      console.error("Error details:", {
+        message: err.message,
+        waitlistId: waitlistId,
+        timestamp: new Date().toISOString()
+      });
+      
       toast({
         title: "Error",
         description: err.message || "Failed to join waitlist",
