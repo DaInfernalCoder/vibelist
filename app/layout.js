@@ -22,16 +22,17 @@ export const metadata = getSEOTags();
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme={config.colors.theme} className={font.className}>
-      <body>
+      <head>
         {/* DataFast Analytics */}
         <Script
           defer
           data-website-id="685938bc86141f1f1e2452f6"
           data-domain="vibe-list.com"
           src="https://datafa.st/js/script.js"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
-
+      </head>
+      <body>
         <PostHogProvider>
           {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
           <ClientLayout>{children}</ClientLayout>
