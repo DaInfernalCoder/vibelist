@@ -40,6 +40,7 @@ export async function generateMetadata({ params }) {
       )
       .eq("url_slug", slug)
       .eq("published", true)
+      .eq("status", "published")
       .single();
 
     if (error) {

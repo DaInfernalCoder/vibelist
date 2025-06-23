@@ -261,6 +261,7 @@ export function PublicWaitlistClient() {
           )
           .eq("url_slug", params.slug)
           .eq("published", true)
+          .eq("status", "published")
           .single();
         const queryTime = performance.now() - startTime;
         console.log(
