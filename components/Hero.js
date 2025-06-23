@@ -6,6 +6,24 @@ const Hero = () => {
   return (
     <section className="max-w-7xl mx-auto bg-base-100 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 pt-8 pb-8 lg:py-20 overflow-hidden">
       <div className="flex flex-col gap-10 lg:gap-14 items-center justify-center text-center lg:text-left lg:items-start">
+        {/* Product Hunt Badge */}
+        <div className="flex justify-center lg:justify-start">
+          <a
+            href="https://www.producthunt.com/products/vibelist?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-vibelist"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:scale-105 transition-transform duration-200"
+          >
+            <img
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=982510&theme=light&t=1750678437347"
+              alt="VibeList - Create beautiful waitlists to validate ideas in minutes | Product Hunt"
+              style={{ width: "250px", height: "54px" }}
+              width="250"
+              height="54"
+            />
+          </a>
+        </div>
+
         <h1 className="font-extrabold text-4xl lg:text-6xl tracking-tight md:-mb-4">
           Create beautiful waitlists to validate ideas{" "}
           <span className="relative">
