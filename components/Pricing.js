@@ -103,6 +103,16 @@ const Pricing = () => {
                       Pay once. Subscribe never.
                     </p>
                   )}
+
+                  {/* Only show "Subscribe every year." for Pro plan with yearly access */}
+                  {plan.name === "Pro" &&
+                    plan.features?.some((feature) =>
+                      feature.name.toLowerCase().includes("one year")
+                    ) && (
+                      <p className="flex items-center justify-center gap-2 text-sm text-center text-base-content/80 font-medium relative">
+                        Subscribe every year.
+                      </p>
+                    )}
                 </div>
               </div>
             </div>
