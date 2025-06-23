@@ -32,8 +32,8 @@ const Hero = () => {
         </h1>
         <p className="text-lg opacity-80 leading-relaxed">
           The no-code platform to create beautiful waitlists to validate vibe
-          coded ideas, without wasting another second. Stop wasting time on
-          building ideas that don&apos;t convert.
+          coded ideas, without wasting another second.{" "}
+          <strong>Stop building shi* nobody wants!</strong>
         </p>
         <a
           href="/dashboard/create"
