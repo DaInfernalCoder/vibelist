@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import { getSEOTags } from "@/libs/seo";
 import ClientLayout from "@/components/LayoutClient";
 import { PostHogProvider } from "@/components/PostHogProvider";
+import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import config from "@/config";
 import "./globals.css";
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme={config.colors.theme} className={font.className}>
       <head>
+        <Analytics />
         {/* DataFast Analytics */}
         <Script
           defer
