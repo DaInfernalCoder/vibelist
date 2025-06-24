@@ -263,25 +263,3 @@ export async function GET(request, { params }) {
     );
   }
 }
-
-/**
- * Get embed analytics for all waitlists (for debugging/monitoring)
- * This endpoint can be used for internal monitoring
- */
-export async function getEmbedAnalytics() {
-  const analyticsData = {};
-
-  for (const [key, analytics] of embedAnalytics) {
-    const waitlistId = analytics.waitlistId;
-    analyticsData[waitlistId] = {
-      waitlistId: analytics.waitlistId,
-      slug: analytics.slug,
-      totalLoads: analytics.totalLoads,
-      uniqueIPs: analytics.uniqueIPs.size,
-      lastLoad: new Date(analytics.lastLoad).toISOString(),
-      dailyLoads: Object.fromEntries(analytics.dailyLoads),
-    };
-  }
-
-  return analyticsData;
-}

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getEmbedAnalytics } from "@/lib/embed-analytics";
 
 // CORS headers for analytics requests
 const corsHeaders = {
@@ -31,7 +32,7 @@ export async function OPTIONS() {
 export async function GET(request) {
   try {
     // Get all embed analytics data
-    const analyticsData = await getEmbedAnalytics();
+    const analyticsData = getEmbedAnalytics();
 
     // Calculate summary statistics
     const summary = {
