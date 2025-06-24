@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeList Embed Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #333;
+            border-bottom: 2px solid #4F46E5;
+            padding-bottom: 10px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 10px 0;
+        }
+        .embed-container {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            margin: 15px 0;
+            background: #fafafa;
+            text-align: center;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 VibeList Embed Widget Test Page</h1>
+    
+    <div class="instructions">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>Make sure your local development server is running on <code>http://localhost:3000</code></li>
+            <li>Replace <code>TEST_SLUG</code> in the scripts below with an actual published waitlist slug</li>
+            <li>Open this HTML file in your browser</li>
+            <li>Check the browser console for any errors</li>
+            <li>Verify the embed widgets load correctly</li>
+        </ol>
+    </div>
+
+    <div class="warning">
+        <strong>⚠️ Important:</strong> Make sure to replace <code>test-waitlist</code> with a real published waitlist slug from your database for the tests to work.
+    </div>
+
+    <!-- Test 1: Auto-initialization via script tag -->
+    <div class="test-section">
+        <h2>Test 1: Auto-initialization (Script Tag Method)</h2>
+        <p>This method automatically initializes the embed widget when the script loads.</p>
+        
+        <div class="code-block">
+&lt;script src="http://localhost:3000/embed.js" data-waitlist="test-waitlist"&gt;&lt;/script&gt;
+        </div>
+        
+        <div class="embed-container">
+            <p>Embed widget should appear below:</p>
+            <script src="http://localhost:3000/embed.js" data-waitlist="test-waitlist"></script>
+        </div>
+    </div>
+
+    <!-- Test 2: Manual initialization -->
+    <div class="test-section">
+        <h2>Test 2: Manual Initialization (Div Method)</h2>
+        <p>This method uses a div element with a data attribute and manual script loading.</p>
+        
+        <div class="code-block">
+&lt;div id="manual-embed" data-waitlist="test-waitlist"&gt;&lt;/div&gt;
+&lt;script src="http://localhost:3000/embed.js"&gt;&lt;/script&gt;
+        </div>
+        
+        <div class="embed-container">
+            <p>Embed widget should appear below:</p>
+            <div id="manual-embed" data-waitlist="test-waitlist"></div>
+        </div>
+    </div>
+
+    <!-- Test 3: Programmatic initialization -->
+    <div class="test-section">
+        <h2>Test 3: Programmatic Initialization (JavaScript API)</h2>
+        <p>This method uses the JavaScript API to create embed widgets programmatically.</p>
+        
+        <div class="code-block">
+&lt;div id="programmatic-embed"&gt;&lt;/div&gt;
+&lt;script&gt;
+  // Load the embed script first
+  const script = document.createElement('script');
+  script.src = 'http://localhost:3000/embed.js';
+  script.onload = function() {
+    // Use the API after script loads
+    window.VibeListEmbed.create('programmatic-embed', {
+      waitlist: 'test-waitlist'
+    });
+  };
+  document.head.appendChild(script);
+&lt;/script&gt;
+        </div>
+        
+        <div class="embed-container">
+            <p>Embed widget should appear below:</p>
+            <div id="programmatic-embed"></div>
+        </div>
+    </div>
+
+    <!-- Test 4: Multiple widgets -->
+    <div class="test-section">
+        <h2>Test 4: Multiple Widgets (Same Waitlist)</h2>
+        <p>Testing multiple embed widgets on the same page.</p>
+        
+        <div class="embed-container">
+            <p>First widget:</p>
+            <script src="http://localhost:3000/embed.js" data-waitlist="test-waitlist"></script>
+        </div>
+        
+        <div class="embed-container">
+            <p>Second widget (should work independently):</p>
+            <div class="widget-2" data-waitlist="test-waitlist"></div>
+        </div>
+    </div>
+
+    <!-- Test 5: Error handling -->
+    <div class="test-section">
+        <h2>Test 5: Error Handling (Invalid Slug)</h2>
+        <p>Testing how the widget handles invalid or non-existent waitlist slugs.</p>
+        
+        <div class="embed-container">
+            <p>Widget with invalid slug (should show error):</p>
+            <script src="http://localhost:3000/embed.js" data-waitlist="non-existent-slug-12345"></script>
+        </div>
+    </div>
+
+    <!-- Test 6: Rate limiting test -->
+    <div class="test-section">
+        <h2>Test 6: Rate Limiting</h2>
+        <p>Use the browser console to test rate limiting by refreshing this page multiple times quickly.</p>
+        
+        <div class="code-block">
+// Open browser console and run:
+console.log('Testing rate limiting...');
+for (let i = 0; i < 15; i++) {
+  fetch('http://localhost:3000/api/embed/test-waitlist')
+    .then(r => r.json())
+    .then(data => console.log(`Request ${i+1}:`, data.error || 'Success'))
+    .catch(e => console.error(`Request ${i+1} failed:`, e));
+}
+        </div>
+        
+        <button onclick="testRateLimit()">🧪 Test Rate Limiting</button>
+        <div id="rate-limit-results"></div>
+    </div>
+
+    <!-- Scripts for programmatic and multiple widget tests -->
+    <script>
+        // Load embed script for manual initialization
+        const embedScript = document.createElement('script');
+        embedScript.src = 'http://localhost:3000/embed.js';
+        embedScript.onload = function() {
+            console.log('✅ Embed script loaded successfully');
+            
+            // Initialize the second widget in Test 4
+            if (window.VibeListEmbed) {
+                window.VibeListEmbed.create('.widget-2', {
+                    waitlist: 'test-waitlist'
+                });
+            }
+            
+            // Initialize programmatic embed
+            window.VibeListEmbed.create('programmatic-embed', {
+                waitlist: 'test-waitlist'
+            });
+        };
+        document.head.appendChild(embedScript);
+
+        // Rate limiting test function
+        async function testRateLimit() {
+            const resultsDiv = document.getElementById('rate-limit-results');
+            resultsDiv.innerHTML = '<p>Testing rate limiting... Check console for details.</p>';
+            
+            console.log('🧪 Testing rate limiting with 15 rapid requests...');
+            const results = [];
+            
+            for (let i = 0; i < 15; i++) {
+                try {
+                    const response = await fetch('http://localhost:3000/api/embed/test-waitlist');
+                    const data = await response.json();
+                    const result = {
+                        request: i + 1,
+                        status: response.status,
+                        success: response.status === 200,
+                        rateLimited: response.status === 429,
+                        error: data.error
+                    };
+                    results.push(result);
+                    console.log(`Request ${i + 1}:`, result);
+                } catch (error) {
+                    console.error(`Request ${i + 1} failed:`, error);
+                }
+                
+                // Small delay
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            const successful = results.filter(r => r.success).length;
+            const rateLimited = results.filter(r => r.rateLimited).length;
+            
+            resultsDiv.innerHTML = `
+                <h4>Rate Limiting Test Results:</h4>
+                <p>✅ Successful requests: ${successful}</p>
+                <p>🛑 Rate limited requests: ${rateLimited}</p>
+                <p>${rateLimited > 0 ? '✅ Rate limiting is working!' : '⚠️ Rate limiting may not be working'}</p>
+            `;
+        }
+
+        // Console logging for debugging
+        console.log('🧪 VibeList Embed Widget Test Page Loaded');
+        console.log('📋 Test checklist:');
+        console.log('  1. Replace test-waitlist with actual slug');
+        console.log('  2. Ensure dev server is running on localhost:3000');
+        console.log('  3. Check for embed widgets loading');
+        console.log('  4. Test "Join Waitlist" button functionality');
+        console.log('  5. Check responsive design on mobile');
+        console.log('  6. Verify no style conflicts with this page');
+    </script>
+</body>
+</html> 
