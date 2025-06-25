@@ -1,6 +1,7 @@
 import { createCheckout } from "@/libs/stripe";
 import { createClient } from "@/libs/supabase/server";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 // Force dynamic rendering to prevent static generation errors
 export const dynamic = "force-dynamic";
@@ -47,6 +48,11 @@ export async function POST(req) {
       .eq("id", user?.id)
       .single();
 
+    // Extract DataFast cookies for attribution
+    const cookieStore = cookies();
+    const datafastVisitorId = cookieStore.get("datafast_visitor_id")?.value;
+    const datafastSessionId = cookieStore.get("datafast_session_id")?.value;
+
     const stripeSessionURL = await createCheckout({
       priceId,
       mode,
@@ -58,6 +64,11 @@ export async function POST(req) {
         email: data?.email,
         // If the user has already purchased, it will automatically prefill it's credit card
         customerId: data?.customer_id,
+      },
+      // Pass DataFast cookies for revenue attribution
+      datafastMetadata: {
+        visitor_id: datafastVisitorId,
+        session_id: datafastSessionId,
       },
       // If you send coupons from the frontend, you can pass it here
       // couponId: body.couponId,

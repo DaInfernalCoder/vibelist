@@ -9,6 +9,7 @@ export const createCheckout = async ({
   couponId,
   clientReferenceId,
   user,
+  datafastMetadata,
 }) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -27,6 +28,21 @@ export const createCheckout = async ({
       extraParams.customer_email = user.email;
     }
     extraParams.tax_id_collection = { enabled: true };
+  }
+
+  // Build metadata object with default values and DataFast attribution data
+  const metadata = {
+    source: "vibelist-app",
+    app_version: "1.0",
+    payment_type: "subscription",
+  };
+
+  // Add DataFast attribution metadata if available
+  if (datafastMetadata?.visitor_id) {
+    metadata.datafast_visitor_id = datafastMetadata.visitor_id;
+  }
+  if (datafastMetadata?.session_id) {
+    metadata.datafast_session_id = datafastMetadata.session_id;
   }
 
   const stripeSession = await stripe.checkout.sessions.create({
@@ -48,11 +64,7 @@ export const createCheckout = async ({
       : [],
     success_url: successUrl,
     cancel_url: cancelUrl,
-    metadata: {
-      source: "vibelist-app",
-      app_version: "1.0",
-      payment_type: "subscription",
-    },
+    metadata,
     ...extraParams,
   });
 
