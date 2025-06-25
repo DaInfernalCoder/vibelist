@@ -10,6 +10,7 @@ import { Tooltip } from "react-tooltip";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import SubscriptionStatusNotification from "@/components/SubscriptionStatusNotification";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ButtonInsighto from "@/components/ButtonInsighto";
 import config from "@/config";
 
 // Crisp customer chat support:
@@ -103,6 +104,9 @@ const ClientLayout = ({ children }) => {
 
         {/* Set Crisp customer chat support */}
         <CrispChat />
+
+        {/* Insighto feedback button */}
+        <ButtonInsighto />
       </SubscriptionProvider>
     </ErrorBoundary>
   );

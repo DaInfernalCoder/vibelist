@@ -1,0 +1,29 @@
+{
+	"meta": {
+		"generatedAt": "2025-06-23T17:39:43.126Z",
+		"tasksAnalyzed": 1,
+		"totalTasks": 50,
+		"analysisCount": 2,
+		"thresholdScore": 5,
+		"projectName": "Task Master",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 49,
+			"taskTitle": "Implement Website Waitlist Embed Feature",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down the implementation of the website waitlist embed feature into clear, actionable subtasks. Consider API endpoint creation, CORS configuration, JavaScript embed script development, UI/UX design for the preview card, integration with existing rate limiting and analytics, cross-site compatibility testing, and documentation preparation.",
+			"reasoning": "This task involves multiple technical domains: backend API development, secure CORS handling, frontend JavaScript engineering for embeddable widgets, dynamic UI rendering with branding, integration with existing systems (rate limiting, analytics), and comprehensive cross-site testing. The need for seamless integration with arbitrary host sites and avoidance of style/script conflicts adds significant complexity. Documentation for non-technical users further increases scope. Given the breadth and depth of requirements, the task is complex and should be decomposed into at least seven subtasks to ensure clarity and quality."
+		},
+		{
+			"taskId": 50,
+			"taskTitle": "Add 'Copy Embed Script' Feature to Post-Publish Success Screen",
+			"complexityScore": 5,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the implementation of the 'Copy Embed Script' feature into subtasks covering: UI design and placement, dynamic script generation using the waitlist slug, integration of copy-to-clipboard logic, accessibility and responsive design updates, UI feedback for copy action, and updating tests/documentation.",
+			"reasoning": "This task involves moderate complexity due to the need to update UI components, generate dynamic content, reuse and possibly refactor existing logic, ensure accessibility and responsiveness, and update tests and documentation. While the individual steps are not highly complex, the integration and attention to UX details require careful coordination and validation across multiple areas of the codebase[4][5]."
+		}
+	]
+}

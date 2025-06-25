@@ -6,6 +6,7 @@ import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import { Tooltip } from "react-tooltip";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ButtonInsighto from "@/components/ButtonInsighto";
 import config from "@/config";
 import { useEffect } from "react";
 
@@ -64,6 +65,9 @@ const WaitlistLayout = ({ children }) => {
 
       {/* Minimal Crisp chat support */}
       <MinimalCrispChat />
+
+      {/* Insighto feedback button */}
+      <ButtonInsighto />
     </ErrorBoundary>
   );
 };
