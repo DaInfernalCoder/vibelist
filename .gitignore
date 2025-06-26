@@ -46,8 +46,9 @@ public/sitemap-0.xml
 .stagewise-*
 stagewise.config.*
 stagewise-*.json
-# Ignore StagewiseToolbar component to prevent build issues
+# Ignore Stagewise components to prevent build issues
 components/StagewiseToolbar.js
+components/StagewiseWrapper.js
 
 # Added by Claude Task Master
 # Logs

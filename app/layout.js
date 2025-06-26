@@ -5,7 +5,7 @@ import { PostHogProvider } from "@/components/PostHogProvider";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import config from "@/config";
-import StagewiseWrapper from "@/components/StagewiseWrapper";
+
 import "./globals.css";
 
 const font = Inter({ subsets: ["latin"] });
@@ -40,7 +40,6 @@ export default function RootLayout({ children }) {
           <ClientLayout>{children}</ClientLayout>
         </PostHogProvider>
         <Analytics />
-        <StagewiseWrapper />
       </body>
     </html>
   );
