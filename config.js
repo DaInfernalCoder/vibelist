@@ -13,12 +13,12 @@ const config = {
     "The ultimate waitlist solution for launching your product. Build, customize, and analyze beautiful waitlists that convert visitors into early users.",
   // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
   domainName: "vibe-list.com",
-  crisp: {
-    // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (mailgun.supportEmail) otherwise customer support won't work.
-    id: "6d12c1b5-5e2b-4e0e-8c8b-4b7e8f2f1e0d",
-    // Hide Crisp by default, except on route "/". Crisp is toggled with <ButtonSupport/>. If you want to show Crisp on all pages, just remove this below
-    onlyShowOnRoutes: ["/"],
-  },
+  // crisp: {
+  //   // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (mailgun.supportEmail) otherwise customer support won't work.
+  //   id: "YOUR_REAL_CRISP_WEBSITE_ID_HERE",
+  //   // Hide Crisp by default, except on route "/". Crisp is toggled with <ButtonSupport/>. If you want to show Crisp on all pages, just remove this below
+  //   onlyShowOnRoutes: ["/"],
+  // },
   stripe: {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
     plans: [
