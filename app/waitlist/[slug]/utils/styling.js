@@ -35,12 +35,33 @@ export const applyCSSVariables = (stylesToApply, requestId) => {
 
       --waitlist-signup-text-color: ${stylesToApply.signupTextColor || "#4b5563"};
       --waitlist-ping-dot-color: ${stylesToApply.pingDotColor || "#10b981"};
+      
+      /* Background image variables */
+      --waitlist-background-image-url: ${stylesToApply.backgroundImageUrl ? `url(${stylesToApply.backgroundImageUrl})` : "none"};
+      --waitlist-background-image-opacity: ${stylesToApply.backgroundImageOpacity || "0.3"};
+      --waitlist-background-image-position: ${stylesToApply.backgroundImagePosition || "center"};
     }
     
     .waitlist-page {
       background-color: var(--waitlist-background-color);
       color: var(--waitlist-text-color); /* Main page text color */
       font-family: var(--waitlist-font-family);
+      position: relative;
+    }
+    
+    .waitlist-page::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: var(--waitlist-background-image-url);
+      background-size: cover;
+      background-position: var(--waitlist-background-image-position);
+      background-repeat: no-repeat;
+      opacity: var(--waitlist-background-image-opacity);
+      z-index: -1;
     }
     
     .waitlist-card {

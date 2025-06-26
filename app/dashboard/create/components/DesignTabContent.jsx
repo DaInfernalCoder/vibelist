@@ -6,6 +6,7 @@ import { useTemplate } from "../context/TemplateContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Bookmark } from "lucide-react";
 import LogoUploadSection from "./LogoUploadSection";
+import BackgroundImageUploadSection from "./BackgroundImageUploadSection";
 
 export default function DesignTabContent() {
   const { template, updateTemplate } = useTemplate();
@@ -20,6 +21,9 @@ export default function DesignTabContent() {
           tab.
         </AlertDescription>
       </Alert>
+
+      {/* Background image upload section */}
+      <BackgroundImageUploadSection />
 
       {/* Logo upload section */}
       <LogoUploadSection />

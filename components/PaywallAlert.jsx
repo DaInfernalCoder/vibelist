@@ -16,7 +16,7 @@ const PaywallAlert = ({
   description = "This feature requires a premium subscription to access.",
   className = "",
 }) => {
-  const { isAuthenticated, hasValidAccess, isLoading } = useSubscription();
+  const { hasValidAccess, isLoading } = useSubscription();
 
   // Don't show paywall if user has access or if still loading
   if (hasValidAccess || isLoading) {

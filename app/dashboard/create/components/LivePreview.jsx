@@ -28,11 +28,33 @@ export default function LivePreview() {
   // Adjust layout for mobile
   const formLayout = previewSize === "mobile" ? "flex-col" : "sm:flex-row";
 
+  // Background image styles
+  const backgroundImageStyles =
+    template.showBackgroundImage && template.backgroundImageUrl
+      ? {
+          backgroundImage: `url(${template.backgroundImageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: template.backgroundImagePosition || "center",
+          backgroundRepeat: "no-repeat",
+        }
+      : {};
+
   return (
     <div
-      className="w-full h-full flex flex-col items-center justify-center overflow-auto"
+      className="w-full h-full flex flex-col items-center justify-center overflow-auto relative"
       style={{ backgroundColor: template.bgColor }}
     >
+      {/* Background image overlay */}
+      {template.showBackgroundImage && template.backgroundImageUrl && (
+        <div
+          className="absolute inset-0"
+          style={{
+            ...backgroundImageStyles,
+            opacity: template.backgroundImageOpacity || 0.3,
+            zIndex: -1,
+          }}
+        />
+      )}
       <div
         className={`flex flex-col items-center text-center p-4 ${previewSize === "mobile" ? "w-full" : "max-w-3xl mx-auto"}`}
       >
