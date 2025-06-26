@@ -43,13 +43,16 @@ const Step = ({ emoji, text }) => {
 const Problem = () => {
   return (
     <section className="bg-base-100 text-base-content mt-0">
-      <div className="max-w-7xl mx-auto px-8 pt-0 pb-16 md:py-32 text-center">
+      <div className="max-w-7xl mx-auto px-8 pt-0 pb-16 md:py-32 text-center relative">
+        <div className="absolute top-4 right-4 text-xs opacity-50 uppercase tracking-wide">
+          the problem
+        </div>
         <h2 className="max-w-3xl mx-auto font-extrabold text-4xl md:text-5xl tracking-tight mb-6 md:mb-8">
-          90% of entrepreneurs build products nobody wants
+          Build waitlists no one signs up for
         </h2>
         <p className="max-w-xl mx-auto text-lg opacity-90 leading-relaxed mb-12 md:mb-20">
-          They skip validation, burn through savings, and watch their dreams
-          crumble when nobody signs up.
+          They don&apos;t know how to post, have ugly waitlists, and watch their
+          dreams crumble when nobody signs up.
         </p>
 
         <div className="flex flex-col md:flex-row justify-center items-center md:items-start gap-6">

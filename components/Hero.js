@@ -25,33 +25,31 @@ const Hero = () => {
         </div>
 
         <h1 className="font-extrabold text-4xl lg:text-6xl tracking-tight md:-mb-4">
-          Create beautiful waitlists to validate ideas{" "}
-          <span className="relative">
-            in{" "}
-            <span className="text-purple-600 relative">
-              minutes
-              <svg
-                className="absolute -bottom-2 left-0 w-full h-3 text-purple-400"
-                viewBox="0 0 100 12"
+          Get a{" "}
+          <span className="text-purple-600 relative">
+            Viral
+            <svg
+              className="absolute -bottom-1 left-0 w-full h-4 text-purple-400"
+              viewBox="0 0 100 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0 10c25-4 50-6 75-2s25 8 25 8"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeLinecap="round"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M2 8c20-4 40-6 60-2s36 8 36 8"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  fill="none"
-                  className="animate-pulse"
-                />
-              </svg>
-            </span>
-          </span>
+                className="animate-pulse"
+              />
+            </svg>
+          </span>{" "}
+          Waitlist in 3 Clicks.
         </h1>
         <p className="text-lg opacity-80 leading-relaxed">
-          The no-code platform to create beautiful waitlists to validate vibe
-          coded ideas, without wasting another second.{" "}
-          <strong>Stop building shi* nobody wants!</strong>
+          No need to tinker with other tools. No design. No wasted time. <br />
+          Launch your idea in under 30 seconds, before motivation fades. We will
+          show you how to market it on Twitter and Reddit to go viral.
         </p>
         <a
           href="/dashboard/create"

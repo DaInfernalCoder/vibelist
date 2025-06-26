@@ -291,9 +291,9 @@ const FeaturesGrid = () => {
     <section className="flex justify-center items-center w-full bg-base-100 text-base-content py-20 lg:py-32">
       <div className="flex flex-col max-w-[82rem] gap-16 md:gap-20 px-4">
         <h2 className="max-w-3xl font-black text-4xl md:text-6xl tracking-[-0.01em]">
-          Build products that{" "}
+          Build waitlists that{" "}
           <span className="underline decoration-dashed underline-offset-8 decoration-base-300">
-            people actually want
+            people actually see
           </span>
         </h2>
         <div className="flex flex-col w-full h-fit gap-4 lg:gap-10 text-text-default max-w-[82rem]">
