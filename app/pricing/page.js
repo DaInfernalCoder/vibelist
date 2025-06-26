@@ -133,14 +133,19 @@ export default async function PricingPage() {
           <div className="space-y-6">
             {[
               {
-                question: "What's the difference between Pro and Hacker plans?",
+                question: "What's included with VibeList Pro?",
                 answer:
-                  "The Pro plan gives you one year of access for $25, perfect for testing the waters. The Hacker plan gives you lifetime access for $50, ideal if you're committed to building multiple projects.",
+                  "The Pro plan gives you lifetime access for $25, including unlimited waitlists, unlimited signups, custom branding, analytics, and 24/7 support. It's a one-time payment with no recurring fees.",
               },
               {
-                question: "Can I upgrade from Pro to Hacker later?",
+                question: "Is this really a one-time payment?",
                 answer:
-                  "Yes! Contact our support team and we'll help you upgrade. You'll only pay the difference between the plans.",
+                  "Yes! Pay $25 once and get lifetime access to VibeList. No monthly fees, no annual subscriptions, no hidden costs. You own it forever.",
+              },
+              {
+                question: "What happens after I pay?",
+                answer:
+                  "You get immediate access to all VibeList features with no limitations. Your access never expires - it's truly lifetime access with no renewal required.",
               },
               {
                 question: "Do you offer refunds?",
@@ -150,7 +155,7 @@ export default async function PricingPage() {
               {
                 question: "Is there a free trial?",
                 answer:
-                  "We don't offer a traditional free trial, but our Pro plan is very affordable at just $25 for a full year of access.",
+                  "We don't offer a traditional free trial, but our Pro plan is very affordable at just $25 for lifetime access. Plus, we have a 30-day money-back guarantee.",
               },
             ].map((faq, index) => (
               <div key={index} className="collapse collapse-plus bg-base-200">

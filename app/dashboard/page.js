@@ -1,6 +1,6 @@
 import { createClient } from "@/libs/supabase/server";
 import { redirect } from "next/navigation";
-import { getSubscriptionDetails, getRemainingDays } from "@/lib/access-control";
+import { getSubscriptionDetails } from "@/lib/access-control";
 import Link from "next/link";
 
 export default async function Dashboard() {
@@ -17,7 +17,6 @@ export default async function Dashboard() {
 
   // Get subscription details
   const subscriptionDetails = await getSubscriptionDetails(user.id);
-  const remainingDays = await getRemainingDays(user.id);
 
   // Get user's waitlists
   const { data: waitlists, error } = await supabase
@@ -56,54 +55,58 @@ export default async function Dashboard() {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                {subscriptionDetails.type === "hacker"
-                  ? "Lifetime Access"
-                  : `Pro Plan`}
+                Pro Plan - Lifetime Access
               </div>
-            )}
-            {subscriptionDetails.type === "pro" && remainingDays !== null && (
-              <p className="text-sm text-base-content/60 mt-1">
-                {remainingDays > 0
-                  ? `${remainingDays} days remaining`
-                  : "Expired"}
-              </p>
             )}
           </div>
         </div>
 
-        {/* Expiration Warning for Pro Users */}
-        {subscriptionDetails.type === "pro" &&
-          remainingDays !== null &&
-          remainingDays <= 30 &&
-          remainingDays > 0 && (
-            <div className="alert alert-warning mb-8">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="stroke-current shrink-0 h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-              <div>
-                <h3 className="font-bold">Your subscription expires soon!</h3>
-                <div className="text-xs">
-                  Your Pro plan expires in {remainingDays} days. Consider
-                  upgrading to the Hacker plan for lifetime access.
-                </div>
-              </div>
-              <div>
-                <Link href="/pricing" className="btn btn-sm btn-outline">
-                  Upgrade Now
-                </Link>
+        {/* Welcome Section */}
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-8 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-base-content mb-2">
+                Welcome back
+                {user?.user_metadata.name ? `, ${user.user_metadata.name}` : ""}
+                ! 👋
+              </h1>
+              <p className="text-base-content/70">
+                Ready to create amazing waitlists? Let&apos;s build something
+                great together.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Link href="/dashboard/create" className="btn btn-primary">
+                Create Waitlist
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Subscription Status - Only show for Pro users */}
+        {subscriptionDetails.type === "pro" && (
+          <div className="alert alert-success mb-8">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <h3 className="font-bold">Pro Plan Active</h3>
+              <div className="text-xs">
+                You have lifetime access to all VibeList features.
               </div>
             </div>
-          )}
+          </div>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

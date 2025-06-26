@@ -473,20 +473,13 @@ export async function POST(req) {
 
         // Determine access expiration based on plan
         let accessExpiresAt = null;
-        if (plan.name === "Pro") {
-          // Pro plan: one year access
-          const oneYearFromNow = new Date();
-          oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
-          accessExpiresAt = oneYearFromNow.toISOString();
-        }
-        // Hacker plan: lifetime access (accessExpiresAt remains null)
+        // All plans now have lifetime access
+        // accessExpiresAt remains null for lifetime access
 
         console.log(`[Webhook:${correlationId}] === UPDATING USER PROFILE ===`);
         console.log(`[Webhook:${correlationId}] User ID: ${user.id}`);
         console.log(`[Webhook:${correlationId}] Plan: ${plan.name}`);
-        console.log(
-          `[Webhook:${correlationId}] Access expires: ${accessExpiresAt || "LIFETIME"}`
-        );
+        console.log(`[Webhook:${correlationId}] Access expires: LIFETIME`);
         console.log(`[Webhook:${correlationId}] Customer ID: ${customerId}`);
         console.log(`[Webhook:${correlationId}] Price ID: ${priceId}`);
 

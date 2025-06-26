@@ -10,13 +10,14 @@ const config = {
   appName: "VibeList",
   // REQUIRED: a short description of your app for SEO tags (can be overwritten)
   appDescription:
-    "The no-code platform to create beautiful waitlists to validate vibe coded products, without wasting another second. From idea to production in 2 minutes.",
+    "The ultimate waitlist solution for launching your product. Build, customize, and analyze beautiful waitlists that convert visitors into early users.",
   // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
   domainName: "vibe-list.com",
   crisp: {
-    // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (resend.supportEmail) otherwise customer support won't work.
-    id: "47f957d6-16b9-4d63-b871-f426704a8cbb",
-    // Crisp will now show on all routes
+    // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (mailgun.supportEmail) otherwise customer support won't work.
+    id: "6d12c1b5-5e2b-4e0e-8c8b-4b7e8f2f1e0d",
+    // Hide Crisp by default, except on route "/". Crisp is toggled with <ButtonSupport/>. If you want to show Crisp on all pages, just remove this below
+    onlyShowOnRoutes: ["/"],
   },
   stripe: {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
@@ -30,33 +31,10 @@ const config = {
         //  REQUIRED - Name of the plan, displayed on the pricing page
         name: "Pro",
         // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
-        description: "Perfect for those that want to try out solopreneurship",
+        description:
+          "One-time payment for lifetime access to all VibeList features",
         // The price you want to display, the one user will be charged on Stripe.
         price: 25,
-        // If you have an anchor price (i.e. $29) that you want to display crossed out, put it here. Otherwise, leave it empty
-        priceAnchor: 50,
-        features: [
-          {
-            name: "Unlimited waitlists",
-          },
-          { name: "Unlimited user sign ups" },
-          { name: "One click database setup" },
-          { name: "24/7 support chat" },
-          { name: "One year of access" },
-        ],
-      },
-      {
-        // This plan will look different on the pricing page, it will be highlighted. You can only have one plan with isFeatured: true
-        isFeatured: true,
-        priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_1RTsylAGcHrscZ2330cQPwvC"
-            : "price_1RTsylAGcHrscZ2330cQPwvC",
-        name: "Hacker",
-        description:
-          "For solopreners that are ALL IN and want to hit $10k Monthly Recurring Revenue with their next product",
-        price: 50,
-        priceAnchor: 100,
         features: [
           {
             name: "Unlimited waitlists",

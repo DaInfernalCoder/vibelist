@@ -38,9 +38,130 @@ export default function LogoUploadSection() {
     updateTemplate("logoSize", value);
   };
 
+  // Handle remove whitespace toggle
+  const handleRemoveWhitespaceToggle = (checked) => {
+    updateTemplate("removeLogoWhitespace", checked);
+  };
+
   // Click the hidden file input
   const triggerFileInput = () => {
     fileInputRef.current.click();
+  };
+
+  // Function to remove whitespace from image
+  const removeImageWhitespace = (file) => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new window.Image();
+
+      img.onload = () => {
+        // Set canvas size to original image size
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // Draw the image
+        ctx.drawImage(img, 0, 0);
+
+        // Get image data
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // Find bounds of non-transparent/non-white pixels
+        let minX = canvas.width,
+          minY = canvas.height,
+          maxX = 0,
+          maxY = 0;
+        let hasContent = false;
+
+        for (let y = 0; y < canvas.height; y++) {
+          for (let x = 0; x < canvas.width; x++) {
+            const idx = (y * canvas.width + x) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            const a = data[idx + 3];
+
+            // Check if pixel is not transparent and not white (with some tolerance)
+            const isNotTransparent = a > 10;
+            const isNotWhite = r < 250 || g < 250 || b < 250;
+
+            if (isNotTransparent && isNotWhite) {
+              hasContent = true;
+              minX = Math.min(minX, x);
+              minY = Math.min(minY, y);
+              maxX = Math.max(maxX, x);
+              maxY = Math.max(maxY, y);
+            }
+          }
+        }
+
+        if (!hasContent) {
+          // If no content found, return original
+          resolve(file);
+          return;
+        }
+
+        // Add small padding
+        const padding = 5;
+        minX = Math.max(0, minX - padding);
+        minY = Math.max(0, minY - padding);
+        maxX = Math.min(canvas.width - 1, maxX + padding);
+        maxY = Math.min(canvas.height - 1, maxY + padding);
+
+        // Calculate cropped dimensions
+        const croppedWidth = maxX - minX + 1;
+        const croppedHeight = maxY - minY + 1;
+
+        // Create new canvas for cropped image
+        const croppedCanvas = document.createElement("canvas");
+        const croppedCtx = croppedCanvas.getContext("2d");
+        croppedCanvas.width = croppedWidth;
+        croppedCanvas.height = croppedHeight;
+
+        // Draw cropped image
+        croppedCtx.drawImage(
+          canvas,
+          minX,
+          minY,
+          croppedWidth,
+          croppedHeight,
+          0,
+          0,
+          croppedWidth,
+          croppedHeight
+        );
+
+        // Convert to blob
+        croppedCanvas.toBlob(
+          (blob) => {
+            if (blob) {
+              // Create a new file with the same name and type
+              const croppedFile = new File([blob], file.name, {
+                type: file.type,
+                lastModified: Date.now(),
+              });
+              resolve(croppedFile);
+            } else {
+              reject(new Error("Failed to create cropped image"));
+            }
+          },
+          file.type,
+          0.95
+        );
+      };
+
+      img.onerror = () => {
+        reject(new Error("Failed to load image"));
+      };
+
+      // Load the image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   // Handle file selection
@@ -86,15 +207,34 @@ export default function LogoUploadSection() {
         return;
       }
 
+      let processedFile = file;
+
+      // Process image to remove whitespace if enabled (skip SVG files)
+      if (template.removeLogoWhitespace && file.type !== "image/svg+xml") {
+        try {
+          processedFile = await removeImageWhitespace(file);
+          toast({
+            title: "Image Processed",
+            description: "Whitespace has been removed from your logo.",
+          });
+        } catch (error) {
+          console.warn(
+            "Failed to remove whitespace, using original image:",
+            error
+          );
+          // Continue with original file if processing fails
+        }
+      }
+
       // Create a unique file path
-      const fileExt = file.name.split(".").pop();
+      const fileExt = processedFile.name.split(".").pop();
       const fileName = `${user.id}_${Date.now()}.${fileExt}`;
       const filePath = `${user.id}/logos/${fileName}`;
 
       // Upload to Supabase Storage
       const { error } = await supabase.storage
         .from("waitlist-assets")
-        .upload(filePath, file, {
+        .upload(filePath, processedFile, {
           cacheControl: "3600",
           upsert: false,
         });
@@ -176,6 +316,20 @@ export default function LogoUploadSection() {
                 <SelectItem value="2X">Large (2X)</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="remove-whitespace">Remove Whitespace</Label>
+              <p className="text-sm text-muted-foreground">
+                Automatically crop excess whitespace around your logo
+              </p>
+            </div>
+            <Switch
+              id="remove-whitespace"
+              checked={template.removeLogoWhitespace || false}
+              onCheckedChange={handleRemoveWhitespaceToggle}
+            />
           </div>
 
           <div className="space-y-2">
@@ -264,6 +418,15 @@ export default function LogoUploadSection() {
             <p className="text-sm text-muted-foreground mt-2">
               Upload a JPG, PNG, GIF, or SVG (max 2MB). Recommended size:
               200x200 pixels.
+              {template.removeLogoWhitespace && (
+                <>
+                  <br />
+                  <span className="text-blue-600">
+                    Whitespace removal is enabled - excess padding will be
+                    automatically cropped.
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </>

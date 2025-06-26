@@ -23,21 +23,17 @@ const Pricing = () => {
         <div className="relative flex justify-center flex-col lg:flex-row items-center lg:items-stretch gap-8">
           {config.stripe.plans.map((plan) => (
             <div key={plan.priceId} className="relative w-full max-w-lg">
-              {plan.isFeatured && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                  <span
-                    className={`badge text-xs text-primary-content font-semibold border-0 bg-primary`}
-                  >
-                    POPULAR
-                  </span>
-                </div>
-              )}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                <span
+                  className={`badge text-xs text-primary-content font-semibold border-0 bg-primary`}
+                >
+                  POPULAR
+                </span>
+              </div>
 
-              {plan.isFeatured && (
-                <div
-                  className={`absolute -inset-[1px] rounded-[9px] bg-primary z-10`}
-                ></div>
-              )}
+              <div
+                className={`absolute -inset-[1px] rounded-[9px] bg-primary z-10`}
+              ></div>
 
               <div className="relative flex flex-col h-full gap-5 lg:gap-8 z-10 bg-base-100 p-8 rounded-lg shadow-lg border border-base-300">
                 <div className="flex justify-between items-center gap-4">
@@ -95,24 +91,9 @@ const Pricing = () => {
                 <div className="space-y-2">
                   <ButtonCheckout priceId={plan.priceId} />
 
-                  {/* Only show "Pay once. Subscribe never." for plans with lifetime access */}
-                  {plan.features?.some((feature) =>
-                    feature.name.toLowerCase().includes("lifetime")
-                  ) && (
-                    <p className="flex items-center justify-center gap-2 text-sm text-center text-base-content/80 font-medium relative">
-                      Pay once. Subscribe never.
-                    </p>
-                  )}
-
-                  {/* Only show "Subscribe every year." for Pro plan with yearly access */}
-                  {plan.name === "Pro" &&
-                    plan.features?.some((feature) =>
-                      feature.name.toLowerCase().includes("one year")
-                    ) && (
-                      <p className="flex items-center justify-center gap-2 text-sm text-center text-base-content/80 font-medium relative">
-                        Subscribe every year.
-                      </p>
-                    )}
+                  <p className="text-xs text-center text-base-content/60 mt-2">
+                    Pay once. Own forever.
+                  </p>
                 </div>
               </div>
             </div>

@@ -46,8 +46,8 @@ const PaywallAlert = ({
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <ButtonCheckout
-            priceId={config.stripe.plans.starter.priceId}
-            mode="subscription"
+            priceId={config.stripe.plans[0].priceId}
+            mode="payment"
             className="btn btn-primary"
           >
             Upgrade to Pro

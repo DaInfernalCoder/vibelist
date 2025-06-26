@@ -47,6 +47,7 @@ export const defaultTemplate = {
   showLogo: true,
   logoSize: "1X",
   logoUrl: "",
+  removeLogoWhitespace: false,
   showSocialProof: true,
   enableReferrals: false,
   whiteLabel: false,
